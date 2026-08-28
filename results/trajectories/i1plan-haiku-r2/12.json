@@ -1,0 +1,39 @@
+{
+  "case": "12",
+  "stage": "I1 one-shot + plan",
+  "model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+  "aws_account": "313951301623",
+  "effort": null,
+  "system": "You are reviewing a Terraform pull request against production infrastructure. You\nare the last human-equivalent checkpoint before this change reaches production.\n\nYour job is not to list everything that could be improved about this stack. It is\nto decide what the person merging this pull request needs to know about *this\nchange*, and to say it in few enough words that they actually read it.\n\n## What to report\n\nReport at most **five** findings. Fewer is better. If the change is safe, report\nnone and say so \u2014 a review that invents problems to look useful is worse than no\nreview.\n\nA finding must be about this pull request: something it introduces, removes, or\ncauses. Pre-existing conditions elsewhere in the stack are not findings, however\ntrue they are.\n\nRank findings by what would actually go wrong, not by how a scanner would score\nthem. Consider at least:\n\n- What the change does to something that already exists and holds data.\n- Whether the effect of the change appears somewhere other than the lines edited.\n- Whether the stated intent in the description matches what the code does.\n- Whether a protection, guard, or constraint is being removed.\n- Whether the change costs money nobody has been told about.\n\n## Ruling against a scanner\n\nConfigurations that look alarming in isolation are often correct in context. A\nload balancer open to the internet is doing its job. A bucket documented as a\npublic marketing site is meant to be public. Storage that is deleted within a day\ndoes not need versioning or replication.\n\nWhen context \u2014 a tag, a comment, the pull request description, the resource's\nevident purpose \u2014 shows an alarming-looking configuration is intended and\nproportionate, do not report it. Say nothing about it at all.\n\n## Categories\n\nEvery finding takes exactly one category:\n\n- `network-exposure` \u2014 something becomes reachable, or reachable more widely\n- `privilege-escalation` \u2014 an identity gains permissions beyond what it needs\n- `data-loss` \u2014 data is destroyed, replaced, or put at risk of being destroyed\n- `guardrail` \u2014 a protection or constraint is weakened or removed\n- `reliability` \u2014 the change will not work as intended, or degrades availability\n- `cost` \u2014 a material and unannounced increase in spend\n\n## Evidence\n\nEvery finding must cite something real: a file and what changed in it, or a\nspecific action in the plan. If you cannot point at the evidence, do not report\nthe finding.\n\n## Address\n\nUse the Terraform resource address the finding is about \u2014 for example\n`aws_db_instance.main`, `aws_security_group.app`. Use the address of the resource\nthat carries the problem, not the file that was edited.\n\n## Verdict\n\n- `block` \u2014 merging this as-is would cause real harm\n- `warn` \u2014 mergeable, but the author needs to see something first\n- `approve` \u2014 nothing here needs their attention\n",
+  "prompt": "Review this Terraform pull request.\n\n## Pull request description\n\n# Let the app read the new reporting buckets\n\nWe keep having to add bucket ARNs to this variable every time analytics creates\none. Widening the default so we stop getting paged about it.\n\n\n## Diff\n\n```diff\ndiff --git a/C:/Users/DELL/Documents/projects/Hackerthon/infra/base/variables.tf b/C:/Users/DELL/Documents/projects/Hackerthon/cases/case-12-var-default-widened/overlay/variables.tf\nindex fff75ee..68c8e48 100644\n--- a/C:/Users/DELL/Documents/projects/Hackerthon/infra/base/variables.tf\n+++ b/C:/Users/DELL/Documents/projects/Hackerthon/cases/case-12-var-default-widened/overlay/variables.tf\n@@ -27,8 +27,5 @@ variable \"availability_zones\" {\n # Buckets the application role may read and write. Consumed by iam.tf.\n variable \"app_data_bucket_arns\" {\n   type = list(string)\n-  default = [\n-    \"arn:aws:s3:::acme-prod-data\",\n-    \"arn:aws:s3:::acme-prod-data/*\",\n-  ]\n+  default = [\"*\"]\n }\n\n```\n\n## terraform plan\n\nActions this change will take:\n\n```\n            update  aws_iam_role_policy.app_data\n```\n\nFull detail for each changed resource, from `terraform show -json`:\n\n```json\n[\n  {\n    \"address\": \"aws_iam_role_policy.app_data\",\n    \"mode\": \"managed\",\n    \"type\": \"aws_iam_role_policy\",\n    \"name\": \"app_data\",\n    \"provider_name\": \"registry.terraform.io/hashicorp/aws\",\n    \"change\": {\n      \"actions\": [\n        \"update\"\n      ],\n      \"before\": {\n        \"id\": \"fixture:acme-prod-app-data\",\n        \"name\": \"acme-prod-app-data\",\n        \"name_prefix\": \"\",\n        \"policy\": \"{\\\"Version\\\":\\\"2012-10-17\\\",\\\"Statement\\\":[{\\\"Action\\\":[\\\"s3:GetObject\\\",\\\"s3:PutObject\\\",\\\"s3:ListBucket\\\"],\\\"Effect\\\":\\\"Allow\\\",\\\"Resource\\\":[\\\"arn:aws:s3:::acme-prod-data\\\",\\\"arn:aws:s3:::acme-prod-data/*\\\"]}]}\",\n        \"role\": \"acme-prod-app\"\n      },\n      \"after\": {\n        \"id\": \"fixture:acme-prod-app-data\",\n        \"name\": \"acme-prod-app-data\",\n        \"name_prefix\": \"\",\n        \"policy\": \"{\\\"Version\\\":\\\"2012-10-17\\\",\\\"Statement\\\":[{\\\"Action\\\":[\\\"s3:GetObject\\\",\\\"s3:PutObject\\\",\\\"s3:ListBucket\\\"],\\\"Effect\\\":\\\"Allow\\\",\\\"Resource\\\":[\\\"*\\\"]}]}\",\n        \"role\": \"acme-prod-app\"\n      },\n      \"after_unknown\": {},\n      \"before_sensitive\": {},\n      \"after_sensitive\": {}\n    }\n  }\n]\n```\n",
+  "response": {
+    "verdict": "block",
+    "headline": "Application role gains unrestricted read/write access to all S3 buckets instead of one specific bucket",
+    "suppressed": "The stated intent to avoid paging when new buckets are added is understandable, but granting wildcard access is the wrong solution. Use a resource pattern like arn:aws:s3:::acme-prod-*, an S3 resource tag condition, or a process to manage the list instead.",
+    "findings": [
+      {
+        "address": "aws_iam_role_policy.app_data",
+        "category": "privilege-escalation",
+        "severity": "critical",
+        "evidence_ref": "aws_iam_role_policy.app_data policy Resource field changes from [\"arn:aws:s3:::acme-prod-data\", \"arn:aws:s3:::acme-prod-data/*\"] to [\"*\"] in terraform plan",
+        "explanation": "The application's IAM policy now grants s3:GetObject, s3:PutObject, and s3:ListBucket permissions on all S3 resources in the account, instead of being limited to the acme-prod-data bucket. This violates least privilege and allows the app to read, modify, and list any bucket."
+      }
+    ]
+  },
+  "usage": {
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 0,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "inference_geo": null,
+    "input_tokens": 2222,
+    "output_tokens": 1017,
+    "output_tokens_details": null,
+    "server_tool_use": null,
+    "service_tier": null
+  },
+  "elapsed_s": 9.3,
+  "cost_usd": 0.0073
+}

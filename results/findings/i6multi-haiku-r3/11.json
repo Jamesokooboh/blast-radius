@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "Adding a second NAT gateway improves reliability but doubles NAT infrastructure costs without mentioning it in the PR description",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_nat_gateway.b",
+      "category": "cost",
+      "severity": "medium",
+      "evidence_ref": "Addition of aws_nat_gateway.b and aws_eip.nat_b in the diff; each NAT gateway costs approximately $0.045/hour (~$32/month) plus data processing charges",
+      "explanation": "This change adds roughly $32\u201360/month in recurring NAT gateway costs. The PR justifies the change for availability but does not acknowledge or quantify the cost impact, which the person merging needs to know."
+    }
+  ]
+}

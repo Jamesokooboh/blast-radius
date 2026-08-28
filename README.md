@@ -3,11 +3,15 @@
 A Terraform pull request reviewer that reads the plan, not the diff — and earns
 its place by throwing most of the scanner's output away.
 
-**Status: day two of five.** All fifteen cases are built and labelled, and both
-scanner baselines are measured. The agent itself is not written yet. See
-[Current state](#current-state) for what runs today, and
-[report/changelog.md](report/changelog.md) for the measurements and the
-predictions they contradicted.
+**Status: complete.** Fifteen labelled cases, two scanner baselines, two model
+baselines, six iterations, and a variance check that invalidated four of this
+project's own findings. Full history in
+[report/changelog.md](report/changelog.md), including every prediction that was
+wrong.
+
+**The result: nothing beat one prompt.** Three of the six agentic additions made
+the review measurably worse, and the other three could not be distinguished from
+doing nothing.
 
 ---
 
@@ -88,26 +92,33 @@ Built and measured:
 Not built yet: the two model baselines (blocked only on an API key) and the
 agent.
 
-### Baseline results, 15 cases
+### Results
 
-| | raw Checkov | Checkov scoped to the change |
-| --- | --- | --- |
-| F1 | 0.053 | **0.348** |
-| precision | 0.028 | 0.308 |
-| recall | 0.400 | 0.400 |
-| findings per PR | 9.5 | 0.9 |
-| band C recall | 0.14 | 0.14 |
-| noise correctly suppressed | 1 of 6 | 1 of 6 |
+Primary metric is F1 over labelled findings. Every configuration marked (n=4) was
+run four times; the spread matters more than any single number, and this project
+learned that the hard way.
 
-Raw Checkov is what CI runs today: it reports on the whole stack every time, so
-every pull request draws the same ~9.5 findings whatever it changed. The scoped
-variant restricts it to the resources the plan touches, as a diff-aware CI
-integration would. **The scoped number is the one the agent has to beat** —
-comparing against the unreadable version would be a strawman.
+| configuration | F1 | | cost/PR |
+| --- | --- | --- | --- |
+| Raw Checkov — what CI runs today | 0.052 | 9.5 findings per PR | $0 |
+| Checkov scoped to the change | 0.320 | the fair scanner baseline | $0 |
+| **One prompt, Haiku 4.5 (n=4)** | **0.784 ± 0.078** | **the best thing measured** | **$0.007** |
+| One prompt, Sonnet 4.6 | 0.783 | no better, 2× the price | $0.015 |
+| + terraform plan (n=4) | 0.674 ± 0.038 | **worse** | $0.009 |
+| + multi-agent split (n=4) | 0.653 ± 0.060 | **worse** | $0.026 |
+| + tools and free exploration (n=4) | 0.588 ± 0.042 | **worst** | $0.133 |
+| + scanner output as claims | 0.842 | no measurable effect | $0.007 |
+| + citation verification | 0.900 | no measurable effect, free | $0.000 |
+| + cost table | 0.842 | no measurable effect | $0.007 |
+| + review memory | 0.800 | no measurable effect | $0.007 |
 
-Band C, the cross-file and plan-transition cases, is where the scanner scores
-0.14: one of seven labelled findings. Band D shows the other half of the
-problem — Checkov blocks a pull request that adds two tags.
+The scanner is far below everything a model does — the interesting comparison is
+not against Checkov, it is between the simplest model configuration and the
+elaborate ones. The elaborate ones lose.
+
+Band C — the six cases built because a static scanner is structurally blind to
+them — is where this is clearest. Checkov scores 0.14 there. One prompt with no
+plan scores 0.86. Adding the plan drops it to 0.57.
 
 ### Gates
 

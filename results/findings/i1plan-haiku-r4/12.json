@@ -1,0 +1,14 @@
+{
+  "verdict": "block",
+  "headline": "Application role granted wildcard S3 access instead of specific buckets",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_iam_role_policy.app_data",
+      "category": "privilege-escalation",
+      "severity": "critical",
+      "evidence_ref": "IAM policy Resource field changing from [\"arn:aws:s3:::acme-prod-data\",\"arn:aws:s3:::acme-prod-data/*\"] to [\"*\"] in the plan output",
+      "explanation": "The application role can now read, write, and list every S3 bucket in the account, not just the intended production data buckets. This violates least-privilege access and exposes all bucket data to the application."
+    }
+  ]
+}

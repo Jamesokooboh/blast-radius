@@ -1,0 +1,28 @@
+{
+  "verdict": "warn",
+  "headline": "App subnets losing NAT protection but unclear if this actually solves the rate-limiting problem",
+  "suppressed": "The actual IP exposure to the internet depends on whether instances have public IPs and what their security group rules are; without seeing those, cannot confirm if inbound exposure is introduced.",
+  "findings": [
+    {
+      "address": "aws_route_table_association.private_a",
+      "category": "network-exposure",
+      "severity": "high",
+      "evidence_ref": "Subnets `private_a` and `private_b` route_table_id changing from private route table (rtb-0ba7c56abd2014cb5) to public route table (rtb-0a0e1a2f39b272aa4), giving direct IGW access instead of NAT egress",
+      "explanation": "Instances in these subnets will now appear to originate from their own public IP addresses instead of the NAT gateway's single address. If these instances have Elastic IPs or public IPs assigned, they become directly internet-addressable and lose NAT translation obfuscation."
+    },
+    {
+      "address": "aws_route_table_association.private_b",
+      "category": "reliability",
+      "severity": "medium",
+      "evidence_ref": "PR states vendor API rate-limits by source IP; this change points instances at direct IGW rather than NAT gateway",
+      "explanation": "If these instances do not have Elastic IPs assigned, they will each appear from different public IPs to the vendor, spreading the traffic across multiple addresses. This actually worsens the rate-limiting problem rather than solving it, unless EIPs are guaranteed elsewhere in the configuration."
+    },
+    {
+      "address": "aws_route_table_association.private_a",
+      "category": "guardrail",
+      "severity": "medium",
+      "evidence_ref": "Subnets named `private_a` and `private_b` are being associated with the public route table",
+      "explanation": "The naming pattern signals these should be private, protected subnets. Moving them to public routing breaks this architectural contract and risks future misconfiguration by operators expecting them to behave as private subnets."
+    }
+  ]
+}

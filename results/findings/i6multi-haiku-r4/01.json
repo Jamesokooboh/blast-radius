@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "SSH is open to the entire internet until Session Manager deployment completes",
+  "suppressed": "The cost reviewer found no implications, and the temporary nature with a stated follow-up ticket is understood. This is mergeable as an intentional tradeoff, but the person merging needs to be certain INFRA-2291 is genuinely prioritized to close this window.",
+  "findings": [
+    {
+      "address": "aws_security_group.app",
+      "category": "network-exposure",
+      "severity": "high",
+      "evidence_ref": "ingress rule added with cidr_blocks = [\"0.0.0.0/0\"] on port 22",
+      "explanation": "App instances are now exposed to SSH brute-force and credential compromise attacks from anywhere on the internet. While the follow-up to Session Manager (INFRA-2291) is the right answer, this removes the VPN requirement that was previously the only protection."
+    }
+  ]
+}

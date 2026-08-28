@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "This configuration won't scale down\u2014desired_capacity cannot be less than min_size",
+  "suppressed": "All three reviewers identified the same core issue: the change is misconfigured and won't achieve its goal. No additional concerns warrant reporting.",
+  "findings": [
+    {
+      "address": "aws_autoscaling_group.app",
+      "category": "reliability",
+      "severity": "high",
+      "evidence_ref": "Diff sets desired_capacity = 1 while min_size = 3 remains unchanged",
+      "explanation": "AWS Auto Scaling Groups enforce desired_capacity >= min_size as a hard constraint. This setting will either fail validation or be immediately corrected back to 3, making the overnight scaling ineffective and preventing the stated cost savings."
+    }
+  ]
+}

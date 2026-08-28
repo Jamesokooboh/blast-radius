@@ -1,0 +1,14 @@
+{
+  "verdict": "block",
+  "headline": "Enabling encryption on an existing RDS instance requires destroying and recreating it\u2014this will cause production downtime and data loss unless a blue-green migration is planned first",
+  "suppressed": "The SOC 2 compliance deadline mentioned in the description is real and urgent, but does not change the technical fact that this change requires a backup-and-restore procedure or blue-green migration to avoid downtime and data loss.",
+  "findings": [
+    {
+      "address": "aws_db_instance.main",
+      "category": "data-loss",
+      "severity": "critical",
+      "evidence_ref": "Change from `storage_encrypted = false` to `storage_encrypted = true` on existing aws_db_instance.main; AWS RDS cannot enable encryption in place on unencrypted instances",
+      "explanation": "AWS does not support enabling encryption on existing unencrypted RDS instances. Terraform will destroy the current database and create a new one, causing production downtime and data loss if no backup is restored first. The PR description frames this as a one-line change, but it is actually a full database replacement."
+    }
+  ]
+}

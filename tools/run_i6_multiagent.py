@@ -67,10 +67,12 @@ def main():
     ap.add_argument("--model", default="haiku", choices=list(M.MODELS))
     ap.add_argument("--effort", default="high")
     ap.add_argument("--profile", default=None)
+    ap.add_argument("--mode", default=None,
+                    help="output directory name; for repeat runs")
     args = ap.parse_args()
     M.use_profile(args.profile)
 
-    mode = f"i6multi-{args.model}"
+    mode = args.mode or f"i6multi-{args.model}"
     out = ROOT / "results" / "findings" / mode
     traj = ROOT / "results" / "trajectories" / mode
     out.mkdir(parents=True, exist_ok=True)

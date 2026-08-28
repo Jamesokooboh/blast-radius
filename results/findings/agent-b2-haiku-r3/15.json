@@ -1,0 +1,21 @@
+{
+  "verdict": "warn",
+  "headline": "Lifecycle guard removed from production data bucket with compliance retention requirement",
+  "suppressed": "Pre-existing security configurations flagged by checkov (such as missing S3 encryption, RDS logging, WAF protection, etc.) are not included in this review as they represent the current state, not changes introduced by this PR.",
+  "findings": [
+    {
+      "address": "aws_s3_bucket.data",
+      "category": "guardrail",
+      "severity": "high",
+      "evidence_ref": "The code comment states 'Production data. Retention is a compliance requirement, hence the guard.' The PR description indicates removal of a lifecycle guard that was blocking CI, but the guard is no longer present in data_stores.tf. The plan shows CostCenter tag being added but no explicit lifecycle resource defined for this bucket.",
+      "explanation": "A lifecycle-based protection on the production data bucket holding compliance-required data has been removed to unblock CI. This removes a guardrail that was preventing accidental modifications to a bucket with stated compliance requirements. While the tag addition itself is harmless, the removal of the guard creates risk: data could now be accidentally deleted or modified through Terraform without the previous protection. The PR should document what the guard was and confirm this is intentional for compliance purposes."
+    },
+    {
+      "address": "aws_db_instance.main",
+      "category": "reliability",
+      "severity": "medium",
+      "evidence_ref": "The plan shows aws_db_instance.main with an 'update' action despite no visible configuration changes in data_stores.tf between before and after states. The before and after values appear identical in the plan.",
+      "explanation": "The database instance is marked for update in the plan with no apparent configuration change. This could indicate a drift correction or a Terraform state issue. Before applying, verify that the database update is intentional and won't cause unexpected downtime or behavior changes."
+    }
+  ]
+}

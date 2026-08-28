@@ -1,0 +1,14 @@
+{
+  "verdict": "block",
+  "headline": "SSH opened to 0.0.0.0/0 instead of restricted to on-call rotation's IP addresses or Session Manager",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_security_group.app",
+      "category": "network-exposure",
+      "severity": "critical",
+      "evidence_ref": "ingress rule added with cidr_blocks = [\"0.0.0.0/0\"] for port 22",
+      "explanation": "Production app instances are now reachable on SSH from anywhere on the internet, creating an attack surface for brute force and SSH exploits. The stated intent\u2014helping on-call get access\u2014is reasonable, but the implementation (0.0.0.0/0) bypasses security unnecessarily. Restrict this to on-call's specific IP range or enable Session Manager before merging; the follow-up ticket is not a substitute for doing it right now."
+    }
+  ]
+}

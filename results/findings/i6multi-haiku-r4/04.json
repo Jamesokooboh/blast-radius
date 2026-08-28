@@ -1,0 +1,6 @@
+{
+  "verdict": "approve",
+  "headline": "HTTP redirect to HTTPS is implemented correctly and safely.",
+  "suppressed": null,
+  "findings": []
+}

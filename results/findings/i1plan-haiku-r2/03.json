@@ -1,0 +1,14 @@
+{
+  "verdict": "block",
+  "headline": "Full AWS permissions granted to production CodeBuild role \u2014 this is a critical security hole regardless of intent to narrow it later",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_iam_role_policy.deploy",
+      "category": "privilege-escalation",
+      "severity": "critical",
+      "evidence_ref": "iam.tf: new policy statement grants `Action: \"*\"` and `Resource: \"*\"`, allowing the CodeBuild service role to perform any action on any resource in the account",
+      "explanation": "A CodeBuild service role with unrestricted permissions can modify or destroy any infrastructure, data, or resource in the account. The stated intent to 'scope it down once we know exactly what it touches' is a known pattern that leaves broad permissions in production indefinitely."
+    }
+  ]
+}

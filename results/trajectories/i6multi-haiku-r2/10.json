@@ -1,0 +1,66 @@
+{
+  "case": "10",
+  "stage": "I6 multi-agent split",
+  "model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+  "aws_account": "313951301623",
+  "specialists": {
+    "security": {
+      "verdict": "warn",
+      "headline": "desired_capacity cannot be below min_size; this change will not scale down as intended",
+      "suppressed": null,
+      "findings": [
+        {
+          "address": "aws_autoscaling_group.app",
+          "category": "reliability",
+          "severity": "high",
+          "evidence_ref": "desired_capacity set to 1 while min_size remains 3 in the same resource",
+          "explanation": "AWS ASG enforces min_size as a floor; setting desired_capacity below it has no effect. The fleet will stay at 3 instances, defeating the stated goal of scaling down overnight to save costs. To make this work, min_size must also be reduced."
+        }
+      ]
+    },
+    "cost": {
+      "verdict": "warn",
+      "headline": "Desired capacity cannot be scaled below minimum size; this configuration will not save money.",
+      "suppressed": null,
+      "findings": [
+        {
+          "address": "aws_autoscaling_group.app",
+          "category": "cost",
+          "severity": "medium",
+          "evidence_ref": "desired_capacity set to 1 while min_size remains 3",
+          "explanation": "AWS Auto Scaling Groups enforce desired_capacity >= min_size. This configuration will maintain 3 instances at all times, not scale down to 1, so the expected cost savings from overnight scaling will not materialize. Either reduce min_size to 1 or use scheduled actions if min_size must stay at 3."
+        }
+      ]
+    },
+    "reliability": {
+      "verdict": "block",
+      "headline": "desired_capacity cannot be less than min_size \u2014 this configuration is invalid and will not apply",
+      "suppressed": null,
+      "findings": [
+        {
+          "address": "aws_autoscaling_group.app",
+          "category": "reliability",
+          "severity": "high",
+          "evidence_ref": "desired_capacity set to 1, but min_size remains 3 in the diff",
+          "explanation": "AWS Auto Scaling Groups require desired_capacity to be at least min_size. This change will either fail validation or cause Terraform to immediately correct the desired_capacity back to 3, making the change ineffective and preventing the stated cost savings."
+        }
+      ]
+    }
+  },
+  "merged": {
+    "verdict": "warn",
+    "headline": "This configuration won't scale down\u2014desired_capacity cannot be less than min_size",
+    "suppressed": "All three reviewers identified the same core issue: the change is misconfigured and won't achieve its goal. No additional concerns warrant reporting.",
+    "findings": [
+      {
+        "address": "aws_autoscaling_group.app",
+        "category": "reliability",
+        "severity": "high",
+        "evidence_ref": "Diff sets desired_capacity = 1 while min_size = 3 remains unchanged",
+        "explanation": "AWS Auto Scaling Groups enforce desired_capacity >= min_size as a hard constraint. This setting will either fail validation or be immediately corrected back to 3, making the overnight scaling ineffective and preventing the stated cost savings."
+      }
+    ]
+  },
+  "elapsed_s": 35.5,
+  "cost_usd": 0.0229
+}

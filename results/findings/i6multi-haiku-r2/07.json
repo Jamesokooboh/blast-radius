@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "Staging bucket created but no upload mechanism configured \u2014 browsers cannot use it",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_s3_bucket.tmp_uploads",
+      "category": "reliability",
+      "severity": "high",
+      "evidence_ref": "New resource aws_s3_bucket.tmp_uploads with no bucket policy, CORS configuration, or IAM permissions defined",
+      "explanation": "The PR description states browser uploads should land in this bucket, but the diff shows no configuration for how browsers will actually upload to it. Without a bucket policy or CORS setup, uploads will fail and the staging workflow cannot work."
+    }
+  ]
+}

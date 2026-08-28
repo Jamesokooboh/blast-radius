@@ -1,0 +1,34 @@
+{
+  "case": "14",
+  "stage": "I6 multi-agent split",
+  "model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+  "aws_account": "313951301623",
+  "specialists": {
+    "security": {
+      "verdict": "approve",
+      "headline": "Purely a billing tag addition with no security implications.",
+      "suppressed": null,
+      "findings": []
+    },
+    "cost": {
+      "verdict": "approve",
+      "headline": "Adding tags for cost allocation does not increase infrastructure costs",
+      "suppressed": null,
+      "findings": []
+    },
+    "reliability": {
+      "verdict": "approve",
+      "headline": "Safe metadata-only change. Adding cost centre tags to VPC and internet gateway has no effect on data, availability, or protections.",
+      "suppressed": null,
+      "findings": []
+    }
+  },
+  "merged": {
+    "verdict": "approve",
+    "headline": "Safe metadata addition for cost allocation tracking",
+    "suppressed": null,
+    "findings": []
+  },
+  "elapsed_s": 25.6,
+  "cost_usd": 0.0171
+}

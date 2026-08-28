@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "SSH access opened to 0.0.0.0/0 contradicts private subnet architecture",
+  "suppressed": "",
+  "findings": [
+    {
+      "address": "aws_security_group.app",
+      "category": "network-exposure",
+      "severity": "high",
+      "evidence_ref": "security.tf lines 36-42 add ingress rule: port 22, protocol tcp, cidr_blocks = [\"0.0.0.0/0\"]",
+      "explanation": "The app instances are intentionally deployed in private subnets (10.0.10.0/24, 10.0.11.0/24) with no public IPs, routing through NAT gateway. Opening port 22 to 0.0.0.0/0 contradicts this architecture by allowing SSH from any internet source. Even though private subnet instances lack direct internet routes, this is overly permissive for an interim access solution. Access should be restricted to specific CIDR blocks (on-call rotation IPs, VPN gateway, bastion hosts, etc.) rather than the entire internet, even temporarily."
+    }
+  ]
+}

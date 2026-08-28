@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "SSH opened to the entire internet on production app instances",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_security_group.app",
+      "category": "network-exposure",
+      "severity": "high",
+      "evidence_ref": "New ingress rule in security.tf with port 22 (SSH) and cidr_blocks = [\"0.0.0.0/0\"]",
+      "explanation": "The change opens SSH access from anywhere on the internet to production app instances. While the intent is to help on-call, the implementation allows anyone globally to attempt SSH connections, drastically expanding the attack surface and enabling brute-force and credential compromise attempts. Restrict cidr_blocks to specific on-call IP ranges or VPN CIDR before merging, or implement Session Manager access now rather than shipping an open SSH rule."
+    }
+  ]
+}

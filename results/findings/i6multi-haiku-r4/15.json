@@ -1,0 +1,21 @@
+{
+  "verdict": "warn",
+  "headline": "Removing a guardrail that prevents accidental data bucket destruction to fix an unexplained CI failure. The root cause deserves investigation before shipping this.",
+  "suppressed": "The CostCenter tag addition is a minor change with no implications.",
+  "findings": [
+    {
+      "address": "aws_s3_bucket.data",
+      "category": "guardrail",
+      "severity": "high",
+      "evidence_ref": "Removal of lifecycle { prevent_destroy = true } block in data_stores.tf",
+      "explanation": "The bucket is no longer protected against accidental deletion via terraform destroy or if the resource is removed from code. This is a production data store with no obvious reason to accept this risk."
+    },
+    {
+      "address": "aws_s3_bucket.data",
+      "category": "data-loss",
+      "severity": "high",
+      "evidence_ref": "PR description claims prevent_destroy has been causing plan failures for a week, but prevent_destroy only blocks destroys, not plans",
+      "explanation": "The stated reason for removing this guard does not match what prevent_destroy does. The root cause of the CI failure is unclear and unaddressed \u2014 removing the guard is a workaround that trades data loss risk for CI convenience without solving the actual problem."
+    }
+  ]
+}

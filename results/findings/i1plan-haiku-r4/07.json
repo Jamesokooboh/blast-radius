@@ -1,0 +1,21 @@
+{
+  "verdict": "warn",
+  "headline": "Production bucket lacks explicit encryption and public access controls",
+  "suppressed": "The bucket has no versioning, which would normally warrant a note, but is appropriate for temporary staging data that expires after one day.",
+  "findings": [
+    {
+      "address": "aws_s3_bucket.tmp_uploads",
+      "category": "guardrail",
+      "severity": "medium",
+      "evidence_ref": "aws_s3_bucket.tmp_uploads in the diff has no server_side_encryption_configuration block; the plan shows this as after_unknown",
+      "explanation": "The bucket is named with 'prod' and will store user uploads, but encryption is not explicitly configured. It will use AWS defaults, which is unreliable for enforcing production security requirements."
+    },
+    {
+      "address": "aws_s3_bucket.tmp_uploads",
+      "category": "guardrail",
+      "severity": "low",
+      "evidence_ref": "aws_s3_bucket.tmp_uploads in the diff has no aws_s3_bucket_public_access_block resource",
+      "explanation": "While AWS defaults to blocking public access on new buckets, production resources should explicitly declare this in Terraform to prevent accidental exposure if AWS defaults change."
+    }
+  ]
+}

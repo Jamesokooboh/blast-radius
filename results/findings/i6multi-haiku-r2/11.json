@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "NAT gateway costs double, but the PR description only discusses reliability",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_nat_gateway.b",
+      "category": "cost",
+      "severity": "high",
+      "evidence_ref": "aws_nat_gateway.b and aws_eip.nat_b added in diff; PR description states only 'Adding a second NAT gateway in 1b with its own route table' without mentioning cost impact",
+      "explanation": "This change doubles the recurring NAT gateway and EIP costs. The PR description frames this as a reliability improvement but omits the material cost increase that should inform the merge decision."
+    }
+  ]
+}

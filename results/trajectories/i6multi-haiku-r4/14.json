@@ -1,0 +1,34 @@
+{
+  "case": "14",
+  "stage": "I6 multi-agent split",
+  "model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+  "aws_account": "313951301623",
+  "specialists": {
+    "security": {
+      "verdict": "approve",
+      "headline": "Pure tagging change with no security implications",
+      "suppressed": null,
+      "findings": []
+    },
+    "cost": {
+      "verdict": "approve",
+      "headline": "No cost impact. Tags enable cost allocation without changing what is billed.",
+      "suppressed": null,
+      "findings": []
+    },
+    "reliability": {
+      "verdict": "approve",
+      "headline": "Tagging VPC and IGW for cost allocation is safe and non-disruptive",
+      "suppressed": null,
+      "findings": []
+    }
+  },
+  "merged": {
+    "verdict": "approve",
+    "headline": "Simple tagging change to meet finance requirements. All three specialists agree it is safe.",
+    "suppressed": null,
+    "findings": []
+  },
+  "elapsed_s": 24.9,
+  "cost_usd": 0.0165
+}

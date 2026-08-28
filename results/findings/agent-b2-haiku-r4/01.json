@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "SSH exposed to the internet on app instances; confirm this is intentional and temporary",
+  "suppressed": "",
+  "findings": [
+    {
+      "address": "aws_security_group.app",
+      "category": "network-exposure",
+      "severity": "high",
+      "evidence_ref": "New ingress rule in security.tf (lines 41-49) opens port 22 to 0.0.0.0/0. App instances in private subnets are now directly reachable from the internet on SSH.",
+      "explanation": "This change breaks the intended security boundary. The infrastructure design kept app instances in private subnets, accessible only through the load balancer. Opening SSH to the entire internet exposes all app instances to brute-force attacks and reconnaissance. The PR references a follow-up ticket (INFRA-2291) to move this behind Session Manager, but there is no code enforcement preventing this from becoming permanent."
+    }
+  ]
+}

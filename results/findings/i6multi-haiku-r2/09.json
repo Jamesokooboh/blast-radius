@@ -1,0 +1,28 @@
+{
+  "verdict": "warn",
+  "headline": "Private subnets are being routed directly to the internet, removing NAT protection and architectural isolation. This is intentional per the rate-limiting requirement, but it materially changes security posture and requires verification that security groups are configured to be the primary inbound defense.",
+  "suppressed": "Naming misalignment ('private' subnets that are now internet-routed) is confusing but not a functional problem; it should be addressed by renaming these subnets in a follow-up, not by blocking this change.",
+  "findings": [
+    {
+      "address": "aws_route_table_association.private_a",
+      "category": "network-exposure",
+      "severity": "high",
+      "evidence_ref": "Route table association changed from aws_route_table.private.id to aws_route_table.public.id in the diff. Instances in these subnets now have direct egress to the internet gateway and will accept inbound connections from anywhere (not through NAT).",
+      "explanation": "Subnets named 'private' are now routed directly to the public internet rather than through NAT. If instances have public IPs, they become directly reachable from the internet instead of being behind NAT translation."
+    },
+    {
+      "address": "aws_route_table_association.private_b",
+      "category": "network-exposure",
+      "severity": "high",
+      "evidence_ref": "Route table association changed from aws_route_table.private.id to aws_route_table.public.id in the diff. Instances in these subnets now have direct egress to the internet gateway and will accept inbound connections from anywhere (not through NAT).",
+      "explanation": "Subnets named 'private' are now routed directly to the public internet rather than through NAT. If instances have public IPs, they become directly reachable from the internet instead of being behind NAT translation."
+    },
+    {
+      "address": "aws_route_table_association.private_a",
+      "category": "guardrail",
+      "severity": "medium",
+      "evidence_ref": "The architectural boundary between private (NAT-egress) and public (direct-egress) subnets is being removed by reassigning both private_a and private_b to the public route table.",
+      "explanation": "The original network design separated private and public subnets using NAT gateways as a security layer. This change eliminates that architectural protection, making security group rules the sole inbound defense. Confirm that security group rules are sufficiently restrictive and that this change is reflected in threat models."
+    }
+  ]
+}

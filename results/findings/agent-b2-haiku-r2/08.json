@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "Production database will be recreated, not updated in-place. Significant downtime ahead.",
+  "suppressed": "",
+  "findings": [
+    {
+      "address": "aws_db_instance.main",
+      "category": "data-loss",
+      "severity": "high",
+      "evidence_ref": "Plan shows `-/+ resource \"aws_db_instance.main\" must be replaced` with actions `[\"delete\",\"create\"]`. The change `storage_encrypted: false -> true` triggers a forced replacement because RDS cannot enable encryption on an existing database.",
+      "explanation": "Setting `storage_encrypted = true` on an existing RDS database instance requires the entire database to be destroyed and recreated. This will cause complete production downtime. While `skip_final_snapshot = false` preserves data via a snapshot, applications will lose connectivity during recreation and must reconnect. The PR description claims this is a 'one-line change' without acknowledging the replacement, suggesting the team may not understand the actual impact."
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "verdict": "approve",
+  "headline": "Correctly implements NAT gateway redundancy per availability zone",
+  "suppressed": null,
+  "findings": []
+}

@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "CodeBuild deploy role grants unrestricted permissions to your entire AWS account. Author acknowledges this is temporary, but this window creates critical exposure.",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_iam_role_policy.deploy",
+      "category": "privilege-escalation",
+      "severity": "critical",
+      "evidence_ref": "Policy statement grants Action=\"*\" and Resource=\"*\", allowing the CodeBuild service to assume this role and perform any action on any AWS resource",
+      "explanation": "If CodeBuild credentials leak or the build pipeline is compromised, an attacker can delete databases, disable security controls, and exfiltrate data with no restrictions. The stated plan to scope this down must be executed before this goes to production."
+    }
+  ]
+}

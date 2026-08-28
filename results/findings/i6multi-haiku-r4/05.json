@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "Infrastructure design is sound, but the new ALB adds ~$20/month in costs that aren't mentioned in the PR description",
+  "suppressed": "The use of HTTP on the internal listener is appropriate for VPC-internal traffic and not a concern. The ALB's isolation and configuration (internal=true, private subnets only) is correct.",
+  "findings": [
+    {
+      "address": "aws_lb.internal",
+      "category": "cost",
+      "severity": "medium",
+      "evidence_ref": "New aws_lb resource added with load_balancer_type = \"application\" and internal = true",
+      "explanation": "Application Load Balancers incur hourly charges (~$16-20/month) plus data processing costs, but the PR description only describes the network benefit and does not mention the cost impact of adding this new ALB."
+    }
+  ]
+}

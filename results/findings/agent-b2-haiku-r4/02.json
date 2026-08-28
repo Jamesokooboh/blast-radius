@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "Production database being made publicly accessible as a temporary workaround",
+  "suppressed": "",
+  "findings": [
+    {
+      "address": "aws_db_instance.main",
+      "category": "network-exposure",
+      "severity": "high",
+      "evidence_ref": "plan.txt shows `publicly_accessible = false -> true` on the production RDS instance (acme-prod-db). The instance holds the production database ('appdb') with customer data.",
+      "explanation": "Setting `publicly_accessible = true` assigns a public IP and internet-routable DNS name to the database. While the security group currently restricts inbound access to the app tier only, this configuration violates the network isolation boundary and creates unnecessary risk. If security group rules are ever misconfigured or database credentials are compromised, the database becomes reachable from the internet. The PR notes this is temporary, but there is no enforcement mechanism to prevent this from becoming permanent."
+    }
+  ]
+}

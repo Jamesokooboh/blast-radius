@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "Lifecycle guard removed from production data bucket with compliance retention requirement",
+  "suppressed": "",
+  "findings": [
+    {
+      "address": "aws_s3_bucket.data",
+      "category": "data-loss",
+      "severity": "high",
+      "evidence_ref": "The PR removes a lifecycle guard on aws_s3_bucket.data. The code comment explicitly states 'Production data. Retention is a compliance requirement, hence the guard.' The lifecycle block that protected this resource is no longer present in data_stores.tf.",
+      "explanation": "The production data bucket previously had a protective lifecycle configuration (likely 'prevent_destroy = true') that guarded against accidental deletion. This guard has been removed to unblock CI, but now production data with documented compliance retention requirements can be accidentally destroyed. This creates risk during any future Terraform operations, especially if someone runs terraform destroy or modifies the bucket state."
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "verdict": "warn",
+  "headline": "Production database will be routable from the internet while awaiting VPC peering. Ensure the database owner explicitly approves this exposure before merge.",
+  "suppressed": "The reliability reviewer flagged that this removes a key protection. However, the PR author acknowledges this is intentional and temporary, so no finding needed\u2014but it should still have explicit approval from your database and security owners before merge.",
+  "findings": [
+    {
+      "address": "aws_db_instance.main",
+      "category": "network-exposure",
+      "severity": "high",
+      "evidence_ref": "publicly_accessible changed from false to true in data_stores.tf",
+      "explanation": "The production RDS instance will be assigned a public IP address and become routable from the internet. Even with security group restrictions, this materially expands the attack surface of a database holding production data."
+    },
+    {
+      "address": "aws_db_instance.main",
+      "category": "cost",
+      "severity": "medium",
+      "evidence_ref": "publicly_accessible = true routes analytics traffic over the internet instead of within VPC",
+      "explanation": "Metabase queries will incur data transfer charges (typically $0.02/GB outbound). The PR does not mention this cost or estimate how long this temporary measure will persist."
+    }
+  ]
+}

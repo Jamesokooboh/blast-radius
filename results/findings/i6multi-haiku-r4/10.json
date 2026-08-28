@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "desired_capacity is set below min_size: AWS will ignore this setting and keep 3 instances running, defeating the cost savings goal",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_autoscaling_group.app",
+      "category": "reliability",
+      "severity": "high",
+      "evidence_ref": "desired_capacity = 1 while min_size = 3 in the diff",
+      "explanation": "AWS requires desired_capacity to be at least min_size. The autoscaling group will maintain 3 instances regardless, and the change will have no effect. To scale down to 1 instance, min_size must also be lowered to 1."
+    }
+  ]
+}

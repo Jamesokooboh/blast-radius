@@ -1,0 +1,14 @@
+{
+  "verdict": "block",
+  "headline": "Removing prevent_destroy from the production data bucket without fixing the root cause",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_s3_bucket.data",
+      "category": "guardrail",
+      "severity": "critical",
+      "evidence_ref": "Diff removes `lifecycle { prevent_destroy = true }` block from aws_s3_bucket.data",
+      "explanation": "The `prevent_destroy` guard is being stripped from the production data bucket (acme-prod-data) to unblock CI, but this leaves the bucket exposed to accidental or intentional destruction. The underlying CI failure should be diagnosed and fixed instead of removing the protection."
+    }
+  ]
+}

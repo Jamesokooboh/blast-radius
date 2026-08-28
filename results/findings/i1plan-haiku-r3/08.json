@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "This change will delete and recreate the production database, causing downtime. The one-line description masks the actual impact.",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_db_instance.main",
+      "category": "reliability",
+      "severity": "critical",
+      "evidence_ref": "terraform plan shows actions: [delete, create] with replace_paths: [[storage_encrypted]]; AWS cannot update storage_encrypted in place on RDS instances",
+      "explanation": "Enabling encryption on an existing RDS instance requires AWS to delete the old database and create a new one. This will cause production downtime, even though Terraform will restore from the final_snapshot. The PR description 'one-line change' does not convey the actual operational impact."
+    }
+  ]
+}

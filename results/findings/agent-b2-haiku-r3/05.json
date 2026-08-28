@@ -1,0 +1,21 @@
+{
+  "verdict": "block",
+  "headline": "Internal load balancer cannot reach app instances due to security group misconfiguration",
+  "suppressed": "",
+  "findings": [
+    {
+      "address": "aws_security_group.app",
+      "category": "reliability",
+      "severity": "critical",
+      "evidence_ref": "The app security group ingress rule allows port 8080 traffic only from the public ALB security group (sg-01d5b59135d60c2bc), but the internal ALB uses the app security group (sg-0f4e14e106d7ef990) itself. The rule cannot match because it's checking for a different source security group.",
+      "explanation": "The internal ALB will fail to reach the application instances because the security group rule doesn't permit traffic from the internal ALB to port 8080. The app SG's ingress rule specifies `security_groups = [aws_security_group.alb.id]` (the public ALB), but the internal ALB uses the app SG directly. This creates a firewall block at the network layer."
+    },
+    {
+      "address": "aws_autoscaling_group.app",
+      "category": "reliability",
+      "severity": "high",
+      "evidence_ref": "The ASG's target_group_arns still only references the public ALB target group. The internal load balancer's target group is created but never attached to the ASG.",
+      "explanation": "Even if the security group issue is fixed, application instances will not be registered with the internal load balancer's target group. Clients attempting to reach the service via the internal ALB will get no healthy targets."
+    }
+  ]
+}

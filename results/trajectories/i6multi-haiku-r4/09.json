@@ -1,0 +1,65 @@
+{
+  "case": "09",
+  "stage": "I6 multi-agent split",
+  "model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+  "aws_account": "313951301623",
+  "specialists": {
+    "security": {
+      "verdict": "warn",
+      "headline": "App subnets moved from private to public routing\u2014direct internet exposure",
+      "suppressed": "The NAT gateway single-IP rate limit is real, but better solutions exist: multiple NAT gateways in different AZs, or a second Elastic IP for the existing NAT. Moving to public routing sacrifices inbound security controls for a vendor rate-limit problem.",
+      "findings": [
+        {
+          "address": "aws_route_table_association.private_a and aws_route_table_association.private_b",
+          "category": "network-exposure",
+          "severity": "high",
+          "evidence_ref": "network.tf: private_a and private_b subnets reassociated from aws_route_table.private to aws_route_table.public",
+          "explanation": "Subnets named 'private_a' and 'private_b' now route directly to the internet gateway instead of through NAT. This exposes instances to direct inbound internet traffic and changes the network tier from private to public\u2014a more drastic change than needed for egress-only access."
+        }
+      ]
+    },
+    "cost": {
+      "verdict": "approve",
+      "headline": "No material cost changes \u2014 this removes NAT gateway costs",
+      "suppressed": null,
+      "findings": []
+    },
+    "reliability": {
+      "verdict": "warn",
+      "headline": "Private subnets are being converted to public by associating them with the public route table",
+      "suppressed": "The rate-limiting justification is reasonable for app-tier egress, but verify there are no databases, caches, or other internal-only services in these subnets that relied on the private routing model.",
+      "findings": [
+        {
+          "address": "aws_route_table_association.private_a",
+          "category": "guardrail",
+          "severity": "high",
+          "evidence_ref": "route_table_id changed from aws_route_table.private.id to aws_route_table.public.id in network.tf",
+          "explanation": "Subnets named `private_a` and `private_b` are now associated with the public route table, which removes the private/NAT-gated egress model entirely. Any instance with a public IP (or discovered on the internet) can now reach services in these subnets directly, instead of only via internal paths."
+        },
+        {
+          "address": "aws_route_table_association.private_b",
+          "category": "guardrail",
+          "severity": "high",
+          "evidence_ref": "route_table_id changed from aws_route_table.private.id to aws_route_table.public.id in network.tf",
+          "explanation": "Subnets named `private_a` and `private_b` are now associated with the public route table, which removes the private/NAT-gated egress model entirely. Any instance with a public IP (or discovered on the internet) can now reach services in these subnets directly, instead of only via internal paths."
+        }
+      ]
+    }
+  },
+  "merged": {
+    "verdict": "warn",
+    "headline": "Subnets moving from private to public network tier\u2014exposes inbound internet traffic, not just egress",
+    "suppressed": "The cost reviewer noted this removes NAT gateway charges, but the PR description does not mention cost savings as a goal, and the trade-off in network exposure should be explicit before this merges.",
+    "findings": [
+      {
+        "address": "aws_route_table_association.private_a",
+        "category": "network-exposure",
+        "severity": "high",
+        "evidence_ref": "route_table_id changed from aws_route_table.private.id to aws_route_table.public.id",
+        "explanation": "Subnets named 'private_a' and 'private_b' now route directly through the internet gateway. This exposes instances to inbound internet traffic, not just egress\u2014a broader change than needed to solve the vendor API rate-limiting issue."
+      }
+    ]
+  },
+  "elapsed_s": 49.7,
+  "cost_usd": 0.0318
+}

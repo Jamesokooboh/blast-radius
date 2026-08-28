@@ -1,0 +1,21 @@
+{
+  "verdict": "warn",
+  "headline": "Making production database publicly accessible won't work as described; requires security group changes",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_db_instance.main",
+      "category": "guardrail",
+      "severity": "high",
+      "evidence_ref": "data_stores.tf line 26: `publicly_accessible = true` removes the default protection against accidental public database exposure. Previously the database was not publicly accessible (false \u2192 true change in plan).",
+      "explanation": "Making the production database publicly accessible weakens the infrastructure guardrail that prevents accidental exposure. Even though the security group currently restricts ingress to the application tier only, this change removes a layer of defense. If the security group is later modified or misconfigured, the database is now open to the internet."
+    },
+    {
+      "address": "aws_db_instance.main",
+      "category": "reliability",
+      "severity": "high",
+      "evidence_ref": "The PR states 'Setting publicly_accessible = true so they can connect' but the database security group (aws_security_group.db) only allows ingress from aws_security_group.app on port 5432. External connections are blocked by the security group.",
+      "explanation": "This change alone will not enable Metabase to connect. Publicly accessible requires BOTH the RDS flag AND security group rules that permit the external connection. Without also modifying the security group ingress, Metabase will still be unable to reach the database, making the stated intent unachievable."
+    }
+  ]
+}

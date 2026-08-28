@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "CodeBuild role has wildcard permissions on all resources \u2014 needs a scope-down plan before this reaches production",
+  "suppressed": "The PR acknowledges this is temporary for unblocking the pipeline. However, temporary high-privilege access should have a hard deadline (e.g., terraform comment with expiration date) and a linked issue tracking the scope-down, not just a verbal intention.",
+  "findings": [
+    {
+      "address": "aws_iam_role_policy.deploy",
+      "category": "privilege-escalation",
+      "severity": "high",
+      "evidence_ref": "iam.tf: policy grants `Action: \"*\"` and `Resource: \"*\"`, allowing any action on any AWS resource",
+      "explanation": "The role can perform any IAM action, create roles, delete data, modify security groups, or assume other roles. This violates least-privilege and creates significant risk if the role is compromised or misused."
+    }
+  ]
+}

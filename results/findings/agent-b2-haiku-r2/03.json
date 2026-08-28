@@ -1,0 +1,14 @@
+{
+  "verdict": "block",
+  "headline": "Deploy role has unrestricted admin permissions; must be scoped before merge",
+  "suppressed": "",
+  "findings": [
+    {
+      "address": "aws_iam_role_policy.deploy",
+      "category": "privilege-escalation",
+      "severity": "critical",
+      "evidence_ref": "iam.tf lines 55-67: policy grants `Action: \"*\"` and `Resource: \"*\"`, giving CodeBuild full AWS account access",
+      "explanation": "The deploy role grants unrestricted administrative permissions across all AWS services and resources. While the PR description acknowledges this is temporary, unrestricted permissions in production infrastructure create a significant security risk. A compromised CodeBuild credential or misconfigured pipeline could access, modify, or delete any infrastructure or data. This must be scoped to only the specific resources and actions the deploy process requires before merging."
+    }
+  ]
+}

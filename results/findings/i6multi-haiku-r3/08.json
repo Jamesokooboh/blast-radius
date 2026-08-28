@@ -1,0 +1,14 @@
+{
+  "verdict": "block",
+  "headline": "Enabling encryption this way will destroy the production database or fail silently\u2014AWS RDS does not support this modification on existing instances",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_db_instance.main",
+      "category": "data-loss",
+      "severity": "critical",
+      "evidence_ref": "Change attempts to set `storage_encrypted = true` on an existing unencrypted RDS instance in data_stores.tf",
+      "explanation": "AWS RDS does not support enabling encryption on an existing unencrypted database by changing a parameter. Terraform will either silently ignore the change (encryption never actually enables, defeating the stated goal) or destroy and recreate the instance, causing production downtime and data loss. The proper fix requires creating a snapshot, copying it with encryption enabled, and restoring to a new instance."
+    }
+  ]
+}

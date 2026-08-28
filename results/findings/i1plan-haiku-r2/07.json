@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "Staging bucket missing explicit public access block configuration",
+  "suppressed": "Bucket lacks server-side encryption and versioning, but both are reasonable to omit for temporary staging data with 1-day expiry and worker-controlled access.",
+  "findings": [
+    {
+      "address": "aws_s3_bucket.tmp_uploads",
+      "category": "guardrail",
+      "severity": "medium",
+      "evidence_ref": "aws_s3_bucket.tmp_uploads resource created with no aws_s3_bucket_public_access_block child resource",
+      "explanation": "Production buckets should explicitly block public access to prevent accidental exposure. This bucket lacks the guardrail that prevents policies or ACLs from making it publicly readable or writable."
+    }
+  ]
+}

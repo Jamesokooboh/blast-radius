@@ -1,0 +1,14 @@
+{
+  "verdict": "block",
+  "headline": "Production deployment role has unlimited IAM permissions",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_iam_role_policy.deploy",
+      "category": "privilege-escalation",
+      "severity": "critical",
+      "evidence_ref": "aws_iam_role_policy.deploy policy statement grants Action: \"*\" on Resource: \"*\"",
+      "explanation": "CodeBuild is being granted full administrative permissions across the entire AWS account. Even with the stated intent to scope this down later, deploying wildcard permissions on a production service creates an unacceptable security window and violates least-privilege principles."
+    }
+  ]
+}

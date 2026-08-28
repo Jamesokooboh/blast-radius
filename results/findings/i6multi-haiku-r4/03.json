@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "CodeBuild deploy role grants full admin permissions; implement least-privilege scoping before merging if not already in progress",
+  "suppressed": "Both security and reliability specialists flagged the same risk from different angles. The PR description acknowledges this is intentionally broad and temporary, which is why this is warn rather than block \u2014 but it means the author and reviewer both understand the blast radius and should have a plan to scope it before this sits in production.",
+  "findings": [
+    {
+      "address": "aws_iam_role_policy.deploy",
+      "category": "privilege-escalation",
+      "severity": "high",
+      "evidence_ref": "Policy statement grants Action: \"*\" on Resource: \"*\"",
+      "explanation": "This role has unrestricted permissions across all AWS services and resources. Any compromise of the CodeBuild project or bug in a deploy script grants full account access, including ability to delete databases, destroy infrastructure, or exfiltrate data."
+    }
+  ]
+}

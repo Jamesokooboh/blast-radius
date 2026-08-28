@@ -1,0 +1,14 @@
+{
+  "verdict": "block",
+  "headline": "ASG desired_capacity contradicts min_size; instances will not scale down",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_autoscaling_group.app",
+      "category": "reliability",
+      "severity": "high",
+      "evidence_ref": "In compute.tf: min_size = 3, max_size = 6, desired_capacity = 1. The ASG will not scale below min_size regardless of desired_capacity setting.",
+      "explanation": "The autoscaling group is configured with a minimum of 3 instances but desired capacity of 1. AWS will maintain the minimum (3) and ignore the desired capacity (1). The fleet will not scale down overnight as intended. To fix this, reduce min_size to 1, or if you need to ensure at least 3 instances during business hours, use scheduled scaling actions instead."
+    }
+  ]
+}

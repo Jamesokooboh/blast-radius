@@ -1,0 +1,14 @@
+{
+  "verdict": "block",
+  "headline": "SSH rule opens to the entire internet instead of restricting to on-call rotation \u2014 brute-force attacks on port 22 will start immediately.",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_security_group.app",
+      "category": "network-exposure",
+      "severity": "critical",
+      "evidence_ref": "Ingress rule in the diff: `cidr_blocks = [\"0.0.0.0/0\"]` for port 22 SSH access",
+      "explanation": "The implementation opens SSH to 0.0.0.0/0 (the entire internet) rather than restricting to the on-call rotation's IP addresses or IAM identities. This exposes app instances to immediate brute-force attacks and reconnaissance."
+    }
+  ]
+}

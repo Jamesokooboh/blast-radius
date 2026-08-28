@@ -1,0 +1,14 @@
+{
+  "verdict": "block",
+  "headline": "Internal ALB cannot communicate with app instances due to security group configuration",
+  "suppressed": "",
+  "findings": [
+    {
+      "address": "aws_lb.internal",
+      "category": "reliability",
+      "severity": "critical",
+      "evidence_ref": "In compute.tf, aws_lb.internal uses security_groups = [aws_security_group.app.id]. The app security group (in security.tf) has an ingress rule allowing port 8080 only from aws_security_group.alb (the public ALB), not from itself. This blocks app instances from reaching the internal ALB on port 8080.",
+      "explanation": "The internal ALB is deployed in the app security group, but that security group only allows inbound traffic from the public ALB's security group, not from app instances themselves. When app instances try to call the internal ALB's internal DNS name on port 8080, the security group will reject the traffic. The internal ALB needs either its own security group or the app security group needs a self-referencing ingress rule on port 8080 to allow app-to-app communication."
+    }
+  ]
+}

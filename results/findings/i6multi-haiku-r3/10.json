@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "desired_capacity cannot be lower than min_size; this change will fail or be silently ignored, and the fleet will stay at 3 instances.",
+  "suppressed": "No security implications, as noted. Cost impact is correctly nil because the change won't take effect.",
+  "findings": [
+    {
+      "address": "aws_autoscaling_group.app",
+      "category": "reliability",
+      "severity": "high",
+      "evidence_ref": "min_size = 3, desired_capacity = 1 (new). AWS ASG constraint requires desired_capacity \u2265 min_size.",
+      "explanation": "The configuration is invalid. AWS Auto Scaling Groups enforce min_size \u2264 desired_capacity \u2264 max_size. With min_size at 3 and desired_capacity at 1, Terraform will either fail to apply or the ASG will maintain 3 instances anyway, defeating the cost savings goal."
+    }
+  ]
+}

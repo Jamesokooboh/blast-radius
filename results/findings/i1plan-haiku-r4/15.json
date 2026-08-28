@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "Removing prevent_destroy from a production data bucket without addressing the root cause",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_s3_bucket.data",
+      "category": "guardrail",
+      "severity": "high",
+      "evidence_ref": "Removal of `lifecycle { prevent_destroy = true }` block from aws_s3_bucket.data in data_stores.tf",
+      "explanation": "The prevent_destroy guardrail prevents accidental bucket destruction in Terraform. Removing it from a production data bucket (acme-prod-data) eliminates a critical safeguard. The CI failures should be diagnosed and fixed rather than removing the protection \u2014 the lifecycle block should not prevent plan/apply operations unless there is a separate issue that needs addressing."
+    }
+  ]
+}

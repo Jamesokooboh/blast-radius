@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "Cost impact not mentioned: NAT gateway spending will roughly double",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_nat_gateway.b",
+      "category": "cost",
+      "severity": "high",
+      "evidence_ref": "Terraform plan creates aws_nat_gateway.b and aws_eip.nat_b; each NAT gateway costs approximately $32-45/month plus data processing charges",
+      "explanation": "Adding a second NAT gateway for high availability will roughly double monthly NAT gateway costs, but this financial impact is not mentioned in the pull request description. The decision-maker needs to know the cost trade-off before merging."
+    }
+  ]
+}

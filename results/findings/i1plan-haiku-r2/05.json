@@ -1,0 +1,21 @@
+{
+  "verdict": "warn",
+  "headline": "Security group rules missing: internal ALB likely won't reach its targets",
+  "suppressed": "Using HTTP on port 8080 for internal-only traffic is appropriate since traffic never leaves the VPC and the ALB is documented as internal.",
+  "findings": [
+    {
+      "address": "aws_lb.internal",
+      "category": "reliability",
+      "severity": "high",
+      "evidence_ref": "The terraform plan shows only three resources being created (aws_lb.internal, aws_lb_listener.internal, aws_lb_target_group.internal), with no security group rule changes. The ALB references aws_security_group.app.id but no ingress rules are added to allow traffic from the ALB to worker targets.",
+      "explanation": "For the internal ALB to forward traffic to its targets, security group ingress rules must allow the ALB to reach the workers. Without these rules, health checks will fail and the load balancer won't function."
+    },
+    {
+      "address": "aws_lb.internal",
+      "category": "cost",
+      "severity": "medium",
+      "evidence_ref": "The plan creates aws_lb (Application Load Balancer type), which incurs hourly charges plus per-GB data processing fees under AWS's ALB pricing model.",
+      "explanation": "Adding an ALB carries material recurring costs that aren't mentioned in the PR description. This should be explicitly acknowledged and budgeted for."
+    }
+  ]
+}

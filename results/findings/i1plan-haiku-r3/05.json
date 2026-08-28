@@ -1,0 +1,6 @@
+{
+  "verdict": "approve",
+  "headline": "Well-designed internal ALB to reduce VPC egress for service-to-service calls. Setup looks sound.",
+  "suppressed": null,
+  "findings": []
+}

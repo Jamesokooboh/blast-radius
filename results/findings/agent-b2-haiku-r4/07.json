@@ -1,0 +1,14 @@
+{
+  "verdict": "block",
+  "headline": "Application cannot access the new staging bucket - missing IAM permissions",
+  "suppressed": "",
+  "findings": [
+    {
+      "address": "aws_s3_bucket.tmp_uploads",
+      "category": "reliability",
+      "severity": "critical",
+      "evidence_ref": "The new staging bucket `aws_s3_bucket.tmp_uploads` is created in data_stores.tf, but the application IAM role policy `aws_iam_role_policy.app_data` in iam.tf is unchanged. It only grants s3:GetObject, s3:PutObject, and s3:ListBucket permissions to the data bucket ARNs, not the tmp_uploads bucket.",
+      "explanation": "According to the PR description, the worker should validate uploads in the staging bucket and move them to the data bucket. However, the app instances running the worker will not have IAM permissions to access the tmp_uploads bucket. The worker cannot read from staging or write to staging, causing the validation workflow to fail. The app_data_bucket_arns variable must be updated to include the tmp_uploads bucket ARNs, and the IAM policy must be updated to reference them."
+    }
+  ]
+}

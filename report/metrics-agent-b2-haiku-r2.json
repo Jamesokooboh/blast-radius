@@ -1,0 +1,261 @@
+{
+  "cases": {
+    "01": {
+      "band": "A",
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "reported": 1,
+      "verdict_ok": false,
+      "noise_total": 0,
+      "noise_suppressed": 0,
+      "missed": [],
+      "spurious": []
+    },
+    "02": {
+      "band": "A",
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "reported": 1,
+      "verdict_ok": true,
+      "noise_total": 0,
+      "noise_suppressed": 0,
+      "missed": [],
+      "spurious": []
+    },
+    "03": {
+      "band": "A",
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "reported": 1,
+      "verdict_ok": true,
+      "noise_total": 0,
+      "noise_suppressed": 0,
+      "missed": [],
+      "spurious": []
+    },
+    "04": {
+      "band": "B",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "reported": 0,
+      "verdict_ok": true,
+      "noise_total": 2,
+      "noise_suppressed": 2,
+      "missed": [],
+      "spurious": []
+    },
+    "05": {
+      "band": "B",
+      "tp": 0,
+      "fp": 1,
+      "fn": 0,
+      "precision": 0.0,
+      "recall": 1.0,
+      "f1": 0.0,
+      "reported": 1,
+      "verdict_ok": false,
+      "noise_total": 2,
+      "noise_suppressed": 1,
+      "missed": [],
+      "spurious": [
+        "aws_lb.internal:reliability"
+      ]
+    },
+    "06": {
+      "band": "B",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "reported": 0,
+      "verdict_ok": true,
+      "noise_total": 2,
+      "noise_suppressed": 2,
+      "missed": [],
+      "spurious": []
+    },
+    "07": {
+      "band": "B",
+      "tp": 0,
+      "fp": 1,
+      "fn": 0,
+      "precision": 0.0,
+      "recall": 1.0,
+      "f1": 0.0,
+      "reported": 1,
+      "verdict_ok": false,
+      "noise_total": 1,
+      "noise_suppressed": 1,
+      "missed": [],
+      "spurious": [
+        "aws_iam_role_policy.app_data:reliability"
+      ]
+    },
+    "08": {
+      "band": "C",
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "reported": 1,
+      "verdict_ok": false,
+      "noise_total": 0,
+      "noise_suppressed": 0,
+      "missed": [],
+      "spurious": []
+    },
+    "09": {
+      "band": "C",
+      "tp": 0,
+      "fp": 3,
+      "fn": 2,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "reported": 3,
+      "verdict_ok": true,
+      "noise_total": 0,
+      "noise_suppressed": 0,
+      "missed": [
+        "aws_nat_gateway.main:cost",
+        "aws_route_table.public:network-exposure"
+      ],
+      "spurious": [
+        "aws_db_instance.main:network-exposure",
+        "aws_route_table_association.private_a:reliability",
+        "aws_route_table_association.private_b:reliability"
+      ]
+    },
+    "10": {
+      "band": "C",
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "reported": 1,
+      "verdict_ok": false,
+      "noise_total": 0,
+      "noise_suppressed": 0,
+      "missed": [],
+      "spurious": []
+    },
+    "11": {
+      "band": "C",
+      "tp": 0,
+      "fp": 0,
+      "fn": 1,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "reported": 0,
+      "verdict_ok": false,
+      "noise_total": 0,
+      "noise_suppressed": 0,
+      "missed": [
+        "aws_eip.nat_b:cost"
+      ],
+      "spurious": []
+    },
+    "12": {
+      "band": "C",
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "reported": 1,
+      "verdict_ok": true,
+      "noise_total": 0,
+      "noise_suppressed": 0,
+      "missed": [],
+      "spurious": []
+    },
+    "13": {
+      "band": "D",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "reported": 0,
+      "verdict_ok": true,
+      "noise_total": 0,
+      "noise_suppressed": 0,
+      "missed": [],
+      "spurious": []
+    },
+    "14": {
+      "band": "D",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "reported": 0,
+      "verdict_ok": true,
+      "noise_total": 0,
+      "noise_suppressed": 0,
+      "missed": [],
+      "spurious": []
+    },
+    "15": {
+      "band": "C",
+      "tp": 0,
+      "fp": 1,
+      "fn": 1,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "reported": 1,
+      "verdict_ok": false,
+      "noise_total": 0,
+      "noise_suppressed": 0,
+      "missed": [
+        "aws_s3_bucket.data:guardrail"
+      ],
+      "spurious": [
+        "aws_s3_bucket.data:data-loss"
+      ]
+    }
+  },
+  "aggregate": {
+    "precision": 0.5,
+    "recall": 0.6,
+    "f1": 0.5454545454545454,
+    "verdict_accuracy": 0.5333333333333333,
+    "findings_per_pr": 0.8,
+    "band_recall": {
+      "A": 1.0,
+      "B": 1.0,
+      "C": 0.42857142857142855,
+      "D": 1.0
+    },
+    "noise_suppressed": 6,
+    "noise_total": 7
+  }
+}

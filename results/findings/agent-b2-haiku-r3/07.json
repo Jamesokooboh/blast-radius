@@ -1,0 +1,14 @@
+{
+  "verdict": "block",
+  "headline": "Application role lacks permissions to access the staging bucket",
+  "suppressed": "",
+  "findings": [
+    {
+      "address": "aws_iam_role_policy.app_data",
+      "category": "reliability",
+      "severity": "critical",
+      "evidence_ref": "In iam.tf, the app_data policy grants s3:GetObject, s3:PutObject, and s3:ListBucket permissions only on the acme-prod-data bucket (from var.app_data_bucket_arns). The tmp_uploads bucket created in data_stores.tf is not included in these permissions. The EC2 instances running the worker role will not be able to read from or write to acme-prod-tmp-uploads.",
+      "explanation": "The PR description states that uploads land in the staging bucket and the worker validates them in place before moving them to the data bucket. However, the worker (running under aws_iam_role.app) has no permissions on the tmp_uploads bucket. It cannot read objects for validation or write move operations. This breaks the described workflow and will cause the application to fail at runtime. Either add tmp_uploads bucket ARNs to var.app_data_bucket_arns or update the IAM policy in iam.tf directly."
+    }
+  ]
+}

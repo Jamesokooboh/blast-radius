@@ -203,10 +203,12 @@ def main():
     ap.add_argument("--profile", default=None)
     ap.add_argument("--force", action="store_true",
                     help="redo cases that already have output; default is to resume")
+    ap.add_argument("--mode", default=None,
+                    help="output directory name; for repeat runs")
     args = ap.parse_args()
     M.use_profile(args.profile)
 
-    mode = f"agent-b2-{args.model}"
+    mode = args.mode or f"agent-b2-{args.model}"
     out = ROOT / "results" / "findings" / mode
     traj = ROOT / "results" / "trajectories" / mode
     out.mkdir(parents=True, exist_ok=True)

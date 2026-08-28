@@ -1,0 +1,21 @@
+{
+  "verdict": "block",
+  "headline": "Deploy role has unrestricted permissions across all AWS services and resources",
+  "suppressed": "",
+  "findings": [
+    {
+      "address": "aws_iam_role_policy.deploy",
+      "category": "privilege-escalation",
+      "severity": "critical",
+      "evidence_ref": "iam.tf lines 55-67: policy grants Action='*' and Resource='*', allowing the CodeBuild role to perform any action on any AWS resource",
+      "explanation": "The deploy role can assume full administrative privileges over the entire AWS account. This violates the principle of least privilege and creates a significant security risk. Any compromise of the CodeBuild process becomes account-wide compromise. Even as a temporary measure, wildcard policies should not be merged to production infrastructure."
+    },
+    {
+      "address": "aws_db_instance.main",
+      "category": "reliability",
+      "severity": "medium",
+      "evidence_ref": "plan.txt shows 'aws_db_instance.main will be updated in-place' with only '(30 unchanged attributes hidden)' and no visible changes shown",
+      "explanation": "The plan shows the database will be updated but provides no details about what changed. This is suspicious\u2014either there's a hidden attribute change or drift in the state that isn't being displayed clearly. Before merging, verify what database configuration is actually changing."
+    }
+  ]
+}

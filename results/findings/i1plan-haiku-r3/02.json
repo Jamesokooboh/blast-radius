@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "Production database exposed to the internet for an unguarded temporary workaround",
+  "suppressed": "The database is encrypted at-rest only and backups are unencrypted, but these are pre-existing conditions unrelated to this change.",
+  "findings": [
+    {
+      "address": "aws_db_instance.main",
+      "category": "network-exposure",
+      "severity": "high",
+      "evidence_ref": "data_stores.tf line 27: `publicly_accessible` changed from `false` to `true`",
+      "explanation": "The production PostgreSQL database holding application data is now reachable from the internet. While intended temporarily, there's no code-level indicator of expiration, no mechanism to revert it, and no visibility into whether the security group sufficiently restricts inbound access."
+    }
+  ]
+}

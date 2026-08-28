@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "CodeBuild deploy role has unrestricted permissions with no enforcement of the stated scope-down plan",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_iam_role_policy.deploy",
+      "category": "guardrail",
+      "severity": "high",
+      "evidence_ref": "Policy with Action: '*' and Resource: '*'",
+      "explanation": "The CodeBuild role can perform any action on any AWS resource in the account. While the PR states permissions will be scoped down, there is no documented timeline, owner, or enforcement mechanism. This risks becoming permanent. If a deployment script is compromised or buggy, it would have account-admin capabilities."
+    }
+  ]
+}

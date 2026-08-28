@@ -1,0 +1,21 @@
+{
+  "verdict": "warn",
+  "headline": "Production database is now internet-accessible with no enforcement that this is temporary",
+  "suppressed": "Storage is unencrypted, but this appears pre-existing and outside the scope of this change.",
+  "findings": [
+    {
+      "address": "aws_db_instance.main",
+      "category": "network-exposure",
+      "severity": "high",
+      "evidence_ref": "publicly_accessible changed from false to true in data_stores.tf",
+      "explanation": "The production PostgreSQL database is now reachable from the internet. Even with the security group, any misconfiguration or credential leak exposes production data directly to external attack."
+    },
+    {
+      "address": "aws_db_instance.main",
+      "category": "guardrail",
+      "severity": "medium",
+      "evidence_ref": "PR description says 'while we work out VPC peering' but no deadline, TODO comment, or code to enforce reversion",
+      "explanation": "There is no mechanism to ensure this temporary access actually gets reverted. Once merged, there is nothing preventing this from staying public indefinitely."
+    }
+  ]
+}

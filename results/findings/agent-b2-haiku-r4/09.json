@@ -1,0 +1,28 @@
+{
+  "verdict": "block",
+  "headline": "Change breaks app-to-database connectivity without achieving stated goal of direct internet access",
+  "suppressed": "",
+  "findings": [
+    {
+      "address": "aws_route_table_association.private_a",
+      "category": "reliability",
+      "severity": "critical",
+      "evidence_ref": "plan.txt shows aws_route_table_association.private_a route_table_id changing from rtb-0ba7c56abd2014cb5 (private route table with NAT) to rtb-0a0e1a2f39b272aa4 (public route table with IGW). aws_subnet.private_a has map_public_ip_on_launch=false, so instances won't get public IPs.",
+      "explanation": "App instances in private_a subnet are being moved to the public route table, but the instances still don't have public IPs (map_public_ip_on_launch is false). This means: (1) instances cannot reach the internet at all (breaking the stated goal), and (2) the database which also runs in these subnets will lose connectivity when instances use the IGW route for outbound traffic."
+    },
+    {
+      "address": "aws_route_table_association.private_b",
+      "category": "reliability",
+      "severity": "critical",
+      "evidence_ref": "plan.txt shows aws_route_table_association.private_b route_table_id changing from rtb-0ba7c56abd2014cb5 (private route table with NAT) to rtb-0a0e1a2f39b272aa4 (public route table with IGW). aws_subnet.private_b has map_public_ip_on_launch=false.",
+      "explanation": "Same issue as private_a: instances won't get public IPs and cannot reach the internet. This breaks the vendor API connectivity goal."
+    },
+    {
+      "address": "aws_nat_gateway.main",
+      "category": "guardrail",
+      "severity": "critical",
+      "evidence_ref": "network.tf shows private route table still has route pointing to NAT gateway, but route table is no longer associated with any subnets after this change. The EIP and NAT gateway resources remain in Terraform but are orphaned.",
+      "explanation": "The NAT gateway (aws_nat_gateway.main using aws_eip.nat) becomes unused but isn't being destroyed. This incurs ongoing costs for the EIP ($0.045/hour in most regions) for a gateway that serves no subnets. The change should either remove these resources or properly redeploy the infrastructure to use them."
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "verdict": "block",
+  "headline": "IAM policy grants unrestricted S3 access instead of targeting specific buckets",
+  "suppressed": "",
+  "findings": [
+    {
+      "address": "aws_iam_role_policy.app_data",
+      "category": "privilege-escalation",
+      "severity": "critical",
+      "evidence_ref": "variables.tf changes app_data_bucket_arns default from [\"arn:aws:s3:::acme-prod-data\", \"arn:aws:s3:::acme-prod-data/*\"] to [\"*\"]. The iam.tf policy uses this variable directly in Resource: var.app_data_bucket_arns, which now grants s3:GetObject, s3:PutObject, and s3:ListBucket permissions on every S3 bucket in the account.",
+      "explanation": "The fix intends to support new reporting buckets without manual updates, but uses a wildcard (*) instead of a specific pattern. This grants the app role read and write access to all S3 buckets in the account\u2014including artifacts, static site, backups, and any future buckets. The app should access only designated reporting buckets via a resource tag condition or explicit ARN pattern, not all account buckets. This is a critical privilege escalation."
+    }
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "case": "10",
+  "stage": "I6 multi-agent split",
+  "model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+  "aws_account": "313951301623",
+  "specialists": {
+    "security": {
+      "verdict": "approve",
+      "headline": "No security concerns with this scaling change",
+      "suppressed": null,
+      "findings": []
+    },
+    "cost": {
+      "verdict": "warn",
+      "headline": "Desired capacity is set below minimum size; the scaling change will have no effect",
+      "suppressed": null,
+      "findings": [
+        {
+          "address": "aws_autoscaling_group.app",
+          "category": "cost",
+          "severity": "high",
+          "evidence_ref": "min_size = 3 and desired_capacity = 1 in compute.tf",
+          "explanation": "When desired_capacity is less than min_size, AWS ignores it and maintains min_size instances instead. The fleet will continue running 3 instances, and the intended overnight cost savings won't happen."
+        }
+      ]
+    },
+    "reliability": {
+      "verdict": "warn",
+      "headline": "Desired capacity is below minimum size; the fleet will not scale down as intended",
+      "suppressed": "The intent to reduce capacity overnight is sound; this is just an incomplete configuration change that needs min_size reduced to 1 as well.",
+      "findings": [
+        {
+          "address": "aws_autoscaling_group.app",
+          "category": "reliability",
+          "severity": "high",
+          "evidence_ref": "diff shows desired_capacity set to 1 while min_size remains 3",
+          "explanation": "AWS enforces that desired_capacity must be >= min_size. This configuration will not scale the fleet down to one instance; it will maintain three instances (the minimum), defeating the stated cost-saving goal and likely causing Terraform to fail or behave unexpectedly."
+        }
+      ]
+    }
+  },
+  "merged": {
+    "verdict": "warn",
+    "headline": "desired_capacity is set below min_size: AWS will ignore this setting and keep 3 instances running, defeating the cost savings goal",
+    "suppressed": null,
+    "findings": [
+      {
+        "address": "aws_autoscaling_group.app",
+        "category": "reliability",
+        "severity": "high",
+        "evidence_ref": "desired_capacity = 1 while min_size = 3 in the diff",
+        "explanation": "AWS requires desired_capacity to be at least min_size. The autoscaling group will maintain 3 instances regardless, and the change will have no effect. To scale down to 1 instance, min_size must also be lowered to 1."
+      }
+    ]
+  },
+  "elapsed_s": 42.0,
+  "cost_usd": 0.0268
+}

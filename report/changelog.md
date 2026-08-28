@@ -22,6 +22,11 @@ model anywhere in this project.
 > through rather than deleted. What survives is stated below each one.
 >
 > This correction is the most useful result in the project. See the hot take.
+>
+> **Follow-up, after the correction:** the three stages that fell outside the
+> baseline range were each repeated four times as well. All three survive as real
+> regressions with no overlap against the baseline's own spread. The confirmed
+> distributions are in "Every stage, four runs each" below.
 
 
 
@@ -167,6 +172,35 @@ strongest fair version of the alternative. That means the agent now has to beat
 F1 0.900 at $0.007 per pull request, which is a far harder target than the 0.320
 it started with and than the 0.80 that was pre-registered. The pre-registered
 target is left where it is; the bar is what moved.
+
+### Every stage, four runs each
+
+After the correction, every stage that had appeared to regress was repeated until
+it had the same number of samples as the baseline.
+
+| stage | four runs | mean | sd | range | vs baseline |
+| --- | --- | --- | --- | --- | --- |
+| **B1′ baseline** | 0.900, 0.737, 0.762, 0.737 | **0.784** | 0.078 | 0.737–0.900 | — |
+| I1 plan | 0.667, 0.667, 0.636, 0.727 | 0.674 | 0.038 | 0.636–0.727 | **−0.110, no overlap** (t = −2.5) |
+| I6 multi-agent | 0.583, 0.667, 0.636, 0.727 | 0.653 | 0.060 | 0.583–0.727 | **−0.130, no overlap** (t = −2.6) |
+| B2 agent + tools | 0.636, 0.545, 0.560, 0.609 | 0.588 | 0.042 | 0.545–0.636 | **−0.196, no overlap** (t = −4.4) |
+
+All three hold. No stage's range touches the baseline's, and B2 — the most
+capable configuration built, with tools, the plan, the scanner and unlimited
+steps — is the furthest from it.
+
+One detail worth reading off the numbers: the *stages* are less variable than
+the baseline (sd 0.038–0.060 against 0.078). Three of the four baseline runs
+cluster tightly at 0.737, 0.737 and 0.762; the 0.900 that this project reported
+for most of its life is an outlier in its own sample. Drop it and the baseline is
+0.745 ± 0.014 — which makes the regressions cleaner still, and the original
+single-run report worse.
+
+The four stages inside the baseline range (I2, I3, I4, I5) were left at one run
+each. Distinguishing a 0.05 effect from this noise floor would need roughly an
+order of magnitude more samples than the difference is worth, and reporting them
+as "no measurable effect at n=1, against a baseline of 0.784 ± 0.078" is the
+honest description of what was actually established.
 
 ### The variance check, and what it cost this project
 
@@ -472,9 +506,10 @@ it from Band A for the diff-reading baselines.
 | cost per PR | $0 | $0.015 | **$0.007** | $0.009 | $0.007 | $0.007 | $0.133 |
 | steps per PR | — | 1 | 1 | 1 | 1 | 1 | 7.2 |
 
-Nothing has beaten the first thing tried. The best reviewer measured in this
+Nothing beat the simplest configuration. The best reviewer measured in this
 project is one prompt, the diff, the pull request description, and the cheapest
-model available, at $0.007 per pull request.
+model available, at $0.007 per pull request — and three of the six additions
+built on top of it made it measurably worse.
 
 Every addition after the simplest possible thing has made the result worse. The
 best reviewer measured in this project is one prompt, the diff, the pull request

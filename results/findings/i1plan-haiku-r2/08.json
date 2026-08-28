@@ -1,0 +1,21 @@
+{
+  "verdict": "warn",
+  "headline": "This change will delete and recreate the production database, causing significant downtime \u2014 the PR description does not mention this.",
+  "suppressed": "The final snapshot is configured correctly and delete_automated_backups is true, which is appropriate for protecting data during this replacement.",
+  "findings": [
+    {
+      "address": "aws_db_instance.main",
+      "category": "reliability",
+      "severity": "high",
+      "evidence_ref": "terraform plan shows `\"actions\": [\"delete\", \"create\"]` and `\"replace_paths\": [[\"storage_encrypted\"]]`",
+      "explanation": "AWS RDS cannot enable encryption on an existing unencrypted instance in-place. This change will delete the current production database and create a new encrypted one. Although a final snapshot is retained, the database will be unavailable during replacement, causing downtime. Applications will lose their connection and may need to be updated if the database endpoint changes."
+    },
+    {
+      "address": "aws_db_instance.main",
+      "category": "guardrail",
+      "severity": "medium",
+      "evidence_ref": "terraform plan shows `\"kms_key_id\": null` in the after state",
+      "explanation": "Encryption is enabled with the default AWS-managed key. If your organization requires customer-managed KMS keys for encryption at rest, you should specify `kms_key_id` explicitly to control key management and rotation."
+    }
+  ]
+}

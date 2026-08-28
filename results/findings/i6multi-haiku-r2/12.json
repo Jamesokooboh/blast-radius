@@ -1,0 +1,14 @@
+{
+  "verdict": "block",
+  "headline": "Application role would gain read/write access to all S3 buckets in the account \u2014 wildcard S3 access is not acceptable trade for operational convenience.",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "variable.app_data_bucket_arns",
+      "category": "privilege-escalation",
+      "severity": "critical",
+      "evidence_ref": "default = [\"*\"] in the diff \u2014 replaces specific bucket ARNs with wildcard",
+      "explanation": "The application role will now read and write any S3 bucket in the account, not just the intended analytics bucket. If the application is compromised, an attacker gains access to all company data stored in S3, including backups, configuration, and other sensitive buckets."
+    }
+  ]
+}

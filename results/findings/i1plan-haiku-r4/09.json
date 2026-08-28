@@ -1,0 +1,21 @@
+{
+  "verdict": "warn",
+  "headline": "Subnets named 'private' are now routed through the public route table, creating architectural confusion and exposure risk",
+  "suppressed": "Vendor API rate-limiting is a legitimate operational problem. The solution of direct egress is reasonable if these instances don't need inbound internet connectivity and are protected by security groups. Verify that: (1) security groups restrict inbound access appropriately, (2) instances do not have public/elastic IPs assigned, and (3) consider renaming subnets to reflect their new routing model.",
+  "findings": [
+    {
+      "address": "aws_route_table_association.private_a",
+      "category": "network-exposure",
+      "severity": "high",
+      "evidence_ref": "route_table_id changes from rtb-0ba7c56abd2014cb5 (private) to rtb-0a0e1a2f39b272aa4 (public); subnet named 'private_a' now uses public route table",
+      "explanation": "These subnets retain their 'private' name but now route through the public route table. If instances in these subnets are later assigned public or elastic IPs\u2014by design or accident\u2014they become directly internet-exposed without the NAT boundary that previously existed."
+    },
+    {
+      "address": "aws_route_table_association.private_b",
+      "category": "guardrail",
+      "severity": "high",
+      "evidence_ref": "route_table_id changes from rtb-0ba7c56abd2014cb5 (private) to rtb-0a0e1a2f39b272aa4 (public)",
+      "explanation": "The naming mismatch between 'private' subnets and public routing is a maintenance hazard. Future operators or security reviews will be confused about the intended network boundary, risking misconfiguration or inadequate security controls."
+    }
+  ]
+}

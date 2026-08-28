@@ -1,0 +1,34 @@
+{
+  "case": "14",
+  "stage": "I6 multi-agent split",
+  "model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+  "aws_account": "313951301623",
+  "specialists": {
+    "security": {
+      "verdict": "approve",
+      "headline": "Tagging change for cost allocation only; no security impact",
+      "suppressed": null,
+      "findings": []
+    },
+    "cost": {
+      "verdict": "approve",
+      "headline": "Tags do not affect infrastructure costs; this is purely a cost allocation mechanism.",
+      "suppressed": null,
+      "findings": []
+    },
+    "reliability": {
+      "verdict": "approve",
+      "headline": "Adding cost center tags to networking resources \u2014 no risk to reliability, data, or protections",
+      "suppressed": null,
+      "findings": []
+    }
+  },
+  "merged": {
+    "verdict": "approve",
+    "headline": "Straightforward cost allocation tagging with no operational impact",
+    "suppressed": null,
+    "findings": []
+  },
+  "elapsed_s": 25.5,
+  "cost_usd": 0.0174
+}

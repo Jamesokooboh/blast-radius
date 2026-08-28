@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "prevent_destroy guard removed from production data bucket to work around a one-week CI failure without explaining the root cause",
+  "suppressed": "Adding the CostCenter tag is appropriate and adds no risk.",
+  "findings": [
+    {
+      "address": "aws_s3_bucket.data",
+      "category": "guardrail",
+      "severity": "high",
+      "evidence_ref": "Removal of lifecycle { prevent_destroy = true } block (lines 41-43 of data_stores.tf)",
+      "explanation": "The prevent_destroy guard prevented accidental deletion of this production data bucket via terraform destroy or misconfigured automation. Removing it exposes the data to loss. The PR states CI has failed for a week but does not explain what the actual conflict is, suggesting this removes a necessary protection rather than fixing an underlying problem."
+    }
+  ]
+}

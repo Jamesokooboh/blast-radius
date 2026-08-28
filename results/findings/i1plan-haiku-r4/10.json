@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "Desired capacity cannot be lower than minimum size \u2014 the ASG will ignore this change and continue running 3 instances",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_autoscaling_group.app",
+      "category": "reliability",
+      "severity": "high",
+      "evidence_ref": "desired_capacity set to 1 in compute.tf diff, but min_size remains 3 in the same resource",
+      "explanation": "AWS autoscaling groups maintain at least min_size instances regardless of desired_capacity. This change will have no effect; the fleet will continue running 3 instances overnight, and the cost savings will not materialize. To scale down, min_size must also be reduced to 1."
+    }
+  ]
+}

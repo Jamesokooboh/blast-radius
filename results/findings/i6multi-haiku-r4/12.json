@@ -1,0 +1,14 @@
+{
+  "verdict": "block",
+  "headline": "Application role gains permission to read and write all S3 buckets in the account instead of two specific ones",
+  "suppressed": "The cost reviewer found no cost impact. The security and reliability findings both correctly identified the same privilege-escalation issue.",
+  "findings": [
+    {
+      "address": "aws_iam_role.app",
+      "category": "privilege-escalation",
+      "severity": "critical",
+      "evidence_ref": "variables.tf: `app_data_bucket_arns` default changed from specific bucket ARNs (`acme-prod-data` and `acme-prod-data/*`) to wildcard `[\"*\"]`",
+      "explanation": "The app role will now have S3 read/write access to every bucket in the account. If the application or its credentials are compromised, all S3 data becomes accessible to the attacker, not just the intended reporting buckets."
+    }
+  ]
+}

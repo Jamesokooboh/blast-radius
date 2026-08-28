@@ -1,0 +1,21 @@
+{
+  "verdict": "warn",
+  "headline": "Production database is now publicly accessible on the internet with no documented mechanism to revert this stated-as-temporary change.",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_db_instance.main",
+      "category": "network-exposure",
+      "severity": "high",
+      "evidence_ref": "publicly_accessible changed from false to true in data_stores.tf",
+      "explanation": "The production database is now reachable from the internet instead of only within the VPC, significantly increasing attack surface and the impact of any credential compromise."
+    },
+    {
+      "address": "aws_db_instance.main",
+      "category": "guardrail",
+      "severity": "high",
+      "evidence_ref": "No code comment, TTL, or automation present; PR description indicates this is temporary 'while we work on it'",
+      "explanation": "The stated temporary access has no enforcement mechanism to revert it, and this pattern historically becomes permanent in practice. Commit this change only if you have documented parallel work to implement VPC peering with a firm reversion deadline."
+    }
+  ]
+}

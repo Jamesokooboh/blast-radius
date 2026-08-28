@@ -1,0 +1,14 @@
+{
+  "verdict": "block",
+  "headline": "Staging bucket created but worker has no permissions to access it",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_iam_role_policy.app_data",
+      "category": "reliability",
+      "severity": "critical",
+      "evidence_ref": "The IAM policy for the app role permits S3 operations only on `arn:aws:s3:::acme-prod-data` and `arn:aws:s3:::acme-prod-data/*`, but the new staging bucket is `acme-prod-tmp-uploads`. The plan shows no update to this policy.",
+      "explanation": "The PR description states that the worker validates uploads in the staging bucket and moves them to the data bucket. However, the worker (running as the app role) cannot access the new staging bucket because its IAM permissions were not updated. Without permissions to read from or write to `acme-prod-tmp-uploads`, the worker will fail when attempting to validate and move files, breaking the upload workflow entirely."
+    }
+  ]
+}

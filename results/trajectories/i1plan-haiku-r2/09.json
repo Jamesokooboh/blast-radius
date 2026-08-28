@@ -1,0 +1,39 @@
+{
+  "case": "09",
+  "stage": "I1 one-shot + plan",
+  "model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+  "aws_account": "313951301623",
+  "effort": null,
+  "system": "You are reviewing a Terraform pull request against production infrastructure. You\nare the last human-equivalent checkpoint before this change reaches production.\n\nYour job is not to list everything that could be improved about this stack. It is\nto decide what the person merging this pull request needs to know about *this\nchange*, and to say it in few enough words that they actually read it.\n\n## What to report\n\nReport at most **five** findings. Fewer is better. If the change is safe, report\nnone and say so \u2014 a review that invents problems to look useful is worse than no\nreview.\n\nA finding must be about this pull request: something it introduces, removes, or\ncauses. Pre-existing conditions elsewhere in the stack are not findings, however\ntrue they are.\n\nRank findings by what would actually go wrong, not by how a scanner would score\nthem. Consider at least:\n\n- What the change does to something that already exists and holds data.\n- Whether the effect of the change appears somewhere other than the lines edited.\n- Whether the stated intent in the description matches what the code does.\n- Whether a protection, guard, or constraint is being removed.\n- Whether the change costs money nobody has been told about.\n\n## Ruling against a scanner\n\nConfigurations that look alarming in isolation are often correct in context. A\nload balancer open to the internet is doing its job. A bucket documented as a\npublic marketing site is meant to be public. Storage that is deleted within a day\ndoes not need versioning or replication.\n\nWhen context \u2014 a tag, a comment, the pull request description, the resource's\nevident purpose \u2014 shows an alarming-looking configuration is intended and\nproportionate, do not report it. Say nothing about it at all.\n\n## Categories\n\nEvery finding takes exactly one category:\n\n- `network-exposure` \u2014 something becomes reachable, or reachable more widely\n- `privilege-escalation` \u2014 an identity gains permissions beyond what it needs\n- `data-loss` \u2014 data is destroyed, replaced, or put at risk of being destroyed\n- `guardrail` \u2014 a protection or constraint is weakened or removed\n- `reliability` \u2014 the change will not work as intended, or degrades availability\n- `cost` \u2014 a material and unannounced increase in spend\n\n## Evidence\n\nEvery finding must cite something real: a file and what changed in it, or a\nspecific action in the plan. If you cannot point at the evidence, do not report\nthe finding.\n\n## Address\n\nUse the Terraform resource address the finding is about \u2014 for example\n`aws_db_instance.main`, `aws_security_group.app`. Use the address of the resource\nthat carries the problem, not the file that was edited.\n\n## Verdict\n\n- `block` \u2014 merging this as-is would cause real harm\n- `warn` \u2014 mergeable, but the author needs to see something first\n- `approve` \u2014 nothing here needs their attention\n",
+  "prompt": "Review this Terraform pull request.\n\n## Pull request description\n\n# Give the app subnets direct internet access\n\nThe vendor API we integrate with rate-limits by source IP, and our NAT gateway's\nsingle address keeps getting throttled. Pointing the app subnets at the public\nroute table so instances egress directly.\n\n\n## Diff\n\n```diff\ndiff --git a/C:/Users/DELL/Documents/projects/Hackerthon/infra/base/network.tf b/C:/Users/DELL/Documents/projects/Hackerthon/cases/case-09-subnet-igw-route/overlay/network.tf\nindex 4edc044..7f771f7 100644\n--- a/C:/Users/DELL/Documents/projects/Hackerthon/infra/base/network.tf\n+++ b/C:/Users/DELL/Documents/projects/Hackerthon/cases/case-09-subnet-igw-route/overlay/network.tf\n@@ -120,10 +120,10 @@ resource \"aws_route_table_association\" \"public_b\" {\n \n resource \"aws_route_table_association\" \"private_a\" {\n   subnet_id      = aws_subnet.private_a.id\n-  route_table_id = aws_route_table.private.id\n+  route_table_id = aws_route_table.public.id\n }\n \n resource \"aws_route_table_association\" \"private_b\" {\n   subnet_id      = aws_subnet.private_b.id\n-  route_table_id = aws_route_table.private.id\n+  route_table_id = aws_route_table.public.id\n }\n\n```\n\n## terraform plan\n\nActions this change will take:\n\n```\n            update  aws_route_table_association.private_a\n            update  aws_route_table_association.private_b\n```\n\nFull detail for each changed resource, from `terraform show -json`:\n\n```json\n[\n  {\n    \"address\": \"aws_route_table_association.private_a\",\n    \"mode\": \"managed\",\n    \"type\": \"aws_route_table_association\",\n    \"name\": \"private_a\",\n    \"provider_name\": \"registry.terraform.io/hashicorp/aws\",\n    \"change\": {\n      \"actions\": [\n        \"update\"\n      ],\n      \"before\": {\n        \"gateway_id\": null,\n        \"id\": \"rtbassoc-05c1f96d6b553aa8e\",\n        \"route_table_id\": \"rtb-0ba7c56abd2014cb5\",\n        \"subnet_id\": \"subnet-0261872bc18fc486d\",\n        \"timeouts\": null\n      },\n      \"after\": {\n        \"gateway_id\": null,\n        \"id\": \"rtbassoc-05c1f96d6b553aa8e\",\n        \"route_table_id\": \"rtb-0a0e1a2f39b272aa4\",\n        \"subnet_id\": \"subnet-0261872bc18fc486d\",\n        \"timeouts\": null\n      },\n      \"after_unknown\": {},\n      \"before_sensitive\": {},\n      \"after_sensitive\": {}\n    }\n  },\n  {\n    \"address\": \"aws_route_table_association.private_b\",\n    \"mode\": \"managed\",\n    \"type\": \"aws_route_table_association\",\n    \"name\": \"private_b\",\n    \"provider_name\": \"registry.terraform.io/hashicorp/aws\",\n    \"change\": {\n      \"actions\": [\n        \"update\"\n      ],\n      \"before\": {\n        \"gateway_id\": null,\n        \"id\": \"rtbassoc-09af268d9ba9918e4\",\n        \"route_table_id\": \"rtb-0ba7c56abd2014cb5\",\n        \"subnet_id\": \"subnet-086d5f2f5ccda55ac\",\n        \"timeouts\": null\n      },\n      \"after\": {\n        \"gateway_id\": null,\n        \"id\": \"rtbassoc-09af268d9ba9918e4\",\n        \"route_table_id\": \"rtb-0a0e1a2f39b272aa4\",\n        \"subnet_id\": \"subnet-086d5f2f5ccda55ac\",\n        \"timeouts\": null\n      },\n      \"after_unknown\": {},\n      \"before_sensitive\": {},\n      \"after_sensitive\": {}\n    }\n  }\n]\n```\n",
+  "response": {
+    "verdict": "warn",
+    "headline": "Private subnets are now internet-routable; confirm this is intentional",
+    "suppressed": null,
+    "findings": [
+      {
+        "address": "aws_route_table_association.private_a",
+        "category": "network-exposure",
+        "severity": "high",
+        "evidence_ref": "Subnets named 'private_a' and 'private_b' moving from private route table (rtb-0ba7c56abd2014cb5) to public route table (rtb-0a0e1a2f39b272aa4), which includes a route to the internet gateway",
+        "explanation": "To achieve the stated goal of outbound direct access, these instances also become directly addressable from the internet\u2014not just for egress. The PR describes an outbound bandwidth problem but does not acknowledge the inbound exposure change, which is a substantial shift in network posture."
+      }
+    ]
+  },
+  "usage": {
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 0,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "inference_geo": null,
+    "input_tokens": 2508,
+    "output_tokens": 1322,
+    "output_tokens_details": null,
+    "server_tool_use": null,
+    "service_tier": null
+  },
+  "elapsed_s": 12.8,
+  "cost_usd": 0.0091
+}

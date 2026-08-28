@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "Enabling encryption forces a destructive database replacement with significant downtime, not an in-place update",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_db_instance.main",
+      "category": "reliability",
+      "severity": "high",
+      "evidence_ref": "terraform plan shows `delete/create` actions with `replace_because_cannot_update` reason; AWS RDS cannot update storage_encrypted on a running instance",
+      "explanation": "The PR describes this as a one-line change, but enabling encryption on an existing RDS database requires AWS to destroy and recreate the entire instance. This causes production downtime and requires a maintenance window, not a transparent update. While backups exist, the operational impact is substantial and not mentioned in the description."
+    }
+  ]
+}

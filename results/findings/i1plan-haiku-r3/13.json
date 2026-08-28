@@ -1,0 +1,6 @@
+{
+  "verdict": "approve",
+  "headline": "Textbook refactor: resource renamed, state migration handled correctly with moved blocks, plan shows no actual changes.",
+  "suppressed": null,
+  "findings": []
+}

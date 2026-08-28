@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "Private subnets are now internet-routable; confirm this is intentional",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_route_table_association.private_a",
+      "category": "network-exposure",
+      "severity": "high",
+      "evidence_ref": "Subnets named 'private_a' and 'private_b' moving from private route table (rtb-0ba7c56abd2014cb5) to public route table (rtb-0a0e1a2f39b272aa4), which includes a route to the internet gateway",
+      "explanation": "To achieve the stated goal of outbound direct access, these instances also become directly addressable from the internet\u2014not just for egress. The PR describes an outbound bandwidth problem but does not acknowledge the inbound exposure change, which is a substantial shift in network posture."
+    }
+  ]
+}

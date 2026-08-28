@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "SSH opened to the entire internet on production app servers \u2014 understand this is a significant security exposure even if temporary.",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_security_group.app",
+      "category": "network-exposure",
+      "severity": "high",
+      "evidence_ref": "New ingress rule with `cidr_blocks = [\"0.0.0.0/0\"]` and port 22 in the diff",
+      "explanation": "SSH (port 22) is now accessible from anywhere on the internet to production app instances. This opens the attack surface to brute-force, credential spraying, and SSH-based exploits, even if the follow-up ticket will eventually move to Session Manager."
+    }
+  ]
+}

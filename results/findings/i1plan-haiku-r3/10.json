@@ -1,0 +1,14 @@
+{
+  "verdict": "block",
+  "headline": "desired_capacity=1 conflicts with min_size=3; change will have no effect",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_autoscaling_group.app",
+      "category": "reliability",
+      "severity": "high",
+      "evidence_ref": "compute.tf diff shows desired_capacity changed to 1, but min_size remains 3 in the same resource",
+      "explanation": "AWS Auto Scaling Groups enforce that desired_capacity cannot be less than min_size. This configuration is invalid; the ASG will keep running 3 instances regardless. To achieve the stated goal of scaling down to 1 instance overnight, min_size must also be reduced to 1, or use scheduled actions instead."
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "Internal ALB will incur ongoing AWS charges not mentioned in the PR description",
+  "suppressed": "Security reviewer confirmed proper isolation (no public subnets, internal=true scheme). Reliability reviewer confirmed correct configuration with no risk to existing infrastructure. Plain HTTP on port 8080 is documented as intentional for internal-only traffic between private subnets.",
+  "findings": [
+    {
+      "address": "aws_lb.internal",
+      "category": "cost",
+      "severity": "high",
+      "evidence_ref": "New aws_lb resource with internal=true on private subnets; ALB pricing includes hourly charges plus per-LCU billing for data processed",
+      "explanation": "Adding an Application Load Balancer introduces material recurring AWS costs (hourly charges plus per-capacity-unit billing). The PR description mentions the architecture change but not the cost impact or budget allocation."
+    }
+  ]
+}

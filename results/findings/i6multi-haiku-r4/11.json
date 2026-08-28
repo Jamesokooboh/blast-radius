@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "Adds second NAT gateway for AZ resilience, but introduces ~$32/month in recurring costs not mentioned in the description",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_nat_gateway.b",
+      "category": "cost",
+      "severity": "medium",
+      "evidence_ref": "New aws_nat_gateway.b and aws_eip.nat_b resources in overlay/network.tf. Each NAT gateway costs approximately $32/month plus data transfer charges.",
+      "explanation": "This PR eliminates a valid availability risk but adds recurring infrastructure costs that are not disclosed in the PR description. The author and approvers should confirm this cost is acceptable and budgeted."
+    }
+  ]
+}

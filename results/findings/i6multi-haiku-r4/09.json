@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "Subnets moving from private to public network tier\u2014exposes inbound internet traffic, not just egress",
+  "suppressed": "The cost reviewer noted this removes NAT gateway charges, but the PR description does not mention cost savings as a goal, and the trade-off in network exposure should be explicit before this merges.",
+  "findings": [
+    {
+      "address": "aws_route_table_association.private_a",
+      "category": "network-exposure",
+      "severity": "high",
+      "evidence_ref": "route_table_id changed from aws_route_table.private.id to aws_route_table.public.id",
+      "explanation": "Subnets named 'private_a' and 'private_b' now route directly through the internet gateway. This exposes instances to inbound internet traffic, not just egress\u2014a broader change than needed to solve the vendor API rate-limiting issue."
+    }
+  ]
+}

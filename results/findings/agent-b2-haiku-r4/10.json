@@ -1,0 +1,14 @@
+{
+  "verdict": "block",
+  "headline": "ASG min_size and desired_capacity are in conflict; scaling goal will not be achieved",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_autoscaling_group.app",
+      "category": "reliability",
+      "severity": "critical",
+      "evidence_ref": "compute.tf line 12-14: min_size = 3, desired_capacity = 1. AWS requires desired_capacity >= min_size.",
+      "explanation": "The PR sets desired_capacity to 1 to achieve overnight scaling savings, but min_size remains at 3. AWS will ignore the desired_capacity setting and maintain 3 instances. Either the apply will fail with a validation error, or the ASG will continue running 3 instances instead of the intended 1, defeating the cost optimization goal. To scale down overnight, min_size should also be reduced to 1 (or 0)."
+    }
+  ]
+}

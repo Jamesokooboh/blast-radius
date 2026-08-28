@@ -1,0 +1,14 @@
+{
+  "verdict": "block",
+  "headline": "storage_encrypted is immutable on existing RDS instances; this change will fail to apply",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_db_instance.main",
+      "category": "reliability",
+      "severity": "critical",
+      "evidence_ref": "diff shows storage_encrypted: false \u2192 true on existing aws_db_instance.main resource",
+      "explanation": "AWS RDS does not permit in-place modification of storage_encrypted on existing instances. Terraform will fail to apply this change. Enabling encryption on an unencrypted database requires creating a new instance and migrating data."
+    }
+  ]
+}

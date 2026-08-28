@@ -1,0 +1,21 @@
+{
+  "verdict": "block",
+  "headline": "SSH is open to the entire internet on production app instances. This must be restricted to specific IPs or a private network.",
+  "suppressed": "The follow-up ticket to move this behind Session Manager is noted but does not justify merging an overly-permissive rule now. Security rules are too easy to forget; ensure the permanent solution is in place before opening network access.",
+  "findings": [
+    {
+      "address": "aws_security_group.app",
+      "category": "network-exposure",
+      "severity": "critical",
+      "evidence_ref": "New ingress rule with protocol=tcp, from_port=22, to_port=22, cidr_blocks=[\"0.0.0.0/0\"]",
+      "explanation": "Production app instances are now reachable on SSH from anywhere. This is a standard target for automated attacks, credential stuffing, and exploitation attempts and defeats basic network perimeter security."
+    },
+    {
+      "address": "aws_security_group.app",
+      "category": "guardrail",
+      "severity": "high",
+      "evidence_ref": "PR description states \"for the on-call rotation\" but code implements 0.0.0.0/0, not on-call team's actual IPs",
+      "explanation": "The implementation does not match the stated intent. If the goal is on-call access, restrict cidr_blocks to their known IPs or VPN range, not the entire internet."
+    }
+  ]
+}

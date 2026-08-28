@@ -1,0 +1,28 @@
+{
+  "verdict": "warn",
+  "headline": "Private subnets are being moved to the public route table, fundamentally changing network architecture and removing a security layer",
+  "suppressed": "The cost reviewer's approval is correct\u2014no new costs. However, this architectural shift is significant enough to warrant discussion before merge, even though the rate-limit problem is real. Confirm that all instances in these subnets are configured without public IPs, and consider whether a separate app-egress route table (with only IGW, no IGW inbound rules) would meet the rate-limit need without flattening the security model.",
+  "findings": [
+    {
+      "address": "aws_route_table_association.private_a",
+      "category": "network-exposure",
+      "severity": "high",
+      "evidence_ref": "route_table_id changed from aws_route_table.private.id to aws_route_table.public.id",
+      "explanation": "Subnets named 'private' are now routed through the public route table, which includes direct Internet Gateway access. This removes the NAT gateway as a security boundary and makes the app tier directly internet-routable instead of isolated on a private network."
+    },
+    {
+      "address": "aws_route_table_association.private_b",
+      "category": "network-exposure",
+      "severity": "high",
+      "evidence_ref": "route_table_id changed from aws_route_table.private.id to aws_route_table.public.id",
+      "explanation": "Same architectural change as private_a: the subnet loses network isolation and is now publicly routable, violating standard AWS security segmentation practices."
+    },
+    {
+      "address": "aws_subnet.private_a",
+      "category": "guardrail",
+      "severity": "high",
+      "evidence_ref": "Private subnets are now associated with the public route table",
+      "explanation": "The distinction between private and public subnets is being removed. If instances in these subnets acquire public IPs, they are now directly exposed to internet scanning and inbound attacks without NAT protection."
+    }
+  ]
+}

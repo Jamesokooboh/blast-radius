@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "The desired capacity change won't take effect because min_size is still 3",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_autoscaling_group.app",
+      "category": "reliability",
+      "severity": "high",
+      "evidence_ref": "diff shows desired_capacity set to 1, but min_size remains 3. terraform show confirms min_size: 3 and desired_capacity would be 1 after apply.",
+      "explanation": "AWS AutoScaling Groups enforce min_size as a hard floor, regardless of desired_capacity. Setting desired_capacity to 1 while min_size is 3 means the group will maintain 3 instances, not 1. The stated cost savings won't be realized."
+    }
+  ]
+}

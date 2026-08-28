@@ -1,0 +1,14 @@
+{
+  "verdict": "block",
+  "headline": "Database replacement required: RDS instance will be destroyed and recreated",
+  "suppressed": "Multiple pre-existing security findings from checkov (RDS logging, WAF, S3 replication, etc.) are not addressed by this PR and therefore not reported here.",
+  "findings": [
+    {
+      "address": "aws_db_instance.main",
+      "category": "data-loss",
+      "severity": "critical",
+      "evidence_ref": "Plan shows `-/+ resource \"aws_db_instance.main\" ... storage_encrypted false -> true # forces replacement`. The resource_changes section shows actions: [\"delete\",\"create\"] with action_reason: \"replace_because_cannot_update\".",
+      "explanation": "Setting storage_encrypted to true on an existing RDS instance forces a full replacement (destroy then create). This destroys the production database, not just updates it. The PR description says \"One-line change: storage_encrypted = true\" which implies an in-place update, but Terraform will delete the current database and create a new one. While a final snapshot will be created (final_snapshot_identifier is set), this is a destructive operation that will cause production downtime and data loss unless explicitly managed. The team needs to understand they're not patching encryption on, they're replacing the entire database."
+    }
+  ]
+}

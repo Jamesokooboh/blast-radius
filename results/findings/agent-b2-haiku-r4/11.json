@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "Database triggers update when route table changes for its subnet",
+  "suppressed": "",
+  "findings": [
+    {
+      "address": "aws_db_instance.main",
+      "category": "reliability",
+      "severity": "high",
+      "evidence_ref": "plan.txt shows `aws_db_instance.main` will be updated in-place. The database subnet group contains subnet-086d5f2f5ccda55ac (private_b), which is changing its route table from rtb-0ba7c56abd2014cb5 (shared) to a new route table rtb-private_b that routes through a different NAT gateway.",
+      "explanation": "The database is being updated when its subnet's routing changes. While the plan shows only metadata changes, any in-place update during production can introduce transient connection issues or brief unavailability. The subnets in the database subnet group should remain stable during a NAT gateway upgrade. Verify this database update is necessary and plan downtime if needed."
+    }
+  ]
+}

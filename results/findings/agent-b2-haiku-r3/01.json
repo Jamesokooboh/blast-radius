@@ -1,0 +1,14 @@
+{
+  "verdict": "block",
+  "headline": "SSH exposed to the entire internet on production app instances in private subnets",
+  "suppressed": "",
+  "findings": [
+    {
+      "address": "aws_security_group.app",
+      "category": "network-exposure",
+      "severity": "critical",
+      "evidence_ref": "Plan shows new ingress rule added: port 22 from 0.0.0.0/0. Prior state shows app SG had only port 8080 from ALB. Compute.tf shows instances are in private subnets (map_public_ip_on_launch=false) with no public IPs.",
+      "explanation": "This change opens SSH access to production application instances from the entire internet. The instances are in private subnets and were previously only accessible through the load balancer. Opening port 22 globally exposes them to SSH brute-force attacks and bypasses the security model of the architecture. The PR mentions this is temporary (with follow-up ticket INFRA-2291 to move to Session Manager), but there is no time limit or mechanism to prevent indefinite exposure if the follow-up is delayed."
+    }
+  ]
+}

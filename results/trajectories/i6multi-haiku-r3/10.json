@@ -1,0 +1,50 @@
+{
+  "case": "10",
+  "stage": "I6 multi-agent split",
+  "model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+  "aws_account": "313951301623",
+  "specialists": {
+    "security": {
+      "verdict": "approve",
+      "headline": "No security implications from this capacity change",
+      "suppressed": null,
+      "findings": []
+    },
+    "cost": {
+      "verdict": "approve",
+      "headline": "No cost impact from this change; the desired_capacity reduction won't actually take effect.",
+      "suppressed": "The configuration has min_size=3 and desired_capacity=1, which means AWS will ignore the desired_capacity and maintain 3 running instances. This is a configuration problem that will prevent any cost savings, but that's a reliability or guardrail issue, not a cost issue \u2014 the infrastructure will not become cheaper or more expensive as written.",
+      "findings": []
+    },
+    "reliability": {
+      "verdict": "warn",
+      "headline": "Desired capacity cannot be less than min_size; the fleet will stay at 3 instances, not scale down as intended.",
+      "suppressed": null,
+      "findings": [
+        {
+          "address": "aws_autoscaling_group.app",
+          "category": "reliability",
+          "severity": "high",
+          "evidence_ref": "Diff: desired_capacity set to 1, but min_size remains 3",
+          "explanation": "AWS Auto Scaling Groups enforce min_size \u2264 desired_capacity \u2264 max_size. This configuration is invalid and the ASG will either reject the change or maintain 3 instances anyway. The cost savings will not happen."
+        }
+      ]
+    }
+  },
+  "merged": {
+    "verdict": "warn",
+    "headline": "desired_capacity cannot be lower than min_size; this change will fail or be silently ignored, and the fleet will stay at 3 instances.",
+    "suppressed": "No security implications, as noted. Cost impact is correctly nil because the change won't take effect.",
+    "findings": [
+      {
+        "address": "aws_autoscaling_group.app",
+        "category": "reliability",
+        "severity": "high",
+        "evidence_ref": "min_size = 3, desired_capacity = 1 (new). AWS ASG constraint requires desired_capacity \u2265 min_size.",
+        "explanation": "The configuration is invalid. AWS Auto Scaling Groups enforce min_size \u2264 desired_capacity \u2264 max_size. With min_size at 3 and desired_capacity at 1, Terraform will either fail to apply or the ASG will maintain 3 instances anyway, defeating the cost savings goal."
+      }
+    ]
+  },
+  "elapsed_s": 44.1,
+  "cost_usd": 0.0272
+}

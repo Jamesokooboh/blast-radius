@@ -1,0 +1,14 @@
+{
+  "verdict": "block",
+  "headline": "Production database made publicly accessible to support temporary external analytics access",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_db_instance.main",
+      "category": "network-exposure",
+      "severity": "critical",
+      "evidence_ref": "data_stores.tf line 26: `publicly_accessible = true` changes from `false`. The plan shows `publicly_accessible: false -> true` for the production database (acme-prod-db).",
+      "explanation": "This change makes the production database reachable from the public internet by assigning it a public IP endpoint. While the security group (aws_security_group.db) still restricts inbound access to port 5432 from the application tier only, adding public accessibility creates an unnecessary attack surface and violates the original VPC design where the database was explicitly in private subnets and only reachable from the app tier. The PR description indicates this is temporary while working on VPC peering, but there are no guardrails or time limits to prevent this from becoming permanent."
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "Production database is being made publicly accessible to the internet",
+  "suppressed": "The database is not encrypted at rest (storage_encrypted: false), but this is a pre-existing condition unrelated to this change.",
+  "findings": [
+    {
+      "address": "aws_db_instance.main",
+      "category": "network-exposure",
+      "severity": "high",
+      "evidence_ref": "data_stores.tf: publicly_accessible changed from false to true on aws_db_instance.main",
+      "explanation": "The production RDS instance (acme-prod-db) will become reachable from the public internet. Even with the security group restricting connections, this significantly expands the attack surface on a database holding application data."
+    }
+  ]
+}

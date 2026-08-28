@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "Removed lifecycle guard protecting production data bucket",
+  "suppressed": "Pre-existing security findings detected by Checkov (CKV_AWS_18, CKV_AWS_145, CKV2_AWS_61, etc.) related to S3 bucket encryption, logging, and lifecycle configuration. These are not introduced by this PR and are pre-existing conditions in the stack.",
+  "findings": [
+    {
+      "address": "aws_s3_bucket.data",
+      "category": "guardrail",
+      "severity": "high",
+      "evidence_ref": "data_stores.tf: Lifecycle guard block removed from aws_s3_bucket.data. Comment in code states 'Retention is a compliance requirement, hence the guard.' The guard is no longer present to enforce compliance-critical retention settings.",
+      "explanation": "The PR removed an explicit lifecycle protection block from the production data bucket to unblock CI failures. While versioning remains enabled on the bucket, the explicit lifecycle guard that enforced compliance-required retention settings is now gone. This removes a protective constraint without addressing the underlying CI issue, leaving the bucket vulnerable to accidental lifecycle policy changes that could violate data retention compliance requirements."
+    }
+  ]
+}

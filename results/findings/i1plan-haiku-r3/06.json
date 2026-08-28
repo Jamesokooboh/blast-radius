@@ -1,0 +1,6 @@
+{
+  "verdict": "approve",
+  "headline": "Marketing bucket is correctly configured to serve static assets publicly, as intended.",
+  "suppressed": null,
+  "findings": []
+}

@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "Removing `prevent_destroy` guardrail on production data bucket without addressing the underlying CI failure",
+  "suppressed": "The added CostCenter tag is a minor improvement and does not create risk.",
+  "findings": [
+    {
+      "address": "aws_s3_bucket.data",
+      "category": "guardrail",
+      "severity": "high",
+      "evidence_ref": "Removed `lifecycle { prevent_destroy = true }` block from aws_s3_bucket.data in data_stores.tf",
+      "explanation": "The `prevent_destroy` guard is a critical protection against accidental deletion of this production data bucket. Rather than remove it to fix CI, investigate why the plan is failing\u2014this is likely a Terraform state issue that needs proper resolution, not a workaround that leaves the bucket unprotected."
+    }
+  ]
+}

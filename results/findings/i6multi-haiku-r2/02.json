@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "Production database is now internet-accessible with no enforcement to revert it.",
+  "suppressed": "The change has legitimate business justification (analytics access) and security groups provide some filtering. However, the lack of any revert mechanism for what is described as temporary makes this worth flagging.",
+  "findings": [
+    {
+      "address": "aws_db_instance.main",
+      "category": "network-exposure",
+      "severity": "high",
+      "evidence_ref": "publicly_accessible changed from false to true in data_stores.tf",
+      "explanation": "The production database is now reachable from the internet and discoverable by attackers. While security groups still filter who can actually connect, this significantly expands the attack surface. The PR describes this as temporary while VPC peering is set up, but there is no code-level guardrail, timeline, or automated revert to prevent this from becoming permanent."
+    }
+  ]
+}
