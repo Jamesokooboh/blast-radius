@@ -1,0 +1,14 @@
+{
+  "verdict": "block",
+  "headline": "SSH opened to the entire internet on production app instances",
+  "suppressed": "",
+  "findings": [
+    {
+      "address": "aws_security_group.app",
+      "category": "network-exposure",
+      "severity": "critical",
+      "evidence_ref": "security.tf lines 38-44: ingress rule with from_port=22, to_port=22, protocol=tcp, cidr_blocks=[\"0.0.0.0/0\"] opens SSH to the entire internet",
+      "explanation": "Port 22 is now reachable from anywhere on the internet (0.0.0.0/0). The PR description states the intent is to allow on-call access, but the implementation grants access to all internet traffic, not just the on-call rotation. Additionally, there is no code-level safeguard to enforce the temporary nature of this change before moving to Session Manager (INFRA-2291). If the instances have any public IP assignment or if an attacker gains network access to the VPC, this becomes exploitable. The rule should be restricted to specific IP ranges (e.g., on-call VPN CIDR blocks) or removed in favor of immediate Session Manager usage."
+    }
+  ]
+}

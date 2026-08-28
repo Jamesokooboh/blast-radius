@@ -1,0 +1,14 @@
+{
+  "verdict": "block",
+  "headline": "Application worker cannot access staging bucket",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_iam_role_policy.app_data",
+      "category": "reliability",
+      "severity": "critical",
+      "evidence_ref": "The IAM policy grants S3 access only to arn:aws:s3:::acme-prod-data and arn:aws:s3:::acme-prod-data/*, but the PR creates a new bucket acme-prod-tmp-uploads. The app_data_bucket_arns variable in variables.tf is not updated to include the staging bucket ARNs.",
+      "explanation": "The PR description states that 'uploads land here, the worker validates and moves them' \u2014 but the worker running with the app role has no permissions to read from or write to the staging bucket (acme-prod-tmp-uploads). This will cause the validation and move operation to fail with permission errors. The app_data_bucket_arns variable needs to include the staging bucket ARNs: arn:aws:s3:::acme-prod-tmp-uploads and arn:aws:s3:::acme-prod-tmp-uploads/*"
+    }
+  ]
+}

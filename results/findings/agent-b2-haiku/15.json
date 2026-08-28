@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "Lifecycle guard removed from data bucket without documented replacement",
+  "suppressed": "",
+  "findings": [
+    {
+      "address": "aws_s3_bucket.data",
+      "category": "guardrail",
+      "severity": "high",
+      "evidence_ref": "The PR description states a 'lifecycle guard' on the data bucket was removed to unblock CI. The code comment in data_stores.tf notes 'Retention is a compliance requirement, hence the guard,' but the guard is no longer present in the updated code.",
+      "explanation": "A lifecycle protection that was documented as a compliance requirement has been removed without clarifying what replacement safeguard is in place. While versioning is still enabled, if the removed guard was a prevent_destroy rule or similar, accidental deletion is now possible. The PR description suggests this was done to work around a CI failure rather than addressing the root cause. Before merging, clarify: (1) what lifecycle configuration was removed, (2) whether it was protecting against accidental deletion or modification, and (3) what compensating control now prevents the compliance violation."
+    }
+  ]
+}

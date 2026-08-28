@@ -1,0 +1,21 @@
+{
+  "verdict": "block",
+  "headline": "Database subnets exposed to internet routing; violates network segmentation",
+  "suppressed": "",
+  "findings": [
+    {
+      "address": "aws_route_table_association.private_a",
+      "category": "network-exposure",
+      "severity": "critical",
+      "evidence_ref": "network.tf: private subnets are changing from routing through NAT gateway (rtb-0ba7c56abd2014cb5) to public route table with direct IGW routing (rtb-0a0e1a2f39b272aa4). The RDS database (aws_db_subnet_group.main) is deployed in these same subnets.",
+      "explanation": "The production database and application instances are co-located in private_a and private_b subnets. This change routes those subnets directly to the Internet Gateway instead of through the NAT gateway. While security group rules prevent database inbound access, this violates fundamental network segmentation: the database should not have a direct internet route. An attacker who compromises an app instance could establish outbound connections to arbitrary internet targets using the database's subnet route, potentially exfiltrating data or conducting further attacks. The intended solution (using different source IPs to avoid rate limiting) should use NAT instances or an alternate outbound path, not expose the database tier to direct internet routing."
+    },
+    {
+      "address": "aws_route_table_association.private_b",
+      "category": "network-exposure",
+      "severity": "critical",
+      "evidence_ref": "network.tf: private_b subnet (containing RDS) is being reassociated from rtb-0ba7c56abd2014cb5 (NAT-routed) to rtb-0a0e1a2f39b272aa4 (IGW-routed)",
+      "explanation": "Same issue as private_a: database tier no longer isolated from direct internet routing."
+    }
+  ]
+}

@@ -14,7 +14,7 @@ model anywhere in this project.
 | **B0′** | Checkov scoped to the resources the plan actually changes, as a competent CI integration would. A deliberately *stronger* baseline. | — | **F1 0.320** — precision 0.267, recall 0.400, **0.9 findings per PR** | Keep as the scanner baseline |
 | **B1** | One direct prompt over the diff and PR description. Sonnet 4.6, no plan, no scanner, no tools. | F1 0.45 | **F1 0.783** — precision 0.692, recall 0.900, band C recall 0.86 | Keep. Prediction badly wrong; see below |
 | **B1′** | The same prompt on Haiku 4.5, to test whether the result is about the task or the model. | worse than B1 | **F1 0.900** — precision 0.900, recall 0.900, noise 7 of 7 suppressed | **The new bar.** The cheap model won |
-| B2 | General agent with shell access, no task structure. | F1 0.55 | not yet run | — |
+| **B2** | General agent with tools and no task structure: reads the whole working directory, runs the scanner, decides for itself when to stop. Haiku 4.5. | F1 0.55 | **F1 0.636** — precision 0.583, recall 0.700, band C recall 0.57, $0.133/PR | Keep. Worse than one prompt, at 19× the cost |
 
 ## Stage notes
 
@@ -142,6 +142,57 @@ F1 0.900 at $0.007 per pull request, which is a far harder target than the 0.320
 it started with and than the 0.80 that was pre-registered. The pre-registered
 target is left where it is; the bar is what moved.
 
+### B2 — more capability made the review worse
+
+B2 gets strictly more than B1: the whole working directory (Terraform sources,
+the human-readable `plan.txt`, the raw plan JSON, the prior state), the scanner
+on demand, and as many steps as it wants. It used 7.2 tool calls per pull
+request on average.
+
+It scored **F1 0.636**, against 0.900 for the same model given one prompt and
+nothing but the diff. It cost **$0.133 per pull request against $0.007 — 19×
+more for a materially worse review.**
+
+| | B1′ one prompt | B2 agent with tools |
+| --- | --- | --- |
+| F1 | **0.900** | 0.636 |
+| precision | **0.900** | 0.583 |
+| recall | **0.900** | 0.700 |
+| band C recall | **0.86** | 0.57 |
+| verdict accuracy | **0.667** | 0.600 |
+| cost per PR | **$0.007** | $0.133 |
+| steps per PR | 1 | 7.2 |
+
+Two failure modes, both visible in the trajectories.
+
+**It wandered.** On case 05 — a pull request that adds an internal load balancer
+— it reported a finding against `aws_db_instance.main`, which that pull request
+does not touch. On case 07, a staging bucket, it reported against
+`aws_iam_role_policy.app_data`. Both are resources it found by reading files it
+was free to read. The review instructions say in as many words that pre-existing
+conditions elsewhere in the stack are not findings; having the whole directory
+available made that instruction harder to follow, not easier. Two of its
+thirteen findings are on resources absent from the plan's change set. B1 has
+none.
+
+**Reading the plan did not help it classify.** Case 08 is the case built to
+require the plan, and `plan.txt` states `aws_db_instance.main must be replaced`
+in its first lines. B2 read that file, named the right resource, and filed it as
+`reliability` rather than `data-loss`. It saw the replacement and did not
+recognise it as data loss. B1, working from the diff alone with no plan at all,
+categorised it correctly.
+
+Band C recall falling from 0.86 to 0.57 while gaining access to the plan is the
+single most direct evidence in this project against the I1 hypothesis. The
+premise was that the agent needs the plan. B2 had the plan, read the plan, and
+did worse.
+
+The tentative reading, to be tested by the agent stages rather than asserted
+here: tool access broadens what the model attends to, and this task rewards
+narrowness. A reviewer's job is to answer "what does *this change* do", and
+every additional file in context is an invitation to answer a different
+question.
+
 ### A case in the set contained a real finding, and B1 found it
 
 Case 05 tests whether the agent suppresses scanner noise about an internal load
@@ -203,18 +254,20 @@ it from Band A for the diff-reading baselines.
 
 ## Every stage measured so far
 
-| | Raw Checkov | Scoped Checkov | B1 Sonnet 4.6 | B1′ Haiku 4.5 |
-| --- | --- | --- | --- | --- |
-| **F1** | 0.052 | 0.320 | 0.783 | **0.900** |
-| precision | 0.028 | 0.267 | 0.692 | 0.900 |
-| recall | 0.400 | 0.400 | 0.900 | 0.900 |
-| verdict accuracy | 0.467 | 0.467 | **0.733** | 0.667 |
-| band A recall | 1.00 | 1.00 | 1.00 | 1.00 |
-| band C recall | 0.14 | 0.14 | 0.86 | 0.86 |
-| noise suppressed | 1 of 7 | 1 of 7 | 4 of 7 | **7 of 7** |
-| false blocks (band D) | 1 | 1 | 0 | 0 |
-| findings per PR | 9.5 | 0.9 | 0.9 | 0.7 |
-| cost per PR | $0 | $0 | $0.015 | $0.007 |
+| | Raw Checkov | Scoped Checkov | B1 Sonnet 4.6 | B1′ Haiku 4.5 | B2 agent + tools |
+| --- | --- | --- | --- | --- | --- |
+| **F1** | 0.052 | 0.320 | 0.783 | **0.900** | 0.636 |
+| precision | 0.028 | 0.267 | 0.692 | **0.900** | 0.583 |
+| recall | 0.400 | 0.400 | 0.900 | **0.900** | 0.700 |
+| verdict accuracy | 0.467 | 0.467 | **0.733** | 0.667 | 0.600 |
+| band A recall | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
+| band C recall | 0.14 | 0.14 | **0.86** | **0.86** | 0.57 |
+| noise suppressed | 1 of 7 | 1 of 7 | 4 of 7 | **7 of 7** | 6 of 7 |
+| false blocks (band D) | 1 | 1 | 0 | 0 | 0 |
+| findings per PR | 9.5 | 0.9 | 0.9 | 0.7 | 0.9 |
+| off-target findings | — | — | 0 | 0 | 2 |
+| cost per PR | $0 | $0 | $0.015 | $0.007 | $0.133 |
+| steps per PR | — | — | 1 | 1 | 7.2 |
 
 Band C is the project's reason for existing. The scanner scores 0.14 there; both
 models score 0.86 from the diff alone. The gap between the scanner and a single
@@ -262,6 +315,25 @@ outputs all work on Sonnet 4.6. Haiku 4.5 rejects `effort` and takes
 `thinking: {type: "enabled", budget_tokens: N}` instead, which `tools/model.py`
 handles.
 
+## A deviation from the plan, recorded
+
+B2 was specified as "a general agent with shell access". It was built with a
+confined tool surface instead: it can list and read files inside one case
+directory and run the scanner with fixed arguments, but no command it writes is
+executed. The runs happen on a workstation holding live cloud credentials and a
+git remote with push rights, and handing a model an unrestricted shell there was
+not a decision to take quietly.
+
+The substitution is judged not to weaken the baseline: B2 still receives strictly
+more information than B1 and still chooses its own path through it. A shell would
+have added the ability to run arbitrary commands over the same files it can
+already read. If that judgement is wrong, the fix is to rerun B2 inside a
+container, and the result above should be read as a lower bound on what an
+unconstrained agent would do.
+
 ## Still to run
 
-B2, the general agent with shell access.
+The agent stages: I1 plan JSON, I2 scanner output as claims to adjudicate,
+I3 citation verification, I4 cost tool, I5 review memory, I6 the multi-agent
+split. On present evidence I1 and I6 are both expected to be null results, and
+both run anyway.

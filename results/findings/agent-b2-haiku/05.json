@@ -1,0 +1,21 @@
+{
+  "verdict": "block",
+  "headline": "Internal load balancer cannot reach application instances due to security group misconfiguration",
+  "suppressed": "Pre-existing checkov findings related to VPC flow logging, S3 public access blocks, RDS logging, and other compliance items are not changes introduced by this PR and are thus not reported.",
+  "findings": [
+    {
+      "address": "aws_lb.internal",
+      "category": "reliability",
+      "severity": "critical",
+      "evidence_ref": "compute.tf lines 83-93: internal LB uses security_groups = [aws_security_group.app.id]. security.tf lines 28-51: aws_security_group.app has ingress rule allowing 8080 only from aws_security_group.alb.id, not from the app security group itself.",
+      "explanation": "The internal load balancer is placed in the app security group but the app security group's ingress rule only permits traffic from the ALB security group (sg-01d5b59135d60c2bc), not from the app security group. Since the internal LB is in the app security group, the instances won't accept its traffic on port 8080. The internal LB will be unable to reach the application instances."
+    },
+    {
+      "address": "aws_db_instance.main",
+      "category": "guardrail",
+      "severity": "medium",
+      "evidence_ref": "plan.txt shows aws_db_instance.main marked for update despite before/after values appearing identical in state. The database has storage_encrypted=false with comment in data_stores.tf noting this predates encryption policy (INFRA-1804).",
+      "explanation": "The database update is appearing in the plan but values don't show meaningful changes. More importantly, this production database remains unencrypted at rest per the inline comment. While this is pre-existing, applying this plan will refresh the database resource, confirming the lack of encryption continues."
+    }
+  ]
+}

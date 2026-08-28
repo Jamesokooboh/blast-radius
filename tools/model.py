@@ -91,7 +91,9 @@ def whoami():
 
 def client():
     os.environ["AWS_PROFILE"] = PROFILE
-    return AnthropicBedrock(aws_region=REGION)
+    # Bedrock throttles hard on multi-step tool loops. The SDK default of 2
+    # retries is not enough; a 15-case B2 run hit 429 at case 13.
+    return AnthropicBedrock(aws_region=REGION, max_retries=8, timeout=180.0)
 
 
 def review_instructions():

@@ -1,0 +1,14 @@
+{
+  "verdict": "block",
+  "headline": "Database made publicly accessible without corresponding security group changes; exposes database with no practical benefit",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_db_instance.main",
+      "category": "network-exposure",
+      "severity": "high",
+      "evidence_ref": "Plan shows `publicly_accessible = false -> true`, but aws_security_group.db remains unchanged, still restricting ingress to only the application tier (sg-0f4e14e106d7ef990).",
+      "explanation": "Setting publicly_accessible=true exposes the database endpoint to the internet, but the security group still blocks all external access. This creates a dangerous configuration: the database appears internet-facing but will reject connections. More importantly, if the security group is later misconfigured, the database becomes exposed with no protective barrier. The stated goal of enabling Metabase access is not actually achieved by this change alone\u2014Metabase would still be blocked by the security group rules."
+    }
+  ]
+}

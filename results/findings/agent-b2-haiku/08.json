@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "Production database will be destroyed and recreated; understand the downtime and recovery requirements",
+  "suppressed": "Checkov flagged multiple pre-existing configuration gaps (missing monitoring, logging, WAF, bucket access blocks, etc.) but these are not introduced by this PR and represent the current state of the infrastructure.",
+  "findings": [
+    {
+      "address": "aws_db_instance.main",
+      "category": "reliability",
+      "severity": "high",
+      "evidence_ref": "Plan shows 'aws_db_instance.main' marked with '-/+ destroy and then create replacement' with 'storage_encrypted = false -> true # forces replacement'",
+      "explanation": "AWS RDS cannot enable encryption on an existing unencrypted instance; the resource must be destroyed and recreated. This will cause downtime on the production database. While a final snapshot will be created (skip_final_snapshot = false), the application will lose connectivity during the transition. No restore procedure or maintenance window is documented in this PR."
+    }
+  ]
+}
