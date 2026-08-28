@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "SSH is opened to the entire internet on production app instances; this creates direct attack surface until INFRA-2291 is completed.",
+  "suppressed": "The PR acknowledges this is temporary and cites follow-up ticket INFRA-2291 to move to Session Manager. The operational need during incidents is legitimate, but the implementation exposes production infrastructure broadly while that ticket is pending.",
+  "findings": [
+    {
+      "address": "aws_security_group.app",
+      "category": "network-exposure",
+      "severity": "critical",
+      "evidence_ref": "New ingress rule in the diff: port 22 with cidr_blocks = [\"0.0.0.0/0\"]",
+      "explanation": "SSH on production app instances is now accessible from any IP address globally. This creates a direct attack surface for brute force, credential compromise, and system exploitation until migrated to Session Manager."
+    }
+  ]
+}

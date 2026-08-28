@@ -1,0 +1,14 @@
+{
+  "verdict": "block",
+  "headline": "desired_capacity set below min_size \u2014 ASG will ignore the scaling request and stay at 3 instances",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_autoscaling_group.app",
+      "category": "reliability",
+      "severity": "critical",
+      "evidence_ref": "compute.tf line 29: desired_capacity = 1, but min_size = 3 (line 27)",
+      "explanation": "AWS Auto Scaling Groups enforce min_size as a hard floor. Setting desired_capacity to 1 violates this constraint and will be ignored; the ASG will scale to min_size (3) instead. The intended cost savings will not happen."
+    }
+  ]
+}

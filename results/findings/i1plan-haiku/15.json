@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "Removing prevent_destroy from production data bucket to work around a CI issue \u2014 fix the CI issue instead",
+  "suppressed": "Adding the CostCenter tag is unremarkable.",
+  "findings": [
+    {
+      "address": "aws_s3_bucket.data",
+      "category": "guardrail",
+      "severity": "high",
+      "evidence_ref": "Removal of `lifecycle { prevent_destroy = true }` block in data_stores.tf",
+      "explanation": "The lifecycle guard prevents accidental destruction of a production data bucket. Removing it as a workaround to unblock CI leaves acme-prod-data vulnerable to deletion by any future terraform apply or destroy. The right fix is to resolve why the guard is causing CI failures, not to remove the guard."
+    }
+  ]
+}

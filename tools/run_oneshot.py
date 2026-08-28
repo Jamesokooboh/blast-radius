@@ -33,17 +33,42 @@ def case_dir(cid):
     return hits[0]
 
 
-def build_prompt(cid):
+def changed_resources(cid):
+    """The plan, reduced to what it actually changes.
+
+    The raw plan is ~145KB per case, almost all of it unchanged VPC attributes.
+    Passing the whole file would bury the signal and cost 55x the tokens, so a
+    real integration would pass this slice -- and so does I1.
+    """
+    plan = json.loads((ROOT / "results" / "plans" / f"{cid}.plan.json").read_text())
+    return [c for c in plan.get("resource_changes", [])
+            if c.get("change", {}).get("actions") != ["no-op"]]
+
+
+def build_prompt(cid, with_plan=False):
     d = case_dir(cid)
     diff = (ROOT / "results" / "diffs" / f"{cid}.diff").read_text(encoding="utf-8", errors="replace")
     pr = (d / "pr_description.md").read_text(encoding="utf-8")
-    return (
+    prompt = (
         "Review this Terraform pull request.\n\n"
         "## Pull request description\n\n"
         f"{pr}\n\n"
         "## Diff\n\n"
         f"```diff\n{diff}\n```\n"
     )
+    if with_plan:
+        changes = changed_resources(cid)
+        summary = "\n".join(
+            f"  {'/'.join(c['change']['actions']):>16}  {c['address']}" for c in changes
+        ) or "  (no resource changes)"
+        prompt += (
+            "\n## terraform plan\n\n"
+            "Actions this change will take:\n\n"
+            f"```\n{summary}\n```\n\n"
+            "Full detail for each changed resource, from `terraform show -json`:\n\n"
+            f"```json\n{json.dumps(changes, indent=2)}\n```\n"
+        )
+    return prompt
 
 
 def main():
@@ -54,6 +79,8 @@ def main():
     ap.add_argument("--effort", default="high")
     ap.add_argument("--profile", default=None,
                     help="AWS profile to bill; defaults to AWS_PROFILE or Joseph")
+    ap.add_argument("--with-plan", action="store_true",
+                    help="I1: also supply the plan's changed resources")
     ap.add_argument("--dry-run", action="store_true",
                     help="build the prompts and report their size without calling")
     ap.add_argument("--mode", default=None,
@@ -62,7 +89,8 @@ def main():
     args = ap.parse_args()
     M.use_profile(args.profile)
 
-    mode = args.mode or ("oneshot" if args.model == "sonnet" else f"oneshot-{args.model}")
+    stem = "i1plan" if args.with_plan else "oneshot"
+    mode = args.mode or (stem if args.model == "sonnet" else f"{stem}-{args.model}")
     out = ROOT / "results" / "findings" / mode
     traj = ROOT / "results" / "trajectories" / mode
     out.mkdir(parents=True, exist_ok=True)
@@ -80,7 +108,7 @@ def main():
         print(f"  system instructions: {len(instructions):,} chars")
         total = 0
         for cid in ids:
-            p = build_prompt(cid)
+            p = build_prompt(cid, args.with_plan)
             total += len(p) + len(instructions)
             print(f"  case {cid}: prompt {len(p):>6,} chars  "
                   f"(~{(len(p)+len(instructions))/3.6/1000:.1f}k tokens)")
@@ -94,7 +122,7 @@ def main():
 
     total_cost, total_s = 0.0, 0.0
     for cid in ids:
-        prompt = build_prompt(cid)
+        prompt = build_prompt(cid, args.with_plan)
         t0 = time.time()
         review, response = M.call(prompt, model=args.model, effort=args.effort)
         elapsed = time.time() - t0
@@ -105,7 +133,7 @@ def main():
         (out / f"{cid}.json").write_text(json.dumps(M.to_findings_json(review), indent=2))
         (traj / f"{cid}.json").write_text(json.dumps({
             "case": cid,
-            "stage": "B1 one-shot",
+            "stage": "I1 one-shot + plan" if args.with_plan else "B1 one-shot",
             "model": M.MODELS[args.model],
             "aws_account": who["account"],
             "effort": args.effort if args.model not in M.LEGACY_THINKING else None,

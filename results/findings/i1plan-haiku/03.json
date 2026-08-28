@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "CodeBuild will have admin access to your entire AWS account. The wildcard permissions are too broad even as a temporary measure.",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_iam_role_policy.deploy",
+      "category": "privilege-escalation",
+      "severity": "critical",
+      "evidence_ref": "aws_iam_role_policy.deploy inline policy with Action: \"*\" and Resource: \"*\"",
+      "explanation": "The CodeBuild role now has unrestricted permissions to all AWS services and resources. If CodeBuild itself or any build configuration is compromised, an attacker has full AWS account access. This should be scoped to specific services (iam, ec2, s3, etc.) and resources before production use."
+    }
+  ]
+}

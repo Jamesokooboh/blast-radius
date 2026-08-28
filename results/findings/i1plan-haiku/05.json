@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "Internal ALB created but security group lacks port 8080 ingress rules, causing health checks to fail",
+  "suppressed": "The use of HTTP instead of HTTPS on port 8080 is acceptable for internal traffic that never leaves the VPC, and the comment makes the intent clear. Worker fleet configuration changes that enable this ALB are not shown in this diff, but are presumably handled separately.",
+  "findings": [
+    {
+      "address": "aws_lb.internal",
+      "category": "reliability",
+      "severity": "high",
+      "evidence_ref": "aws_lb.internal specifies security_groups = [aws_security_group.app.id]; aws_lb_target_group.internal targets port 8080; but the diff shows no security group modifications adding ingress rules for port 8080",
+      "explanation": "The ALB's targets run on port 8080 inside the app security group, but there is no ingress rule allowing the ALB to reach them. The health checks on /healthz will timeout and targets will remain unhealthy, so traffic will not route."
+    }
+  ]
+}

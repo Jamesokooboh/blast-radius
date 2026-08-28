@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "Production staging bucket for browser uploads lacks explicit security controls",
+  "suppressed": "The one-day lifecycle expiration is correctly configured and appropriate for the use case. Lack of versioning is acceptable for temporary files.",
+  "findings": [
+    {
+      "address": "aws_s3_bucket.tmp_uploads",
+      "category": "network-exposure",
+      "severity": "high",
+      "evidence_ref": "PR description states \"browser uploads\" go here, but the bucket resource has no aws_s3_bucket_public_access_block, aws_s3_bucket_server_side_encryption_configuration, bucket policy, or other access controls defined",
+      "explanation": "A production bucket receiving browser uploads needs explicit public access blocking and encryption, even as a temporary staging area. Without these controls defined in Terraform, the bucket's security depends entirely on external factors that may not be enforced."
+    }
+  ]
+}

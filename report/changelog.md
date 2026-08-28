@@ -15,6 +15,7 @@ model anywhere in this project.
 | **B1** | One direct prompt over the diff and PR description. Sonnet 4.6, no plan, no scanner, no tools. | F1 0.45 | **F1 0.783** — precision 0.692, recall 0.900, band C recall 0.86 | Keep. Prediction badly wrong; see below |
 | **B1′** | The same prompt on Haiku 4.5, to test whether the result is about the task or the model. | worse than B1 | **F1 0.900** — precision 0.900, recall 0.900, noise 7 of 7 suppressed | **The new bar.** The cheap model won |
 | **B2** | General agent with tools and no task structure: reads the whole working directory, runs the scanner, decides for itself when to stop. Haiku 4.5. | F1 0.55 | **F1 0.636** — precision 0.583, recall 0.700, band C recall 0.57, $0.133/PR | Keep. Worse than one prompt, at 19× the cost |
+| **I1** | Add the plan's changed resources to B1′. Same model, same instructions, same code path — the plan is the only variable. | 0.68, the project's central hypothesis | **F1 0.667** — precision 0.636, recall 0.700, **band C recall 0.57**, verdict accuracy 0.467 | **Remove.** The plan makes the review worse |
 
 ## Stage notes
 
@@ -142,6 +143,57 @@ F1 0.900 at $0.007 per pull request, which is a far harder target than the 0.320
 it started with and than the 0.80 that was pre-registered. The pre-registered
 target is left where it is; the bar is what moved.
 
+### I1 — the plan makes the review worse, and B2 had already shown it
+
+This is the project's central hypothesis: a reviewer needs the plan, because the
+diff does not say what will happen. I1 tests it as cleanly as the harness allows
+— the plan is added as a flag on the *same* runner, so the model, the review
+instructions, the output schema and the code path are byte-identical to B1′ and
+the plan is the only variable.
+
+**F1 fell from 0.900 to 0.667.**
+
+| | B1′ no plan | I1 with plan | B2 with plan + tools |
+| --- | --- | --- | --- |
+| F1 | **0.900** | 0.667 | 0.636 |
+| precision | **0.900** | 0.636 | 0.583 |
+| recall | **0.900** | 0.700 | 0.700 |
+| **band C recall** | **0.86** | **0.57** | **0.57** |
+| verdict accuracy | **0.667** | 0.467 | 0.600 |
+| noise suppressed | **7 of 7** | 5 of 7 | 6 of 7 |
+
+Band C is where the plan was supposed to help — those six cases were built
+because a scanner cannot see across files or into plan transitions. Recall there
+drops from 0.86 to 0.57, and it drops to **exactly** 0.57 in both I1 and B2,
+which reached the plan by completely different routes: I1 was handed the changed
+resources in its prompt, B2 chose to open `plan.txt` with a tool. Two
+architectures, one effect, the same number.
+
+**The mechanism is visible on case 08**, the case built specifically to require
+the plan:
+
+| | verdict | category | |
+| --- | --- | --- | --- |
+| B1′ (no plan) | block | `data-loss` | correct |
+| I1 (plan in prompt) | block | `reliability` | wrong |
+| B2 (plan read by tool) | warn | `reliability` | wrong |
+
+Working from the diff alone — `storage_encrypted` flipping from false to true —
+the model reasons about what happens to the data and calls it data loss. Shown
+the plan, which states the action as `delete` then `create`, it reasons about
+the *operation* and calls it reliability. The plan is more precise and more
+truthful than the diff, and it reframes the question from "what happens to the
+data" to "what happens to the resource". Both models that saw the plan made the
+same substitution.
+
+That is a real mechanism, not a scoring artifact: the finding is on the right
+resource with the right verdict, and only the category moved.
+
+**Decision: remove.** I1 is the stage the project was built around, and it is
+being cut on its own evidence. The prediction going in was already pessimistic
+after B1 — recorded as "expected to add little" — but the measured result is
+worse than null, and it replicates.
+
 ### B2 — more capability made the review worse
 
 B2 gets strictly more than B1: the whole working directory (Terraform sources,
@@ -254,20 +306,23 @@ it from Band A for the diff-reading baselines.
 
 ## Every stage measured so far
 
-| | Raw Checkov | Scoped Checkov | B1 Sonnet 4.6 | B1′ Haiku 4.5 | B2 agent + tools |
-| --- | --- | --- | --- | --- | --- |
-| **F1** | 0.052 | 0.320 | 0.783 | **0.900** | 0.636 |
-| precision | 0.028 | 0.267 | 0.692 | **0.900** | 0.583 |
-| recall | 0.400 | 0.400 | 0.900 | **0.900** | 0.700 |
-| verdict accuracy | 0.467 | 0.467 | **0.733** | 0.667 | 0.600 |
-| band A recall | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
-| band C recall | 0.14 | 0.14 | **0.86** | **0.86** | 0.57 |
-| noise suppressed | 1 of 7 | 1 of 7 | 4 of 7 | **7 of 7** | 6 of 7 |
-| false blocks (band D) | 1 | 1 | 0 | 0 | 0 |
-| findings per PR | 9.5 | 0.9 | 0.9 | 0.7 | 0.9 |
-| off-target findings | — | — | 0 | 0 | 2 |
-| cost per PR | $0 | $0 | $0.015 | $0.007 | $0.133 |
-| steps per PR | — | — | 1 | 1 | 7.2 |
+| | Raw Checkov | Scoped Checkov | B1 Sonnet | **B1′ Haiku** | I1 + plan | B2 + tools |
+| --- | --- | --- | --- | --- | --- | --- |
+| **F1** | 0.052 | 0.320 | 0.783 | **0.900** | 0.667 | 0.636 |
+| precision | 0.028 | 0.267 | 0.692 | **0.900** | 0.636 | 0.583 |
+| recall | 0.400 | 0.400 | 0.900 | **0.900** | 0.700 | 0.700 |
+| verdict accuracy | 0.467 | 0.467 | **0.733** | 0.667 | 0.467 | 0.600 |
+| band A recall | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
+| band C recall | 0.14 | 0.14 | 0.86 | **0.86** | 0.57 | 0.57 |
+| noise suppressed | 1 of 7 | 1 of 7 | 4 of 7 | **7 of 7** | 5 of 7 | 6 of 7 |
+| false blocks (band D) | 1 | 1 | 0 | 0 | 0 | 0 |
+| findings per PR | 9.5 | 0.9 | 0.9 | 0.7 | 0.7 | 0.9 |
+| cost per PR | $0 | $0 | $0.015 | **$0.007** | $0.009 | $0.133 |
+| steps per PR | — | — | 1 | 1 | 1 | 7.2 |
+
+Every addition after the simplest possible thing has made the result worse. The
+best reviewer measured in this project is one prompt, the diff, the pull request
+description, and the cheapest available model.
 
 Band C is the project's reason for existing. The scanner scores 0.14 there; both
 models score 0.86 from the diff alone. The gap between the scanner and a single
@@ -331,9 +386,42 @@ already read. If that judgement is wrong, the fix is to rerun B2 inside a
 container, and the result above should be read as a lower bound on what an
 unconstrained agent would do.
 
+## Hot take, provisional
+
+**Context is not free, and it is not neutral. Adding it reframes the question.**
+
+The plan is strictly more accurate than the diff. It is machine-generated, it is
+what Terraform will actually do, and it states the RDS replacement in as many
+words. Supplying it made the review worse in two independent architectures, by
+the same amount, through the same substitution: shown a `delete` followed by a
+`create`, the model reasons about the resource lifecycle and stops reasoning
+about the data inside it.
+
+The lesson generalises past Terraform. When an agent underperforms, the reflex is
+to give it more — more context, more tools, more steps. Every such addition also
+changes what the model thinks it is being asked. Three times in this project the
+addition moved attention somewhere defensible and somewhere wrong: the plan moved
+it from data to resources, tools moved it from the change to the codebase, and
+the only configuration that stayed on the question was the one with the least
+information.
+
+What we would build differently next time: measure the naive version first and
+treat every subsequent addition as a hypothesis that must beat it, rather than as
+progress. This project pre-registered six iterations on the assumption they would
+stack. Two have been measured and both regress.
+
 ## Still to run
 
-The agent stages: I1 plan JSON, I2 scanner output as claims to adjudicate,
-I3 citation verification, I4 cost tool, I5 review memory, I6 the multi-agent
-split. On present evidence I1 and I6 are both expected to be null results, and
-both run anyway.
+I2 (scanner output as claims to adjudicate), I3 (citation verification),
+I4 (cost tool), I5 (review memory), I6 (the multi-agent split).
+
+**Prediction, recorded before running: I2 will also regress.** It adds context of
+exactly the kind that has now failed twice, and the failure mode it invites --
+defending the scanner's findings rather than judging them -- is the one flagged
+in the original plan. If it does regress, the project's finding is not "the plan
+specifically is bad" but the more general claim in the hot take above.
+
+The remaining candidates that do not add context are I3 (verification, which only
+removes findings) and better prompting for verdict calibration, where the
+measured headroom actually is: B1′ has precision 0.900 and verdict accuracy
+0.667.

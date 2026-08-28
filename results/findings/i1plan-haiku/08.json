@@ -1,0 +1,14 @@
+{
+  "verdict": "block",
+  "headline": "Enabling encryption on this RDS instance requires destroying and recreating the entire database, causing production downtime and data loss risk.",
+  "suppressed": "The final snapshot is configured, so data recovery is possible. However, the PR description says this is a 'one-line change' and does not mention the downtime or database recreation. The author may not understand what will happen in production. This needs explicit acknowledgment and a maintenance window before it can proceed.",
+  "findings": [
+    {
+      "address": "aws_db_instance.main",
+      "category": "reliability",
+      "severity": "critical",
+      "evidence_ref": "terraform plan shows `delete/create` action with `action_reason: replace_because_cannot_update` on the `storage_encrypted` field. AWS RDS cannot update this parameter in place.",
+      "explanation": "The production database will be destroyed and recreated. The application will lose connectivity during the recreation, which can take 10-30 minutes. Although a final snapshot is configured, the old database is gone until a restore completes."
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "App subnets moving from private (NAT-gated) to public routing \u2014 instances will have direct internet access and potentially accept inbound internet traffic",
+  "suppressed": "The PR provides legitimate business justification (vendor API rate limiting by source IP). However, the implementation completely eliminates the private/public network boundary rather than exploring narrower solutions like additional Elastic IPs or different egress strategies. Confirm this is the intended security posture change and that instances in these subnets will not inadvertently become inbound-accessible to the internet.",
+  "findings": [
+    {
+      "address": "aws_route_table_association.private_a",
+      "category": "network-exposure",
+      "severity": "high",
+      "evidence_ref": "route_table_id changes from rtb-0ba7c56abd2014cb5 (private) to rtb-0a0e1a2f39b272aa4 (public)",
+      "explanation": "Subnets are switching from private routing through a NAT gateway to direct public routing via an Internet Gateway. Any instances with public IPs will now be directly reachable from the internet, and the architectural boundary that protected inbound traffic is removed."
+    }
+  ]
+}

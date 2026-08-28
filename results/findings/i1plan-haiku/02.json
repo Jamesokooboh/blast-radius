@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "Production database will be publicly routable from the internet; ensure this is temporary and document reversion plan",
+  "suppressed": "The database is still protected by a security group. Storage encryption is disabled, but that is a pre-existing condition unrelated to this change.",
+  "findings": [
+    {
+      "address": "aws_db_instance.main",
+      "category": "network-exposure",
+      "severity": "high",
+      "evidence_ref": "data_stores.tf changes `publicly_accessible` from `false` to `true` on the production `acme-prod-db` instance. The `terraform plan` confirms this update will apply to the RDS instance currently holding production application data.",
+      "explanation": "The database will receive a public IP address and become routable from the internet. While security group rules provide some protection, this removes the network isolation that was your primary defense. The stated intent is temporary (pending VPC peering), but the code has no safeguard to enforce that."
+    }
+  ]
+}
