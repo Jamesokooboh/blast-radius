@@ -152,32 +152,32 @@ both directions.
 
 ## Reproduction
 
-Requires Terraform 1.9+ and Python 3.10+. Network is needed once, to fetch the
-provider. No AWS account, no credentials, no cost.
+Full guide: **[REPRODUCE.md](REPRODUCE.md)** — versions, exact commands, expected
+output, measured runtime and cost for every stage, and the Bedrock setup notes
+that cost the most time to work out.
+
+The harness half needs no AWS account and no money:
 
 ```bash
 pip install -r requirements.txt
-./plan.sh --all                             # ~4 min, every plan and diff
-python tools/run_checkov.py --all           # baseline A
-python tools/run_checkov.py --all --scoped  # baseline A'
-python score.py --mode checkov
-python score.py --mode checkov-scoped
-python tools/make_oracle.py
-python score.py --mode oracle               # harness self-test, must be 1.000
+./plan.sh --all                             # ~4 min, builds every plan and diff
+python tools/run_checkov.py --all --scoped  # ~6 min, the scanner baseline
+python score.py --mode checkov-scoped       # expect F1 0.320
 ```
 
-To regenerate the state fixture from scratch (not normally needed):
+The short path to the main result, if you have Bedrock access — 4 minutes, $0.11:
 
 ```bash
-python tools/make_state.py --dir infra/base --out fixtures/base.tfstate
+python tools/run_oneshot.py --all --model haiku             # the winner
+python tools/run_oneshot.py --all --with-plan --model haiku # the plan makes it worse
+python score.py --mode oneshot-haiku    # ~0.78
+python score.py --mode i1plan-haiku     # ~0.67
 ```
 
-Self-checks:
+The project's central hypothesis was that the second would beat the first.
 
-```bash
-python tools/planfilter.py    # phantom-change filter
-python score.py --selfcheck   # scoring logic
-```
+Reproducing everything is about 3 hours and $10.44, which is what it cost to
+produce, taken from the per-run figures in `results/trajectories/`.
 
 ## Layout
 
