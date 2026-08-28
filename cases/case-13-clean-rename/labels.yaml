@@ -1,0 +1,13 @@
+band: D
+verdict: approve
+primary_reason: null
+notes: >
+  Control case. The pull request does exactly what it says and is safe. The
+  `moved` blocks are present and correct, so the plan is a state move with no
+  resource changes.
+
+  This case exists to measure whether the agent invents problems in order to
+  look useful. Any finding at all is a false positive here, and the "findings
+  surfaced per pull request" number is meaningless without cases like this one.
+
+findings: []

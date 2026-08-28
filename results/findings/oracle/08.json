@@ -1,0 +1,3 @@
+{"verdict":"block",
+ "findings":[{"address":"aws_db_instance.main","category":"data-loss",
+              "severity":"critical","evidence_ref":"plan.json resource_changes[].change.actions"}]}

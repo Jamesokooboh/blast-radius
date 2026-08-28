@@ -1,0 +1,15 @@
+.work/
+.plugin-cache/
+.terraform/
+tfplan
+*.tfplan
+terraform.tfstate
+terraform.tfstate.backup
+__pycache__/
+
+# Regenerable in seconds via ./plan.sh --all; ~250KB each. Summaries and diffs
+# are committed instead, since those are the readable evidence.
+results/plans/*.plan.json
+
+# The competition brief is micro1's material, not ours to redistribute.
+*.pdf

@@ -1,0 +1,23 @@
+diff --git a/C:/Users/DELL/Documents/projects/Hackerthon/infra/base/data_stores.tf b/C:/Users/DELL/Documents/projects/Hackerthon/cases/case-08-rds-encrypt-in-place/overlay/data_stores.tf
+index 7ffb97e..9dd0585 100644
+--- a/C:/Users/DELL/Documents/projects/Hackerthon/infra/base/data_stores.tf
++++ b/C:/Users/DELL/Documents/projects/Hackerthon/cases/case-08-rds-encrypt-in-place/overlay/data_stores.tf
+@@ -3,8 +3,7 @@ resource "aws_db_subnet_group" "main" {
+   subnet_ids = [aws_subnet.private_a.id, aws_subnet.private_b.id]
+ }
+ 
+-# The production database. Predates the encryption-at-rest policy; migrating it
+-# is tracked in INFRA-1804.
++# The production database. Encryption at rest enabled per INFRA-1804.
+ resource "aws_db_instance" "main" {
+   identifier     = "${var.name_prefix}-db"
+   engine         = "postgres"
+@@ -13,7 +12,7 @@ resource "aws_db_instance" "main" {
+ 
+   allocated_storage = 100
+   storage_type      = "gp3"
+-  storage_encrypted = false
++  storage_encrypted = true
+ 
+   db_name  = "appdb"
+   username = "appuser"

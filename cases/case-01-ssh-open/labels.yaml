@@ -1,0 +1,18 @@
+band: A
+verdict: block
+primary_reason: aws_security_group.app
+notes: >
+  Baseline case. The scanner catches this one and it genuinely matters, so the
+  agent must not regress on it. Nothing here requires the plan or cross-file
+  reasoning -- the finding is visible in the diff alone.
+
+findings:
+  - address: aws_security_group.app
+    category: network-exposure
+    severity: critical
+    linter_catches: true
+    evidence: >
+      security.tf, ingress block on port 22 with cidr_blocks ["0.0.0.0/0"].
+      The app security group is attached to instances in private subnets, but
+      the rule itself is unrestricted and the stated follow-up is not in this
+      pull request.

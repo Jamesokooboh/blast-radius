@@ -1,0 +1,26 @@
+band: C
+verdict: block
+primary_reason: aws_db_instance.main
+notes: >
+  The pull request is a security improvement and reads as one. Every static
+  scanner either stays silent or approves, because the resulting configuration
+  is strictly better than what it replaces. The danger is not in the
+  configuration at all -- it is in the transition. storage_encrypted is
+  immutable on aws_db_instance, so Terraform satisfies the change by destroying
+  the instance and creating a new empty one.
+
+  A reviewer who reads only the diff approves this. A reviewer who reads the
+  plan sees the replace. That difference is the entire hypothesis behind
+  iteration I1.
+
+findings:
+  - address: aws_db_instance.main
+    category: data-loss
+    severity: critical
+    linter_catches: false
+    evidence: >
+      plan.json resource_changes -> aws_db_instance.main -> change.actions is
+      ["delete", "create"]. storage_encrypted cannot be modified in place, so
+      the production database is replaced and its contents are lost. The
+      encryption goal is correct; it needs a snapshot-and-restore migration
+      rather than an attribute flip.

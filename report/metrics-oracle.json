@@ -1,0 +1,63 @@
+{
+  "cases": {
+    "01": {
+      "band": "A",
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "reported": 1,
+      "verdict_ok": true,
+      "noise_total": 0,
+      "noise_suppressed": 0,
+      "missed": [],
+      "spurious": []
+    },
+    "08": {
+      "band": "C",
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "reported": 1,
+      "verdict_ok": true,
+      "noise_total": 0,
+      "noise_suppressed": 0,
+      "missed": [],
+      "spurious": []
+    },
+    "13": {
+      "band": "D",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "reported": 0,
+      "verdict_ok": true,
+      "noise_total": 0,
+      "noise_suppressed": 0,
+      "missed": [],
+      "spurious": []
+    }
+  },
+  "aggregate": {
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "verdict_accuracy": 1.0,
+    "findings_per_pr": 0.6666666666666666,
+    "band_recall": {
+      "A": 1.0,
+      "C": 1.0,
+      "D": 1.0
+    },
+    "noise_suppressed": 0,
+    "noise_total": 0
+  }
+}

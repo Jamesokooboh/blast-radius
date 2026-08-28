@@ -1,0 +1,38 @@
+diff --git a/C:/Users/DELL/Documents/projects/Hackerthon/infra/base/data_stores.tf b/C:/Users/DELL/Documents/projects/Hackerthon/cases/case-13-clean-rename/overlay/data_stores.tf
+index 7ffb97e..25cc890 100644
+--- a/C:/Users/DELL/Documents/projects/Hackerthon/infra/base/data_stores.tf
++++ b/C:/Users/DELL/Documents/projects/Hackerthon/cases/case-13-clean-rename/overlay/data_stores.tf
+@@ -67,7 +67,7 @@ resource "aws_s3_bucket" "static_site" {
+ }
+ 
+ # Build artifacts, rebuilt on every pipeline run and expired after a week.
+-resource "aws_s3_bucket" "artifacts" {
++resource "aws_s3_bucket" "build_artifacts" {
+   bucket = "${var.name_prefix}-artifacts"
+ 
+   tags = {
+@@ -76,8 +76,8 @@ resource "aws_s3_bucket" "artifacts" {
+   }
+ }
+ 
+-resource "aws_s3_bucket_lifecycle_configuration" "artifacts" {
+-  bucket = aws_s3_bucket.artifacts.id
++resource "aws_s3_bucket_lifecycle_configuration" "build_artifacts" {
++  bucket = aws_s3_bucket.build_artifacts.id
+ 
+   rule {
+     id     = "expire"
+@@ -90,3 +90,13 @@ resource "aws_s3_bucket_lifecycle_configuration" "artifacts" {
+     }
+   }
+ }
++
++moved {
++  from = aws_s3_bucket.artifacts
++  to   = aws_s3_bucket.build_artifacts
++}
++
++moved {
++  from = aws_s3_bucket_lifecycle_configuration.artifacts
++  to   = aws_s3_bucket_lifecycle_configuration.build_artifacts
++}

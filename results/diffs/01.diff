@@ -1,0 +1,19 @@
+diff --git a/C:/Users/DELL/Documents/projects/Hackerthon/infra/base/security.tf b/C:/Users/DELL/Documents/projects/Hackerthon/cases/case-01-ssh-open/overlay/security.tf
+index d11da40..ef2af09 100644
+--- a/C:/Users/DELL/Documents/projects/Hackerthon/infra/base/security.tf
++++ b/C:/Users/DELL/Documents/projects/Hackerthon/cases/case-01-ssh-open/overlay/security.tf
+@@ -38,6 +38,14 @@ resource "aws_security_group" "app" {
+     security_groups = [aws_security_group.alb.id]
+   }
+ 
++  ingress {
++    description = "SSH for the on-call rotation"
++    from_port   = 22
++    to_port     = 22
++    protocol    = "tcp"
++    cidr_blocks = ["0.0.0.0/0"]
++  }
++
+   egress {
+     from_port   = 0
+     to_port     = 0
