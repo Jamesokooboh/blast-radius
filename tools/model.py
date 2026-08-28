@@ -18,6 +18,10 @@ from pydantic import BaseModel, Field
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 REGION = os.environ.get("AWS_REGION", "us-east-1")
 
+# Which AWS account gets billed. Two accounts are configured on this machine, so
+# the profile is explicit rather than whatever `default` happens to point at.
+PROFILE = os.environ.get("AWS_PROFILE", "Joseph")
+
 # Bedrock model ids carry an `anthropic.` prefix, and the Messages (Mantle)
 # endpoint wants them UNDATED. `bedrock:ListFoundationModels` returns dated ids
 # like `anthropic.claude-haiku-4-5-20251001-v1` -- those are for the legacy
@@ -59,7 +63,25 @@ class Review(BaseModel):
     )
 
 
+def use_profile(profile=None):
+    """Pin the AWS profile before any client is constructed."""
+    global PROFILE
+    if profile:
+        PROFILE = profile
+    os.environ["AWS_PROFILE"] = PROFILE
+    return PROFILE
+
+
+def whoami():
+    """Account and identity that will be billed. Printed before anything spends."""
+    import boto3
+    os.environ["AWS_PROFILE"] = PROFILE
+    ident = boto3.Session(profile_name=PROFILE).client("sts").get_caller_identity()
+    return {"profile": PROFILE, "account": ident["Account"], "arn": ident["Arn"]}
+
+
 def client():
+    os.environ["AWS_PROFILE"] = PROFILE
     return AnthropicBedrockMantle(aws_region=REGION)
 
 

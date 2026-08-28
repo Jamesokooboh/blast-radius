@@ -52,12 +52,15 @@ def main():
     ap.add_argument("--all", action="store_true")
     ap.add_argument("--model", default="sonnet", choices=list(M.MODELS))
     ap.add_argument("--effort", default="high")
+    ap.add_argument("--profile", default=None,
+                    help="AWS profile to bill; defaults to AWS_PROFILE or Joseph")
     ap.add_argument("--dry-run", action="store_true",
                     help="build the prompts and report their size without calling")
     ap.add_argument("--mode", default=None,
                     help="output directory name; defaults to oneshot, or "
                          "oneshot-<model> for anything but sonnet")
     args = ap.parse_args()
+    M.use_profile(args.profile)
 
     mode = args.mode or ("oneshot" if args.model == "sonnet" else f"oneshot-{args.model}")
     out = ROOT / "results" / "findings" / mode
@@ -85,6 +88,10 @@ def main():
         print(f"  estimated cost on sonnet: ${total/3.6*2.0/1e6 + len(ids)*3000*10.0/1e6:.2f}")
         return
 
+    who = M.whoami()
+    print(f"  billing: profile {who['profile']}  account {who['account']}  "
+          f"model {M.MODELS[args.model]}\n")
+
     total_cost, total_s = 0.0, 0.0
     for cid in ids:
         prompt = build_prompt(cid)
@@ -100,6 +107,7 @@ def main():
             "case": cid,
             "stage": "B1 one-shot",
             "model": M.MODELS[args.model],
+            "aws_account": who["account"],
             "effort": args.effort if args.model not in M.LEGACY_THINKING else None,
             "system": M.review_instructions(),
             "prompt": prompt,
