@@ -1,0 +1,11 @@
+band: D
+verdict: approve
+primary_reason: null
+notes: >
+  Control case. Two tag additions, two in-place updates in the plan, nothing
+  else. Any finding is a false positive.
+
+  Band D exists because "findings per pull request" is meaningless without cases
+  where the correct number is zero.
+
+findings: []

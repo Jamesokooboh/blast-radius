@@ -1,0 +1,4 @@
+            create  aws_s3_bucket_policy.static_site
+            create  aws_s3_bucket_public_access_block.static_site
+
+dropped 1 phantom update(s): aws_db_instance.main

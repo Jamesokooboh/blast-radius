@@ -1,0 +1,23 @@
+band: C
+verdict: warn
+primary_reason: aws_autoscaling_group.app
+notes: >
+  The plan applies cleanly and the configuration is valid as far as Terraform is
+  concerned, so nothing errors and no scanner objects. The change simply will not
+  do what the pull request says: min_size is still 3, so the autoscaling service
+  brings the fleet straight back to three instances and the saving never
+  materialises.
+
+  Catching this means reading two attributes of one resource against each other,
+  which is a different operation from matching a pattern.
+
+findings:
+  - address: aws_autoscaling_group.app
+    category: reliability
+    severity: medium
+    linter_catches: false
+    evidence: >
+      compute.tf, desired_capacity changes from 3 to 1 while min_size remains 3.
+      The plan shows an in-place update. Autoscaling treats min_size as a floor
+      and will scale back to 3 within minutes, so the stated cost saving does not
+      happen and the running fleet size silently disagrees with the code.

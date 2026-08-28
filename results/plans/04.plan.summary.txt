@@ -1,0 +1,4 @@
+            create  aws_lb_listener.http_redirect
+            update  aws_security_group.alb
+
+dropped 1 phantom update(s): aws_db_instance.main

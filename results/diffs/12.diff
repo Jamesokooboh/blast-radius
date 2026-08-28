@@ -1,0 +1,14 @@
+diff --git a/C:/Users/DELL/Documents/projects/Hackerthon/infra/base/variables.tf b/C:/Users/DELL/Documents/projects/Hackerthon/cases/case-12-var-default-widened/overlay/variables.tf
+index fff75ee..68c8e48 100644
+--- a/C:/Users/DELL/Documents/projects/Hackerthon/infra/base/variables.tf
++++ b/C:/Users/DELL/Documents/projects/Hackerthon/cases/case-12-var-default-widened/overlay/variables.tf
+@@ -27,8 +27,5 @@ variable "availability_zones" {
+ # Buckets the application role may read and write. Consumed by iam.tf.
+ variable "app_data_bucket_arns" {
+   type = list(string)
+-  default = [
+-    "arn:aws:s3:::acme-prod-data",
+-    "arn:aws:s3:::acme-prod-data/*",
+-  ]
++  default = ["*"]
+ }

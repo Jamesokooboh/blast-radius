@@ -1,0 +1,44 @@
+diff --git a/C:/Users/DELL/Documents/projects/Hackerthon/infra/base/compute.tf b/C:/Users/DELL/Documents/projects/Hackerthon/cases/case-04-http-redirect/overlay/compute.tf
+index 2fd68d6..210a60a 100644
+--- a/C:/Users/DELL/Documents/projects/Hackerthon/infra/base/compute.tf
++++ b/C:/Users/DELL/Documents/projects/Hackerthon/cases/case-04-http-redirect/overlay/compute.tf
+@@ -77,3 +77,20 @@ resource "aws_lb_listener" "https" {
+     target_group_arn = aws_lb_target_group.app.arn
+   }
+ }
++
++# Sends anyone who arrives on http:// to the https:// listener above.
++resource "aws_lb_listener" "http_redirect" {
++  load_balancer_arn = aws_lb.main.arn
++  port              = 80
++  protocol          = "HTTP"
++
++  default_action {
++    type = "redirect"
++
++    redirect {
++      port        = "443"
++      protocol    = "HTTPS"
++      status_code = "HTTP_301"
++    }
++  }
++}
+diff --git a/C:/Users/DELL/Documents/projects/Hackerthon/infra/base/security.tf b/C:/Users/DELL/Documents/projects/Hackerthon/cases/case-04-http-redirect/overlay/security.tf
+index d11da40..b4483a8 100644
+--- a/C:/Users/DELL/Documents/projects/Hackerthon/infra/base/security.tf
++++ b/C:/Users/DELL/Documents/projects/Hackerthon/cases/case-04-http-redirect/overlay/security.tf
+@@ -13,6 +13,14 @@ resource "aws_security_group" "alb" {
+     cidr_blocks = ["0.0.0.0/0"]
+   }
+ 
++  ingress {
++    description = "HTTP, redirected to HTTPS by the listener"
++    from_port   = 80
++    to_port     = 80
++    protocol    = "tcp"
++    cidr_blocks = ["0.0.0.0/0"]
++  }
++
+   egress {
+     from_port   = 0
+     to_port     = 0

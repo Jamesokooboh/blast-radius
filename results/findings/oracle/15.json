@@ -1,0 +1,11 @@
+{
+  "verdict": "block",
+  "findings": [
+    {
+      "address": "aws_s3_bucket.data",
+      "category": "guardrail",
+      "severity": "high",
+      "evidence_ref": "labels.yaml"
+    }
+  ]
+}

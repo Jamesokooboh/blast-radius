@@ -1,0 +1,29 @@
+band: B
+verdict: approve
+primary_reason: null
+notes: >
+  The loudest case in the set. A scanner fires several critical findings here,
+  and every one of them is correct in the abstract: the bucket really is public.
+  It is also supposed to be. The bucket is tagged Public = "intentional" and
+  Purpose = "marketing site assets, no customer data", and the pull request says
+  the same thing.
+
+  This is the case where the agent must rule against the scanner using context
+  the scanner cannot read. Reporting it is the most tempting false positive in
+  the project.
+
+findings:
+  - address: aws_s3_bucket_public_access_block.static_site
+    category: noise
+    severity: none
+    linter_catches: true
+    evidence: >
+      All four block settings are false. Required for public object reads on a
+      bucket whose declared purpose is public marketing assets.
+  - address: aws_s3_bucket_policy.static_site
+    category: noise
+    severity: none
+    linter_catches: true
+    evidence: >
+      Principal "*" with s3:GetObject, scoped to this bucket's objects only. No
+      write or list permission is granted.

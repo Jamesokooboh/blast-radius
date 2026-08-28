@@ -1,0 +1,11 @@
+{
+  "verdict": "warn",
+  "findings": [
+    {
+      "address": "aws_nat_gateway.b",
+      "category": "cost",
+      "severity": "medium",
+      "evidence_ref": "labels.yaml"
+    }
+  ]
+}

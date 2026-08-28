@@ -3,7 +3,7 @@
   "findings": [
     {
       "address": "aws_db_instance.main",
-      "category": "data-loss",
+      "category": "network-exposure",
       "severity": "critical",
       "evidence_ref": "labels.yaml"
     }

@@ -17,6 +17,100 @@
       ],
       "spurious": []
     },
+    "02": {
+      "band": "A",
+      "tp": 0,
+      "fp": 0,
+      "fn": 1,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "reported": 0,
+      "verdict_ok": false,
+      "noise_total": 0,
+      "noise_suppressed": 0,
+      "missed": [
+        "aws_db_instance.main:network-exposure"
+      ],
+      "spurious": []
+    },
+    "03": {
+      "band": "A",
+      "tp": 0,
+      "fp": 0,
+      "fn": 1,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "reported": 0,
+      "verdict_ok": false,
+      "noise_total": 0,
+      "noise_suppressed": 0,
+      "missed": [
+        "aws_iam_role_policy.deploy:privilege-escalation"
+      ],
+      "spurious": []
+    },
+    "04": {
+      "band": "B",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "reported": 0,
+      "verdict_ok": false,
+      "noise_total": 2,
+      "noise_suppressed": 2,
+      "missed": [],
+      "spurious": []
+    },
+    "05": {
+      "band": "B",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "reported": 0,
+      "verdict_ok": false,
+      "noise_total": 1,
+      "noise_suppressed": 1,
+      "missed": [],
+      "spurious": []
+    },
+    "06": {
+      "band": "B",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "reported": 0,
+      "verdict_ok": false,
+      "noise_total": 2,
+      "noise_suppressed": 2,
+      "missed": [],
+      "spurious": []
+    },
+    "07": {
+      "band": "B",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "reported": 0,
+      "verdict_ok": false,
+      "noise_total": 1,
+      "noise_suppressed": 1,
+      "missed": [],
+      "spurious": []
+    },
     "08": {
       "band": "C",
       "tp": 0,
@@ -34,6 +128,75 @@
       ],
       "spurious": []
     },
+    "09": {
+      "band": "C",
+      "tp": 0,
+      "fp": 0,
+      "fn": 2,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "reported": 0,
+      "verdict_ok": false,
+      "noise_total": 0,
+      "noise_suppressed": 0,
+      "missed": [
+        "aws_nat_gateway.main:cost",
+        "aws_route_table.public:network-exposure"
+      ],
+      "spurious": []
+    },
+    "10": {
+      "band": "C",
+      "tp": 0,
+      "fp": 0,
+      "fn": 1,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "reported": 0,
+      "verdict_ok": false,
+      "noise_total": 0,
+      "noise_suppressed": 0,
+      "missed": [
+        "aws_autoscaling_group.app:reliability"
+      ],
+      "spurious": []
+    },
+    "11": {
+      "band": "C",
+      "tp": 0,
+      "fp": 0,
+      "fn": 1,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "reported": 0,
+      "verdict_ok": false,
+      "noise_total": 0,
+      "noise_suppressed": 0,
+      "missed": [
+        "aws_eip.nat_b:cost"
+      ],
+      "spurious": []
+    },
+    "12": {
+      "band": "C",
+      "tp": 0,
+      "fp": 0,
+      "fn": 1,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "reported": 0,
+      "verdict_ok": false,
+      "noise_total": 0,
+      "noise_suppressed": 0,
+      "missed": [
+        "app_data_bucket_arns:privilege-escalation"
+      ],
+      "spurious": []
+    },
     "13": {
       "band": "D",
       "tp": 0,
@@ -48,6 +211,38 @@
       "noise_suppressed": 0,
       "missed": [],
       "spurious": []
+    },
+    "14": {
+      "band": "D",
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "reported": 0,
+      "verdict_ok": false,
+      "noise_total": 0,
+      "noise_suppressed": 0,
+      "missed": [],
+      "spurious": []
+    },
+    "15": {
+      "band": "C",
+      "tp": 0,
+      "fp": 0,
+      "fn": 1,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "reported": 0,
+      "verdict_ok": false,
+      "noise_total": 0,
+      "noise_suppressed": 0,
+      "missed": [
+        "aws_s3_bucket.data:guardrail"
+      ],
+      "spurious": []
     }
   },
   "aggregate": {
@@ -58,10 +253,11 @@
     "findings_per_pr": 0.0,
     "band_recall": {
       "A": 0.0,
+      "B": 1.0,
       "C": 0.0,
       "D": 1.0
     },
-    "noise_suppressed": 0,
-    "noise_total": 0
+    "noise_suppressed": 6,
+    "noise_total": 6
   }
 }

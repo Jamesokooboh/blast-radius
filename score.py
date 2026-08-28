@@ -33,33 +33,72 @@ def norm(address):
     return INDEX.sub("", (address or "").strip()).lower()
 
 
+MATCH = "strict"  # "strict" = address and category; "address" = address only
+
+
 def key(item):
-    return (norm(item.get("address")), (item.get("category") or "").strip().lower())
+    cat = "" if MATCH == "address" else (item.get("category") or "").strip().lower()
+    return (norm(item.get("address")), cat)
+
+
+def group(label_finding):
+    """The set of addresses that count as naming this problem.
+
+    One problem often spans several resources -- both subnet associations moved
+    to the same route table, three resources added for one NAT gateway. A
+    reviewer who reports that once, against any of them, has found it. `also`
+    lists the equally acceptable addresses; naming several is neither rewarded
+    nor punished, since they are the same finding.
+    """
+    cat = "" if MATCH == "address" else (label_finding.get("category") or "").strip().lower()
+    addrs = [label_finding.get("address")] + list(label_finding.get("also") or [])
+    return {(norm(a), cat) for a in addrs if a}
 
 
 def score_case(labels, findings):
-    expected = {key(f) for f in labels.get("findings", []) if f.get("category") != "noise"}
-    noise = {key(f) for f in labels.get("findings", []) if f.get("category") == "noise"}
-    reported = {key(f) for f in findings.get("findings", [])}
+    all_labels = labels.get("findings", []) or []
+    expected = [group(f) for f in all_labels if f.get("category") != "noise"]
+    noise = [group(f) for f in all_labels if f.get("category") == "noise"]
+    reported = {key(f) for f in findings.get("findings", []) or []}
 
-    tp = expected & reported
-    fn = expected - reported
-    fp = reported - expected
+    remaining = set(reported)
+    tp, missed = 0, []
+    for g in expected:
+        if remaining & g:
+            tp += 1
+            remaining -= g
+        else:
+            missed.append(sorted(g)[0])
 
-    precision = len(tp) / len(reported) if reported else (1.0 if not expected else 0.0)
-    recall = len(tp) / len(expected) if expected else 1.0
+    # Reprinting a finding the reviewer should have suppressed is a false
+    # positive, and it is the one this project most wants to catch. Noise
+    # matches on address alone: raising that resource at all is the mistake,
+    # whatever category the reporter files it under.
+    parroted = []
+    for g in noise:
+        addrs = {a for a, _ in g}
+        hits = {k for k in remaining if k[0] in addrs}
+        if hits:
+            parroted.append(sorted(hits)[0])
+            remaining -= hits
+
+    fp = len(remaining) + len(parroted)
+    fn = len(missed)
+
+    precision = tp / (tp + fp) if (tp + fp) else (1.0 if not expected else 0.0)
+    recall = tp / len(expected) if expected else 1.0
     f1 = 2 * precision * recall / (precision + recall) if (precision + recall) else 0.0
 
     return {
         "band": labels.get("band", "?"),
-        "tp": len(tp), "fp": len(fp), "fn": len(fn),
+        "tp": tp, "fp": fp, "fn": fn,
         "precision": precision, "recall": recall, "f1": f1,
         "reported": len(reported),
         "verdict_ok": findings.get("verdict") == labels.get("verdict"),
         "noise_total": len(noise),
-        "noise_suppressed": len(noise - reported),
-        "missed": sorted(f"{a}:{c}" for a, c in fn),
-        "spurious": sorted(f"{a}:{c}" for a, c in fp),
+        "noise_suppressed": len(noise) - len(parroted),
+        "missed": sorted(f"{a}:{c}" for a, c in missed),
+        "spurious": sorted(f"{a}:{c}" for a, c in (list(remaining) + parroted)),
     }
 
 
@@ -102,8 +141,14 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--case")
     ap.add_argument("--mode", default="agent", help="which run's findings to score")
+    ap.add_argument("--match", choices=("strict", "address"), default="strict",
+                    help="address: credit a finding that names the right resource "
+                         "however it classifies it. Used for the scanner baseline.")
     ap.add_argument("--selfcheck", action="store_true")
     args = ap.parse_args()
+
+    global MATCH
+    MATCH = args.match
 
     if args.selfcheck:
         return selfcheck()
@@ -175,6 +220,13 @@ def selfcheck():
     assert q["recall"] == 1.0 and q["precision"] == 0.5, q
     assert q["noise_suppressed"] == 0, q
 
+    # Noise is matched by address, so miscategorising it does not launder it.
+    miscategorised = score_case(labels, {"verdict": "block", "findings": [
+        {"address": "aws_db_instance.main", "category": "data-loss"},
+        {"address": "aws_security_group.alb", "category": "network-exposure"}]})
+    assert miscategorised["noise_suppressed"] == 0, miscategorised
+    assert miscategorised["fp"] == 1, miscategorised
+
     # A clean case with no findings: silence is a perfect score, noise is not.
     clean = {"band": "D", "verdict": "approve", "findings": []}
     assert score_case(clean, {"verdict": "approve", "findings": []})["f1"] == 1.0
@@ -183,6 +235,24 @@ def selfcheck():
 
     agg = aggregate([p, e])
     assert 0.0 < agg["f1"] < 1.0, agg
+
+    # One problem across several resources: naming any one of them finds it,
+    # naming all of them is not punished, naming none is a miss.
+    spread = {"band": "C", "verdict": "block", "findings": [
+        {"address": "aws_route_table_association.private_a",
+         "also": ["aws_route_table_association.private_b"],
+         "category": "network-exposure"}]}
+    one = score_case(spread, {"verdict": "block", "findings": [
+        {"address": "aws_route_table_association.private_b", "category": "network-exposure"}]})
+    assert one["f1"] == 1.0, one
+    both = score_case(spread, {"verdict": "block", "findings": [
+        {"address": "aws_route_table_association.private_a", "category": "network-exposure"},
+        {"address": "aws_route_table_association.private_b", "category": "network-exposure"}]})
+    assert both["f1"] == 1.0 and both["fp"] == 0, both
+    neither = score_case(spread, {"verdict": "block", "findings": [
+        {"address": "aws_vpc.main", "category": "network-exposure"}]})
+    assert neither["tp"] == 0 and neither["fp"] == 1, neither
+
     print("score selfcheck ok")
     return 0
 

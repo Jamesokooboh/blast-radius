@@ -1,0 +1,3 @@
+            update  aws_iam_role_policy.app_data
+
+dropped 1 phantom update(s): aws_db_instance.main

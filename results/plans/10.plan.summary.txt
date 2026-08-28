@@ -1,0 +1,3 @@
+            update  aws_autoscaling_group.app
+
+dropped 1 phantom update(s): aws_db_instance.main

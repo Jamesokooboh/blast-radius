@@ -1,0 +1,12 @@
+{
+  "verdict": "block",
+  "findings": [
+    {
+      "address": "aws_iam_role_policy.app_data",
+      "category": "privilege-escalation",
+      "severity": "unknown",
+      "check_id": "CKV_AWS_288",
+      "evidence_ref": "\\iam.tf:19 Ensure IAM policies does not allow data exfiltration"
+    }
+  ]
+}

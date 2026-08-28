@@ -1,0 +1,19 @@
+{
+  "verdict": "block",
+  "findings": [
+    {
+      "address": "aws_s3_bucket_lifecycle_configuration.tmp_uploads",
+      "category": "hygiene",
+      "severity": "unknown",
+      "check_id": "CKV_AWS_300",
+      "evidence_ref": "\\data_stores.tf:105 Ensure S3 lifecycle configuration sets period for aborting failed uploads"
+    },
+    {
+      "address": "aws_s3_bucket.tmp_uploads",
+      "category": "hygiene",
+      "severity": "unknown",
+      "check_id": "CKV2_AWS_62",
+      "evidence_ref": "\\data_stores.tf:96 Ensure S3 buckets should have event notifications enabled"
+    }
+  ]
+}

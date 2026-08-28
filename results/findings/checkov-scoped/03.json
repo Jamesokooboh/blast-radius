@@ -1,0 +1,12 @@
+{
+  "verdict": "block",
+  "findings": [
+    {
+      "address": "aws_iam_role_policy.deploy",
+      "category": "privilege-escalation",
+      "severity": "unknown",
+      "check_id": "CKV_AWS_62",
+      "evidence_ref": "\\iam.tf:55 Ensure IAM policies that allow full \"*-*\" administrative privileges are not created"
+    }
+  ]
+}

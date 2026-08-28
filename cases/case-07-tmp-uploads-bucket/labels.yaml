@@ -1,0 +1,18 @@
+band: B
+verdict: approve
+primary_reason: null
+notes: >
+  Scanners want versioning and an explicit encryption block on every bucket.
+  Neither is worth paying for on storage whose contents are deleted within a
+  day, and S3 has encrypted new objects by default since January 2023, so the
+  encryption rule is stale rather than merely disproportionate.
+
+findings:
+  - address: aws_s3_bucket.tmp_uploads
+    category: noise
+    severity: none
+    linter_catches: true
+    evidence: >
+      No versioning and no server-side encryption block. The lifecycle rule
+      expires objects after one day and default bucket encryption already
+      applies. Versioning here would bill for retaining failed uploads.

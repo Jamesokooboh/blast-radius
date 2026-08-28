@@ -1,0 +1,17 @@
+diff --git a/C:/Users/DELL/Documents/projects/Hackerthon/infra/base/network.tf b/C:/Users/DELL/Documents/projects/Hackerthon/cases/case-09-subnet-igw-route/overlay/network.tf
+index 4edc044..7f771f7 100644
+--- a/C:/Users/DELL/Documents/projects/Hackerthon/infra/base/network.tf
++++ b/C:/Users/DELL/Documents/projects/Hackerthon/cases/case-09-subnet-igw-route/overlay/network.tf
+@@ -120,10 +120,10 @@ resource "aws_route_table_association" "public_b" {
+ 
+ resource "aws_route_table_association" "private_a" {
+   subnet_id      = aws_subnet.private_a.id
+-  route_table_id = aws_route_table.private.id
++  route_table_id = aws_route_table.public.id
+ }
+ 
+ resource "aws_route_table_association" "private_b" {
+   subnet_id      = aws_subnet.private_b.id
+-  route_table_id = aws_route_table.private.id
++  route_table_id = aws_route_table.public.id
+ }

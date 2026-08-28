@@ -1,0 +1,28 @@
+band: C
+verdict: block
+primary_reason: aws_s3_bucket.data
+notes: >
+  The hard case, and the one for the video. Every scanner passes it. The plan is
+  boring: a single in-place tag update, nothing created, nothing destroyed.
+  Terraform reports no danger because there is none today.
+
+  What the pull request does is remove the only thing preventing a future change
+  from destroying the production data bucket, for an unrelated reason, bundled
+  with a routine tag edit that makes the diff look like housekeeping. The finding
+  is not in what the change does but in what it takes away.
+
+  The stated justification is itself the warning sign: a lifecycle guard failing
+  a plan means something in the pipeline is already trying to destroy that
+  bucket. Removing the guard silences the alarm rather than answering it.
+
+findings:
+  - address: aws_s3_bucket.data
+    category: guardrail
+    severity: high
+    linter_catches: false
+    evidence: >
+      data_stores.tf, the lifecycle block containing prevent_destroy = true is
+      deleted. The plan shows only an in-place tag update, so nothing in the plan
+      output indicates risk. The bucket's comment records that retention is a
+      compliance requirement, and no replacement control is added anywhere in the
+      pull request.

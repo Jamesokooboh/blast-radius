@@ -48,121 +48,142 @@
     "04": {
       "band": "B",
       "tp": 0,
-      "fp": 0,
+      "fp": 1,
       "fn": 0,
-      "precision": 1.0,
+      "precision": 0.0,
       "recall": 1.0,
-      "f1": 1.0,
-      "reported": 0,
-      "verdict_ok": true,
+      "f1": 0.0,
+      "reported": 1,
+      "verdict_ok": false,
       "noise_total": 2,
-      "noise_suppressed": 2,
+      "noise_suppressed": 1,
       "missed": [],
-      "spurious": []
+      "spurious": [
+        "aws_security_group.alb:network-exposure"
+      ]
     },
     "05": {
       "band": "B",
       "tp": 0,
-      "fp": 0,
+      "fp": 1,
       "fn": 0,
-      "precision": 1.0,
+      "precision": 0.0,
       "recall": 1.0,
-      "f1": 1.0,
-      "reported": 0,
-      "verdict_ok": true,
+      "f1": 0.0,
+      "reported": 1,
+      "verdict_ok": false,
       "noise_total": 1,
-      "noise_suppressed": 1,
+      "noise_suppressed": 0,
       "missed": [],
-      "spurious": []
+      "spurious": [
+        "aws_lb.internal:hygiene"
+      ]
     },
     "06": {
       "band": "B",
       "tp": 0,
-      "fp": 0,
+      "fp": 2,
       "fn": 0,
-      "precision": 1.0,
+      "precision": 0.0,
       "recall": 1.0,
-      "f1": 1.0,
-      "reported": 0,
-      "verdict_ok": true,
+      "f1": 0.0,
+      "reported": 2,
+      "verdict_ok": false,
       "noise_total": 2,
-      "noise_suppressed": 2,
+      "noise_suppressed": 0,
       "missed": [],
-      "spurious": []
+      "spurious": [
+        "aws_s3_bucket_policy.static_site:network-exposure",
+        "aws_s3_bucket_public_access_block.static_site:network-exposure"
+      ]
     },
     "07": {
       "band": "B",
       "tp": 0,
-      "fp": 0,
+      "fp": 2,
       "fn": 0,
-      "precision": 1.0,
+      "precision": 0.0,
       "recall": 1.0,
-      "f1": 1.0,
-      "reported": 0,
-      "verdict_ok": true,
+      "f1": 0.0,
+      "reported": 2,
+      "verdict_ok": false,
       "noise_total": 1,
-      "noise_suppressed": 1,
+      "noise_suppressed": 0,
       "missed": [],
-      "spurious": []
+      "spurious": [
+        "aws_s3_bucket.tmp_uploads:hygiene",
+        "aws_s3_bucket_lifecycle_configuration.tmp_uploads:hygiene"
+      ]
     },
     "08": {
       "band": "C",
-      "tp": 1,
-      "fp": 0,
-      "fn": 0,
-      "precision": 1.0,
-      "recall": 1.0,
-      "f1": 1.0,
+      "tp": 0,
+      "fp": 1,
+      "fn": 1,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
       "reported": 1,
       "verdict_ok": true,
       "noise_total": 0,
       "noise_suppressed": 0,
-      "missed": [],
-      "spurious": []
+      "missed": [
+        "aws_db_instance.main:data-loss"
+      ],
+      "spurious": [
+        "aws_db_instance.main:hygiene"
+      ]
     },
     "09": {
       "band": "C",
-      "tp": 2,
+      "tp": 0,
       "fp": 0,
-      "fn": 0,
-      "precision": 1.0,
-      "recall": 1.0,
-      "f1": 1.0,
-      "reported": 2,
-      "verdict_ok": true,
+      "fn": 2,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "reported": 0,
+      "verdict_ok": false,
       "noise_total": 0,
       "noise_suppressed": 0,
-      "missed": [],
+      "missed": [
+        "aws_nat_gateway.main:cost",
+        "aws_route_table.public:network-exposure"
+      ],
       "spurious": []
     },
     "10": {
       "band": "C",
-      "tp": 1,
+      "tp": 0,
       "fp": 0,
-      "fn": 0,
-      "precision": 1.0,
-      "recall": 1.0,
-      "f1": 1.0,
-      "reported": 1,
-      "verdict_ok": true,
+      "fn": 1,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "reported": 0,
+      "verdict_ok": false,
       "noise_total": 0,
       "noise_suppressed": 0,
-      "missed": [],
+      "missed": [
+        "aws_autoscaling_group.app:reliability"
+      ],
       "spurious": []
     },
     "11": {
       "band": "C",
-      "tp": 1,
+      "tp": 0,
       "fp": 0,
-      "fn": 0,
-      "precision": 1.0,
-      "recall": 1.0,
-      "f1": 1.0,
-      "reported": 1,
-      "verdict_ok": true,
+      "fn": 1,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "reported": 0,
+      "verdict_ok": false,
       "noise_total": 0,
       "noise_suppressed": 0,
-      "missed": [],
+      "missed": [
+        "aws_eip.nat_b:cost"
+      ],
       "spurious": []
     },
     "12": {
@@ -198,47 +219,53 @@
     "14": {
       "band": "D",
       "tp": 0,
-      "fp": 0,
+      "fp": 1,
       "fn": 0,
-      "precision": 1.0,
+      "precision": 0.0,
       "recall": 1.0,
-      "f1": 1.0,
-      "reported": 0,
-      "verdict_ok": true,
+      "f1": 0.0,
+      "reported": 1,
+      "verdict_ok": false,
       "noise_total": 0,
       "noise_suppressed": 0,
       "missed": [],
-      "spurious": []
+      "spurious": [
+        "aws_vpc.main:hygiene"
+      ]
     },
     "15": {
       "band": "C",
-      "tp": 1,
-      "fp": 0,
-      "fn": 0,
-      "precision": 1.0,
-      "recall": 1.0,
-      "f1": 1.0,
+      "tp": 0,
+      "fp": 1,
+      "fn": 1,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
       "reported": 1,
       "verdict_ok": true,
       "noise_total": 0,
       "noise_suppressed": 0,
-      "missed": [],
-      "spurious": []
+      "missed": [
+        "aws_s3_bucket.data:guardrail"
+      ],
+      "spurious": [
+        "aws_s3_bucket.data:hygiene"
+      ]
     }
   },
   "aggregate": {
-    "precision": 1.0,
-    "recall": 1.0,
-    "f1": 1.0,
-    "verdict_accuracy": 1.0,
-    "findings_per_pr": 0.6666666666666666,
+    "precision": 0.3076923076923077,
+    "recall": 0.4,
+    "f1": 0.34782608695652173,
+    "verdict_accuracy": 0.4666666666666667,
+    "findings_per_pr": 0.8666666666666667,
     "band_recall": {
       "A": 1.0,
       "B": 1.0,
-      "C": 1.0,
+      "C": 0.14285714285714285,
       "D": 1.0
     },
-    "noise_suppressed": 6,
+    "noise_suppressed": 1,
     "noise_total": 6
   }
 }

@@ -1,0 +1,12 @@
+{
+  "verdict": "block",
+  "findings": [
+    {
+      "address": "aws_db_instance.main",
+      "category": "hygiene",
+      "severity": "unknown",
+      "check_id": "CKV_AWS_129",
+      "evidence_ref": "\\data_stores.tf:7 Ensure that respective logs of Amazon Relational Database Service (Amazon RDS) are enabled"
+    }
+  ]
+}

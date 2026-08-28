@@ -1,0 +1,25 @@
+band: C
+verdict: warn
+primary_reason: aws_nat_gateway.b
+notes: >
+  The change is correct and the reasoning in the pull request is sound. The
+  problem is that it is described purely as an availability fix and costs real
+  money nobody has been told about. No scanner prices anything, so this is
+  invisible to the existing tooling by construction.
+
+  The right outcome is not to block it. It is to say what it costs, so the
+  decision gets made with the number in view.
+
+findings:
+  - address: aws_nat_gateway.b
+    also:
+      - aws_eip.nat_b
+      - aws_route_table.private_b
+    category: cost
+    severity: medium
+    linter_catches: false
+    evidence: >
+      network.tf adds a second NAT gateway, a second elastic IP and a route
+      table; the plan creates all three. A NAT gateway is roughly $32/month
+      before data processing charges, so this is about a $400/year increase that
+      the pull request describes only as an availability improvement.

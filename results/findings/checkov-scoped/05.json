@@ -1,0 +1,12 @@
+{
+  "verdict": "block",
+  "findings": [
+    {
+      "address": "aws_lb.internal",
+      "category": "hygiene",
+      "severity": "unknown",
+      "check_id": "CKV_AWS_131",
+      "evidence_ref": "\\compute.tf:83 Ensure that ALB drops HTTP headers"
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+            update  aws_route_table_association.private_a
+            update  aws_route_table_association.private_b
+
+dropped 1 phantom update(s): aws_db_instance.main

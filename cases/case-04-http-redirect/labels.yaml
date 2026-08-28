@@ -1,0 +1,27 @@
+band: B
+verdict: approve
+primary_reason: null
+notes: >
+  Scanners flag both halves of this change: an ingress rule open to 0.0.0.0/0,
+  and a listener that speaks plain HTTP. Both are correct here. A redirect
+  listener nobody can reach is useless, and the listener carries no traffic
+  beyond the 301 itself.
+
+  Suppressing this pair correctly is the skill Band B measures. An agent that
+  reports either one has reprinted the scanner.
+
+findings:
+  - address: aws_security_group.alb
+    category: noise
+    severity: none
+    linter_catches: true
+    evidence: >
+      Ingress on port 80 from 0.0.0.0/0. Intended: the redirect must be
+      reachable by anyone who would otherwise land on http://.
+  - address: aws_lb_listener.http_redirect
+    category: noise
+    severity: none
+    linter_catches: true
+    evidence: >
+      Listener protocol is HTTP rather than HTTPS. Its only action is a 301 to
+      the HTTPS listener; no application traffic crosses it.

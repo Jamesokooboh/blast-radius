@@ -1,0 +1,12 @@
+{
+  "verdict": "block",
+  "findings": [
+    {
+      "address": "aws_security_group.app",
+      "category": "network-exposure",
+      "severity": "unknown",
+      "check_id": "CKV_AWS_24",
+      "evidence_ref": "\\security.tf:28 Ensure no security groups allow ingress from 0.0.0.0:0 to port 22"
+    }
+  ]
+}

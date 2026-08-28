@@ -1,0 +1,34 @@
+diff --git a/C:/Users/DELL/Documents/projects/Hackerthon/infra/base/data_stores.tf b/C:/Users/DELL/Documents/projects/Hackerthon/cases/case-07-tmp-uploads-bucket/overlay/data_stores.tf
+index 7ffb97e..e87a050 100644
+--- a/C:/Users/DELL/Documents/projects/Hackerthon/infra/base/data_stores.tf
++++ b/C:/Users/DELL/Documents/projects/Hackerthon/cases/case-07-tmp-uploads-bucket/overlay/data_stores.tf
+@@ -90,3 +90,29 @@ resource "aws_s3_bucket_lifecycle_configuration" "artifacts" {
+     }
+   }
+ }
++
++# Browser uploads land here, are validated by the worker, then moved to the
++# data bucket. Anything still here after a day is a failed upload.
++resource "aws_s3_bucket" "tmp_uploads" {
++  bucket = "${var.name_prefix}-tmp-uploads"
++
++  tags = {
++    Name      = "${var.name_prefix}-tmp-uploads"
++    Retention = "24h"
++  }
++}
++
++resource "aws_s3_bucket_lifecycle_configuration" "tmp_uploads" {
++  bucket = aws_s3_bucket.tmp_uploads.id
++
++  rule {
++    id     = "expire"
++    status = "Enabled"
++
++    filter {}
++
++    expiration {
++      days = 1
++    }
++  }
++}

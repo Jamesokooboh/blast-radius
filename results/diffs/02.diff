@@ -1,0 +1,13 @@
+diff --git a/C:/Users/DELL/Documents/projects/Hackerthon/infra/base/data_stores.tf b/C:/Users/DELL/Documents/projects/Hackerthon/cases/case-02-rds-public/overlay/data_stores.tf
+index 7ffb97e..6ecbfc3 100644
+--- a/C:/Users/DELL/Documents/projects/Hackerthon/infra/base/data_stores.tf
++++ b/C:/Users/DELL/Documents/projects/Hackerthon/cases/case-02-rds-public/overlay/data_stores.tf
+@@ -24,7 +24,7 @@ resource "aws_db_instance" "main" {
+   vpc_security_group_ids = [aws_security_group.db.id]
+ 
+   multi_az                = true
+-  publicly_accessible     = false
++  publicly_accessible     = true
+   backup_retention_period = 7
+   skip_final_snapshot     = false
+   final_snapshot_identifier = "${var.name_prefix}-db-final"

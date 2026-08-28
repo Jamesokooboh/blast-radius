@@ -1,0 +1,18 @@
+band: A
+verdict: block
+primary_reason: aws_db_instance.main
+notes: >
+  Straightforward and correctly caught by every scanner. Present so that Band A
+  measures something real: the agent has to keep finding the obvious problems
+  after it has been taught to suppress the irrelevant ones.
+
+findings:
+  - address: aws_db_instance.main
+    category: network-exposure
+    severity: critical
+    linter_catches: true
+    evidence: >
+      data_stores.tf, publicly_accessible changes from false to true, and the
+      plan shows an in-place update on aws_db_instance.main. The instance holds
+      production customer data, and the stated need -- reachability for one
+      analytics tool -- is served by peering rather than a public endpoint.

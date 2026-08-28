@@ -1,0 +1,11 @@
+{
+  "verdict": "warn",
+  "findings": [
+    {
+      "address": "aws_autoscaling_group.app",
+      "category": "reliability",
+      "severity": "medium",
+      "evidence_ref": "labels.yaml"
+    }
+  ]
+}

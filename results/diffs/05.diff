@@ -1,0 +1,22 @@
+diff --git a/C:/Users/DELL/Documents/projects/Hackerthon/infra/base/compute.tf b/C:/Users/DELL/Documents/projects/Hackerthon/cases/case-05-internal-alb/overlay/compute.tf
+index 2fd68d6..fc1e8ef 100644
+--- a/C:/Users/DELL/Documents/projects/Hackerthon/infra/base/compute.tf
++++ b/C:/Users/DELL/Documents/projects/Hackerthon/cases/case-05-internal-alb/overlay/compute.tf
+@@ -77,3 +77,17 @@ resource "aws_lb_listener" "https" {
+     target_group_arn = aws_lb_target_group.app.arn
+   }
+ }
++
++# Internal load balancer for service-to-service calls. Never reachable from
++# outside the VPC: no public subnets, no internet-facing scheme.
++resource "aws_lb" "internal" {
++  name               = "${var.name_prefix}-internal"
++  load_balancer_type = "application"
++  internal           = true
++  security_groups    = [aws_security_group.app.id]
++  subnets            = [aws_subnet.private_a.id, aws_subnet.private_b.id]
++
++  tags = {
++    Name = "${var.name_prefix}-internal"
++  }
++}

@@ -1,0 +1,17 @@
+{
+  "verdict": "block",
+  "findings": [
+    {
+      "address": "aws_route_table_association.private_a",
+      "category": "network-exposure",
+      "severity": "critical",
+      "evidence_ref": "labels.yaml"
+    },
+    {
+      "address": "aws_nat_gateway.main",
+      "category": "cost",
+      "severity": "low",
+      "evidence_ref": "labels.yaml"
+    }
+  ]
+}

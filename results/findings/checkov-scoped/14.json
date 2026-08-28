@@ -1,0 +1,12 @@
+{
+  "verdict": "block",
+  "findings": [
+    {
+      "address": "aws_vpc.main",
+      "category": "hygiene",
+      "severity": "unknown",
+      "check_id": "CKV2_AWS_11",
+      "evidence_ref": "\\network.tf:1 Ensure VPC flow logging is enabled in all VPCs"
+    }
+  ]
+}

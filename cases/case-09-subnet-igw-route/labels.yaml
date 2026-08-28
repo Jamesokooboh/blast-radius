@@ -1,0 +1,35 @@
+band: C
+verdict: block
+primary_reason: aws_route_table_association.private_a
+notes: >
+  Nothing in this diff matches a scanner rule. There is no security group
+  change, no public IP setting, no IAM. The only edits are two route table
+  associations, and no static check treats those as a finding.
+
+  What actually happens is that the application tier stops being private. Its
+  subnets gain a default route to the internet gateway, so every existing and
+  future security group rule on those instances becomes internet-facing rather
+  than VPC-facing. The change of posture is invisible unless you reason across
+  the route table, the subnets, and the instances in them.
+
+findings:
+  - address: aws_route_table_association.private_a
+    also:
+      - aws_route_table_association.private_b
+      - aws_route_table.public
+    category: network-exposure
+    severity: critical
+    linter_catches: false
+    evidence: >
+      network.tf, both private associations change route_table_id from
+      aws_route_table.private to aws_route_table.public, and the plan shows
+      in-place updates on both. The public table routes 0.0.0.0/0 to the internet
+      gateway, so the application subnets are no longer private.
+  - address: aws_nat_gateway.main
+    category: cost
+    severity: low
+    linter_catches: false
+    evidence: >
+      With no subnet associated to the private route table, the NAT gateway
+      carries no traffic but continues to bill at roughly $32/month plus its
+      elastic IP. Nothing in the pull request removes it.

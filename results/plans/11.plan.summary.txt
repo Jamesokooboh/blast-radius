@@ -1,0 +1,6 @@
+            create  aws_eip.nat_b
+            create  aws_nat_gateway.b
+            create  aws_route_table.private_b
+            update  aws_route_table_association.private_b
+
+dropped 1 phantom update(s): aws_db_instance.main

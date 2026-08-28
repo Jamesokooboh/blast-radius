@@ -1,0 +1,13 @@
+diff --git a/C:/Users/DELL/Documents/projects/Hackerthon/infra/base/compute.tf b/C:/Users/DELL/Documents/projects/Hackerthon/cases/case-10-asg-below-min/overlay/compute.tf
+index 2fd68d6..3cbc278 100644
+--- a/C:/Users/DELL/Documents/projects/Hackerthon/infra/base/compute.tf
++++ b/C:/Users/DELL/Documents/projects/Hackerthon/cases/case-10-asg-below-min/overlay/compute.tf
+@@ -26,7 +26,7 @@ resource "aws_autoscaling_group" "app" {
+ 
+   min_size         = 3
+   max_size         = 6
+-  desired_capacity = 3
++  desired_capacity = 1
+ 
+   launch_template {
+     id      = aws_launch_template.app.id

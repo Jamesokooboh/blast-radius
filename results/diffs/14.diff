@@ -1,0 +1,24 @@
+diff --git a/C:/Users/DELL/Documents/projects/Hackerthon/infra/base/network.tf b/C:/Users/DELL/Documents/projects/Hackerthon/cases/case-14-cost-center-tags/overlay/network.tf
+index 4edc044..7efb611 100644
+--- a/C:/Users/DELL/Documents/projects/Hackerthon/infra/base/network.tf
++++ b/C:/Users/DELL/Documents/projects/Hackerthon/cases/case-14-cost-center-tags/overlay/network.tf
+@@ -4,7 +4,8 @@ resource "aws_vpc" "main" {
+   enable_dns_support   = true
+ 
+   tags = {
+-    Name = "${var.name_prefix}-vpc"
++    Name       = "${var.name_prefix}-vpc"
++    CostCenter = "platform"
+   }
+ }
+ 
+@@ -12,7 +13,8 @@ resource "aws_internet_gateway" "main" {
+   vpc_id = aws_vpc.main.id
+ 
+   tags = {
+-    Name = "${var.name_prefix}-igw"
++    Name       = "${var.name_prefix}-igw"
++    CostCenter = "platform"
+   }
+ }
+ 

@@ -3,9 +3,11 @@
 A Terraform pull request reviewer that reads the plan, not the diff — and earns
 its place by throwing most of the scanner's output away.
 
-**Status: day one of five.** The evaluation harness is built and both halves of
-its gate pass. The agent itself is not written yet. See
-[Current state](#current-state) for exactly what runs today.
+**Status: day two of five.** All fifteen cases are built and labelled, and both
+scanner baselines are measured. The agent itself is not written yet. See
+[Current state](#current-state) for what runs today, and
+[report/changelog.md](report/changelog.md) for the measurements and the
+predictions they contradicted.
 
 ---
 
@@ -72,37 +74,70 @@ finding, including the replace in case 08, which does change an attribute.
 
 ## Current state
 
-Built and passing:
+Built and measured:
 
 - `infra/base/` — a 32-resource fixture stack (VPC, ALB, autoscaling group,
   RDS, three S3 buckets, IAM), no data sources
 - `fixtures/base.tfstate` — the converged state fixture
 - `plan.sh` — applies a case overlay, plans it, emits `plan.json` and the diff
 - `score.py` — set-intersection scoring on (address, category), no LLM judge
-- three cases: `01` (band A), `08` (band C), `13` (band D)
+- **all 15 cases**, labelled: 3 in band A, 4 in B, 6 in C, 2 in D, carrying
+  10 real findings and 6 findings a good reviewer suppresses
+- **both scanner baselines**, measured
 
-Not built yet: the remaining twelve cases, the three baselines, and the agent.
+Not built yet: the two model baselines (blocked only on an API key) and the
+agent.
 
-**Day-one gate, both halves passing:**
+### Baseline results, 15 cases
+
+| | raw Checkov | Checkov scoped to the change |
+| --- | --- | --- |
+| F1 | 0.053 | **0.348** |
+| precision | 0.028 | 0.308 |
+| recall | 0.400 | 0.400 |
+| findings per PR | 9.5 | 0.9 |
+| band C recall | 0.14 | 0.14 |
+| noise correctly suppressed | 1 of 6 | 1 of 6 |
+
+Raw Checkov is what CI runs today: it reports on the whole stack every time, so
+every pull request draws the same ~9.5 findings whatever it changed. The scoped
+variant restricts it to the resources the plan touches, as a diff-aware CI
+integration would. **The scoped number is the one the agent has to beat** —
+comparing against the unreadable version would be a strawman.
+
+Band C, the cross-file and plan-transition cases, is where the scanner scores
+0.14: one of seven labelled findings. Band D shows the other half of the
+problem — Checkov blocks a pull request that adds two tags.
+
+### Gates
 
 ```
-$ ./plan.sh --all
+$ ./plan.sh --all            # every case produces its intended plan signal
 --- case base ---   (no changes)
---- case 01 ---              update  aws_security_group.app
 --- case 08 ---       delete/create  aws_db_instance.main
+--- case 12 ---              update  aws_iam_role_policy.app_data
 --- case 13 ---   (no changes)
 
-$ python score.py --mode oracle   # hand-written perfect answers
-precision 1.000   recall 1.000   F1 1.000
+$ python tools/make_oracle.py && python score.py --mode oracle
+precision 1.000   recall 1.000   F1 1.000     # a perfect answer
 
-$ python score.py --mode agent    # nothing written yet
-precision 0.000   recall 0.000   F1 0.000
+$ python score.py --mode agent
+precision 0.000   recall 0.000   F1 0.000     # nothing produced yet
+
+$ python score.py --mode checkov-scoped       # day-two gate: F1 within 0.2 - 0.5
+precision 0.308   recall 0.400   F1 0.348
 ```
 
-The base stack is a clean no-op, case 08 produces the `delete/create` on the
-production database that the whole project hangs on, and case 13's `moved`
-blocks resolve to a pure state move. A perfect answer scores 1.0 and an empty
-one scores 0.0, so the scorer discriminates in both directions.
+`--mode oracle` is a harness self-test, not a measurement: `tools/make_oracle.py`
+replays the labels back as findings to confirm the scorer awards a perfect score
+to a perfect answer. Paired with an empty run scoring 0.000, it shows the scorer
+discriminates in both directions rather than being pinned at one end.
+
+Case 08 produces the `delete/create` on the production database the project
+hangs on. Case 12 shows `aws_iam_role_policy.app_data` changing even though the
+diff touches only `variables.tf` and the policy never appears in it. A perfect
+answer scores 1.0 and an empty one scores 0.0, so the scorer discriminates in
+both directions.
 
 ## Reproduction
 
@@ -111,8 +146,13 @@ provider. No AWS account, no credentials, no cost.
 
 ```bash
 pip install -r requirements.txt
-./plan.sh --all
-python score.py --mode oracle
+./plan.sh --all                             # ~4 min, every plan and diff
+python tools/run_checkov.py --all           # baseline A
+python tools/run_checkov.py --all --scoped  # baseline A'
+python score.py --mode checkov
+python score.py --mode checkov-scoped
+python tools/make_oracle.py
+python score.py --mode oracle               # harness self-test, must be 1.000
 ```
 
 To regenerate the state fixture from scratch (not normally needed):
@@ -134,7 +174,8 @@ python score.py --selfcheck   # scoring logic
 infra/base/          fixture stack, 32 resources
 fixtures/            the converged state fixture
 cases/case-NN-*/     overlay/ (the pull request), pr_description.md, labels.yaml
-tools/               make_state, fixture_ids, planfilter, emit_plan
+tools/               make_state, fixture_ids, planfilter, emit_plan,
+                     run_checkov, make_oracle
 plan.sh              overlay -> plan.json + diff
 score.py             findings x labels -> F1, band recall
 results/             plans, diffs, findings, trajectories
@@ -143,6 +184,30 @@ results/             plans, diffs, findings, trajectories
 A case's `overlay/` holds whole `.tf` files that replace their base version;
 `plan.sh` copies base, applies the overlay, and diffs the two to produce the
 pull request the reviewer would see.
+
+### Scoring the scanner fairly
+
+Checkov classifies by its own check ids, so scoring it against this project's
+categories needs a mapping. That mapping lives in `tools/run_checkov.py` and is
+published rather than buried, because it decides how well the baseline does.
+Checks corresponding to a labelled category are mapped; everything else becomes
+`hygiene` — a true observation about the stack that says nothing about this
+pull request.
+
+Nothing maps to `data-loss`, `guardrail`, `cost` or `reliability`, because
+Checkov has no check for any of them. That absence is the finding, not an
+oversight in the table.
+
+Two scoring rules exist because the first version of each was wrong, and both
+corrections lowered the score the agent will be able to claim:
+
+- Findings match on address **and** category. An earlier address-only rule gave
+  the scanner credit for naming the right resource for entirely unrelated
+  reasons, inflating its band C recall from 0.14 to 0.43.
+- `noise` labels match on **address alone**. Reporting that resource at all is
+  the error, whatever category it is filed under. Matching noise on category too
+  let a miscategorised parrot slip through, and reported 6 of 6 noise findings
+  correctly suppressed when the true figure was 1 of 6.
 
 ## Disclosure
 

@@ -1,0 +1,17 @@
+band: A
+verdict: block
+primary_reason: aws_iam_role_policy.deploy
+notes: >
+  The "we will scope it down later" intent is stated in the pull request and is
+  worth reading, but it does not change the verdict. Scanners catch this one.
+
+findings:
+  - address: aws_iam_role_policy.deploy
+    category: privilege-escalation
+    severity: critical
+    linter_catches: true
+    evidence: >
+      iam.tf, the new policy grants Action "*" on Resource "*". The plan creates
+      aws_iam_role.deploy and aws_iam_role_policy.deploy. A role assumable by
+      CodeBuild with unrestricted permissions can modify its own trust policy and
+      every other resource in the account.

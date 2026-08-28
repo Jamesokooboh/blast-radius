@@ -1,0 +1,43 @@
+diff --git a/C:/Users/DELL/Documents/projects/Hackerthon/infra/base/network.tf b/C:/Users/DELL/Documents/projects/Hackerthon/cases/case-11-nat-per-az/overlay/network.tf
+index 4edc044..d3da563 100644
+--- a/C:/Users/DELL/Documents/projects/Hackerthon/infra/base/network.tf
++++ b/C:/Users/DELL/Documents/projects/Hackerthon/cases/case-11-nat-per-az/overlay/network.tf
+@@ -125,5 +125,37 @@ resource "aws_route_table_association" "private_a" {
+ 
+ resource "aws_route_table_association" "private_b" {
+   subnet_id      = aws_subnet.private_b.id
+-  route_table_id = aws_route_table.private.id
++  route_table_id = aws_route_table.private_b.id
++}
++
++resource "aws_eip" "nat_b" {
++  domain = "vpc"
++
++  tags = {
++    Name = "${var.name_prefix}-nat-b"
++  }
++}
++
++resource "aws_nat_gateway" "b" {
++  allocation_id = aws_eip.nat_b.id
++  subnet_id     = aws_subnet.public_b.id
++
++  tags = {
++    Name = "${var.name_prefix}-nat-b"
++  }
++
++  depends_on = [aws_internet_gateway.main]
++}
++
++resource "aws_route_table" "private_b" {
++  vpc_id = aws_vpc.main.id
++
++  route {
++    cidr_block     = "0.0.0.0/0"
++    nat_gateway_id = aws_nat_gateway.b.id
++  }
++
++  tags = {
++    Name = "${var.name_prefix}-private-b"
++  }
+ }

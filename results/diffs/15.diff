@@ -1,0 +1,19 @@
+diff --git a/C:/Users/DELL/Documents/projects/Hackerthon/infra/base/data_stores.tf b/C:/Users/DELL/Documents/projects/Hackerthon/cases/case-15-guardrail-removed/overlay/data_stores.tf
+index 7ffb97e..c7fc58a 100644
+--- a/C:/Users/DELL/Documents/projects/Hackerthon/infra/base/data_stores.tf
++++ b/C:/Users/DELL/Documents/projects/Hackerthon/cases/case-15-guardrail-removed/overlay/data_stores.tf
+@@ -38,12 +38,9 @@ resource "aws_db_instance" "main" {
+ resource "aws_s3_bucket" "data" {
+   bucket = "${var.name_prefix}-data"
+ 
+-  lifecycle {
+-    prevent_destroy = true
+-  }
+-
+   tags = {
+-    Name = "${var.name_prefix}-data"
++    Name       = "${var.name_prefix}-data"
++    CostCenter = "platform"
+   }
+ }
+ 

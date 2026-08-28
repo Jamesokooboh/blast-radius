@@ -1,3 +1,11 @@
-{"verdict":"block",
- "findings":[{"address":"aws_security_group.app","category":"network-exposure",
-              "severity":"critical","evidence_ref":"security.tf ingress 22"}]}
+{
+  "verdict": "block",
+  "findings": [
+    {
+      "address": "aws_security_group.app",
+      "category": "network-exposure",
+      "severity": "critical",
+      "evidence_ref": "labels.yaml"
+    }
+  ]
+}

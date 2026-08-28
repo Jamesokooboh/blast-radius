@@ -1,0 +1,4 @@
+            create  aws_s3_bucket.tmp_uploads
+            create  aws_s3_bucket_lifecycle_configuration.tmp_uploads
+
+dropped 1 phantom update(s): aws_db_instance.main

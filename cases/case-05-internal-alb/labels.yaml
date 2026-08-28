@@ -1,0 +1,18 @@
+band: B
+verdict: approve
+primary_reason: null
+notes: >
+  Scanners apply the same load balancer rules regardless of scheme, so an
+  internal ALB gets flagged for having no WAF and no internet-facing hardening.
+  The resource is not reachable from outside the VPC, which is the whole point
+  of the change. Suppress.
+
+findings:
+  - address: aws_lb.internal
+    category: noise
+    severity: none
+    linter_catches: true
+    evidence: >
+      internal = true, and the subnets are the two private ones. WAF and
+      internet-facing protections do not apply to a load balancer with no public
+      address.

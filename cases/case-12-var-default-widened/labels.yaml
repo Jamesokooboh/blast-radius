@@ -1,0 +1,33 @@
+band: C
+verdict: block
+primary_reason: aws_iam_role_policy.app_data
+notes: >
+  The flagship indirect-effect case. The diff touches exactly one file,
+  variables.tf, and changes one default. The IAM policy that consumes it lives in
+  iam.tf, is not modified, and never appears in the pull request at all.
+
+  A reviewer reading the diff sees a variable default. A reviewer reading the
+  plan sees aws_iam_role_policy.app_data being updated and can follow it back to
+  what the new value does.
+
+  MEASURED, and against prediction: Checkov does catch this one. It resolves the
+  variable default and fires CKV_AWS_355 on aws_iam_role_policy.app_data, which
+  makes this the only Band C case the scanner finds. The band is kept as C
+  because the case tests reasoning about an effect absent from the diff, which
+  is still what separates it from Band A for the diff-reading baselines -- but
+  linter_catches below records the measurement, not the prediction.
+
+findings:
+  - address: aws_iam_role_policy.app_data
+    also:
+      - app_data_bucket_arns
+    category: privilege-escalation
+    severity: critical
+    linter_catches: true
+    evidence: >
+      variables.tf, app_data_bucket_arns default changes from two specific bucket
+      ARNs to ["*"], and the plan shows an in-place update on
+      aws_iam_role_policy.app_data even though iam.tf is unchanged. The
+      application role gains s3:GetObject, s3:PutObject and s3:ListBucket on every
+      bucket in the account, including the production data bucket and the build
+      artifacts bucket.

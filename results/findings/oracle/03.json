@@ -2,8 +2,8 @@
   "verdict": "block",
   "findings": [
     {
-      "address": "aws_db_instance.main",
-      "category": "data-loss",
+      "address": "aws_iam_role_policy.deploy",
+      "category": "privilege-escalation",
       "severity": "critical",
       "evidence_ref": "labels.yaml"
     }

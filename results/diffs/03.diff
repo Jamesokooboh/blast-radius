@@ -1,0 +1,35 @@
+diff --git a/C:/Users/DELL/Documents/projects/Hackerthon/infra/base/iam.tf b/C:/Users/DELL/Documents/projects/Hackerthon/cases/case-03-iam-wildcard/overlay/iam.tf
+index 08c2fcb..935213a 100644
+--- a/C:/Users/DELL/Documents/projects/Hackerthon/infra/base/iam.tf
++++ b/C:/Users/DELL/Documents/projects/Hackerthon/cases/case-03-iam-wildcard/overlay/iam.tf
+@@ -38,3 +38,30 @@ resource "aws_iam_instance_profile" "app" {
+   name = "${var.name_prefix}-app"
+   role = aws_iam_role.app.name
+ }
++
++resource "aws_iam_role" "deploy" {
++  name = "${var.name_prefix}-deploy"
++
++  assume_role_policy = jsonencode({
++    Version = "2012-10-17"
++    Statement = [{
++      Effect    = "Allow"
++      Action    = "sts:AssumeRole"
++      Principal = { Service = "codebuild.amazonaws.com" }
++    }]
++  })
++}
++
++resource "aws_iam_role_policy" "deploy" {
++  name = "${var.name_prefix}-deploy"
++  role = aws_iam_role.deploy.id
++
++  policy = jsonencode({
++    Version = "2012-10-17"
++    Statement = [{
++      Effect   = "Allow"
++      Action   = "*"
++      Resource = "*"
++    }]
++  })
++}

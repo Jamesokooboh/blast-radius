@@ -1,0 +1,12 @@
+{
+  "verdict": "block",
+  "findings": [
+    {
+      "address": "aws_s3_bucket.data",
+      "category": "hygiene",
+      "severity": "unknown",
+      "check_id": "CKV2_AWS_62",
+      "evidence_ref": "\\data_stores.tf:38 Ensure S3 buckets should have event notifications enabled"
+    }
+  ]
+}
