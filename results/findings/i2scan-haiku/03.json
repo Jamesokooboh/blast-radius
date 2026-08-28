@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "Temporary broad permissions create significant privilege escalation surface until scoped down",
+  "suppressed": "CKV_AWS_62 scanner finding \u2014 while technically correct, the PR author has explicitly acknowledged and justified the broad permissions as intentional and temporary, indicating this is a conscious decision rather than accidental over-permission.",
+  "findings": [
+    {
+      "address": "aws_iam_role_policy.deploy",
+      "category": "privilege-escalation",
+      "severity": "high",
+      "evidence_ref": "iam.tf lines 55\u201358: policy grants `Action: \"*\"` on `Resource: \"*\"`",
+      "explanation": "CodeBuild can now assume a role with full administrative access to all AWS services and resources. This must be scoped down immediately after deployment needs are known, or it remains an uncontrolled attack surface."
+    }
+  ]
+}

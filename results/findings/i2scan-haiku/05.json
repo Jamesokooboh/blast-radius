@@ -1,0 +1,6 @@
+{
+  "verdict": "approve",
+  "headline": "Internal load balancer correctly isolated; HTTP-over-HTTPS scanner findings are inapplicable in this context",
+  "suppressed": "Static scanner flagged HTTP protocol (CKV_AWS_131, CKV_AWS_2, CKV_AWS_378). These are standard HTTPS-enforcement rules, but they do not apply here: the ALB is marked `internal=true`, deployed only to private subnets with no internet-facing configuration, and explicitly documented as carrying only service-to-service traffic within the VPC. Plain HTTP is appropriate for this use case. No actual exposure or risk.",
+  "findings": []
+}

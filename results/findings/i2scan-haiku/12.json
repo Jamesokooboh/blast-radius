@@ -1,0 +1,14 @@
+{
+  "verdict": "block",
+  "headline": "Application role would gain permission to access all S3 buckets in the account instead of just the two reporting buckets it needs.",
+  "suppressed": "The static scanner CKV_AWS_288 warning is correct and not suppressed \u2014 wildcard S3 permissions do create exfiltration risk. The real problem is the change itself, not a false positive.",
+  "findings": [
+    {
+      "address": "aws_iam_role_policy.app_data",
+      "category": "privilege-escalation",
+      "severity": "critical",
+      "evidence_ref": "variables.tf: `default = [\"*\"]` on the `app_data_bucket_arns` variable, which is used by iam.tf to construct the policy",
+      "explanation": "Changing the default from specific bucket ARNs to `[\"*\"]` grants the application role permission to read and write every S3 bucket in the account. This violates least privilege and exposes all company data to the application, not just the reporting buckets it needs."
+    }
+  ]
+}

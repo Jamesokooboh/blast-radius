@@ -1,0 +1,6 @@
+{
+  "verdict": "approve",
+  "headline": "Making the marketing bucket public is the correct configuration for serving a static site. The scanner warnings are expected and appropriate for this use case.",
+  "suppressed": "Static scanner flagged CKV_AWS_53 (block_public_acls should be true) and CKV_AWS_70 (Principal should not be `*`). Both are correct detections, but they identify the intended state, not a misconfiguration. This bucket is supposed to be public, serving only static marketing assets (HTML, CSS, images) with no customer data. The GetObject-only policy is the right permission level for a public website bucket.",
+  "findings": []
+}

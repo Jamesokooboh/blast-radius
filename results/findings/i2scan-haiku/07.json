@@ -1,0 +1,6 @@
+{
+  "verdict": "approve",
+  "headline": "Staging bucket is well-designed for its stated purpose: temporary storage with automatic cleanup",
+  "suppressed": "CKV_AWS_300 and CKV2_AWS_62 are not concerns here. CKV_AWS_300 flags the lack of multipart upload abort configuration, but objects in this bucket expire after 1 day anyway, so incomplete uploads clean up automatically. CKV2_AWS_62 requires event notifications on all buckets, but a temporary staging bucket does not need them\u2014the worker can poll or use other discovery mechanisms. Neither rule applies to a 24-hour expiration bucket.",
+  "findings": []
+}

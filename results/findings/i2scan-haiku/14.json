@@ -1,0 +1,6 @@
+{
+  "verdict": "approve",
+  "headline": "Safe metadata change for cost allocation; static warning is pre-existing",
+  "suppressed": "CKV2_AWS_11 (VPC flow logging): This is a pre-existing configuration state unrelated to the tag addition. The scanner is correctly flagging that flow logging isn't enabled, but that condition exists before and after this PR\u2014the change only adds cost center tags.",
+  "findings": []
+}

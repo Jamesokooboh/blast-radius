@@ -1,0 +1,6 @@
+{
+  "verdict": "approve",
+  "headline": "Implementing per-AZ NAT gateways as described, no problems with the implementation.",
+  "suppressed": "The addition of a second NAT gateway will materially increase costs (hourly gateway charges plus potential egress data processing). This is explicitly announced in the PR description as the intended change, and the reviewer authorizing this should be aware of the expense, but it is not hidden or surprising from the diff.",
+  "findings": []
+}

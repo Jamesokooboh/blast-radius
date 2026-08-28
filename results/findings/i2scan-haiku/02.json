@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "Production database exposed to the internet as a temporary measure \u2014 ensure VPC peering gets prioritized",
+  "suppressed": "The static scanner's CKV_AWS_17 finding is correct and material here, not suppressed.",
+  "findings": [
+    {
+      "address": "aws_db_instance.main",
+      "category": "network-exposure",
+      "severity": "high",
+      "evidence_ref": "data_stores.tf: publicly_accessible changed from false to true",
+      "explanation": "The production database is now reachable from the internet. While the PR describes this as temporary during VPC peering setup, temporary security exceptions often become permanent and leave the database vulnerable to direct internet attacks and credential compromise attempts."
+    }
+  ]
+}

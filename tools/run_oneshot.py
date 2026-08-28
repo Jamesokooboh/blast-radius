@@ -45,7 +45,7 @@ def changed_resources(cid):
             if c.get("change", {}).get("actions") != ["no-op"]]
 
 
-def build_prompt(cid, with_plan=False):
+def build_prompt(cid, with_plan=False, with_scanner=False):
     d = case_dir(cid)
     diff = (ROOT / "results" / "diffs" / f"{cid}.diff").read_text(encoding="utf-8", errors="replace")
     pr = (d / "pr_description.md").read_text(encoding="utf-8")
@@ -56,6 +56,32 @@ def build_prompt(cid, with_plan=False):
         "## Diff\n\n"
         f"```diff\n{diff}\n```\n"
     )
+    if with_scanner:
+        # The scoped scanner output: findings on resources this PR actually
+        # changes. That is the fair version -- the same one B0' is scored on --
+        # and it isolates the question I2 asks, which is whether the agent
+        # adjudicates the scanner or repeats it.
+        f = ROOT / "results" / "findings" / "checkov-scoped" / f"{cid}.json"
+        flagged = json.loads(f.read_text()).get("findings", []) if f.exists() else []
+        if flagged:
+            lines = "\n".join(
+                f"  {x['address']}  [{x.get('check_id','')}]  {x.get('evidence_ref','')}"
+                for x in flagged)
+        else:
+            lines = "  (the scanner flagged nothing on the changed resources)"
+        prompt += (
+            "\n## Static scanner output\n\n"
+            "A static scanner reported the following against resources this pull\n"
+            "request changes:\n\n"
+            f"```\n{lines}\n```\n\n"
+            "Treat these as claims, not findings. Each one may be correct and\n"
+            "important, correct but irrelevant in this context, or based on a rule\n"
+            "that no longer applies. Judge each against the evidence in this pull\n"
+            "request. You are expected to rule against the scanner where the\n"
+            "context warrants it; note anything you dismissed, and why, in\n"
+            "`suppressed`.\n"
+        )
+
     if with_plan:
         changes = changed_resources(cid)
         summary = "\n".join(
@@ -81,6 +107,8 @@ def main():
                     help="AWS profile to bill; defaults to AWS_PROFILE or Joseph")
     ap.add_argument("--with-plan", action="store_true",
                     help="I1: also supply the plan's changed resources")
+    ap.add_argument("--with-scanner", action="store_true",
+                    help="I2: also supply the scanner output, as claims to adjudicate")
     ap.add_argument("--dry-run", action="store_true",
                     help="build the prompts and report their size without calling")
     ap.add_argument("--mode", default=None,
@@ -89,7 +117,8 @@ def main():
     args = ap.parse_args()
     M.use_profile(args.profile)
 
-    stem = "i1plan" if args.with_plan else "oneshot"
+    stem = ("i2scan" if args.with_scanner else
+            "i1plan" if args.with_plan else "oneshot")
     mode = args.mode or (stem if args.model == "sonnet" else f"{stem}-{args.model}")
     out = ROOT / "results" / "findings" / mode
     traj = ROOT / "results" / "trajectories" / mode
@@ -108,7 +137,7 @@ def main():
         print(f"  system instructions: {len(instructions):,} chars")
         total = 0
         for cid in ids:
-            p = build_prompt(cid, args.with_plan)
+            p = build_prompt(cid, args.with_plan, args.with_scanner)
             total += len(p) + len(instructions)
             print(f"  case {cid}: prompt {len(p):>6,} chars  "
                   f"(~{(len(p)+len(instructions))/3.6/1000:.1f}k tokens)")
@@ -122,7 +151,7 @@ def main():
 
     total_cost, total_s = 0.0, 0.0
     for cid in ids:
-        prompt = build_prompt(cid, args.with_plan)
+        prompt = build_prompt(cid, args.with_plan, args.with_scanner)
         t0 = time.time()
         review, response = M.call(prompt, model=args.model, effort=args.effort)
         elapsed = time.time() - t0
@@ -133,7 +162,8 @@ def main():
         (out / f"{cid}.json").write_text(json.dumps(M.to_findings_json(review), indent=2))
         (traj / f"{cid}.json").write_text(json.dumps({
             "case": cid,
-            "stage": "I1 one-shot + plan" if args.with_plan else "B1 one-shot",
+            "stage": ("I2 one-shot + scanner" if args.with_scanner else
+                      "I1 one-shot + plan" if args.with_plan else "B1 one-shot"),
             "model": M.MODELS[args.model],
             "aws_account": who["account"],
             "effort": args.effort if args.model not in M.LEGACY_THINKING else None,

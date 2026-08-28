@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "Desired capacity is set below minimum size, so the ASG will ignore it and stay at 3 instances instead of scaling to 1.",
+  "suppressed": "No context in the PR about how the overnight scaling is meant to work. If this is meant to be time-based scaling, scheduled actions should be used instead of changing desired_capacity.",
+  "findings": [
+    {
+      "address": "aws_autoscaling_group.app",
+      "category": "reliability",
+      "severity": "high",
+      "evidence_ref": "Diff shows desired_capacity changed to 1, but min_size remains 3. AWS requires desired_capacity >= min_size and will enforce min_size.",
+      "explanation": "This configuration is invalid. AWS will ignore the desired_capacity of 1 and maintain 3 instances to satisfy min_size. The fleet will not scale down as intended."
+    }
+  ]
+}

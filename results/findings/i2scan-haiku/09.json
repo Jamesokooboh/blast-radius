@@ -1,0 +1,28 @@
+{
+  "verdict": "warn",
+  "headline": "Subnets named 'private' are now directly internet-routable with instance IPs exposed",
+  "suppressed": "The vendor rate-limiting issue is a real operational problem that justifies this change. The solution works as intended. However, whoever merges this needs to confirm that exposing these instances directly to the internet is acceptable and that security groups are configured appropriately for internet-facing instances.",
+  "findings": [
+    {
+      "address": "aws_route_table_association.private_a",
+      "category": "network-exposure",
+      "severity": "high",
+      "evidence_ref": "route_table_id changed from aws_route_table.private.id to aws_route_table.public.id in private_a association",
+      "explanation": "Instances in this subnet will now egress directly to the internet via the IGW with their own ENI IPs instead of through NAT gateway masquerading. They become directly internet-routable and lose the network isolation that the 'private' naming implies."
+    },
+    {
+      "address": "aws_route_table_association.private_b",
+      "category": "network-exposure",
+      "severity": "high",
+      "evidence_ref": "route_table_id changed from aws_route_table.private.id to aws_route_table.public.id in private_b association",
+      "explanation": "Same as private_a: instances now route directly to the internet with their real IPs exposed, rather than through the private (NAT) route table."
+    },
+    {
+      "address": "aws_route_table_association.private_a",
+      "category": "guardrail",
+      "severity": "medium",
+      "evidence_ref": "Removal of private route table association implies removal of NAT gateway protection",
+      "explanation": "The NAT gateway's IP masquerading and the network boundary it provided are no longer in place for these subnets. Inbound traffic from the internet can now reach instances directly if security groups permit it."
+    }
+  ]
+}

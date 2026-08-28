@@ -1,0 +1,14 @@
+{
+  "verdict": "block",
+  "headline": "Enabling encryption on an existing RDS instance requires database recreation, causing data loss and downtime. This change will destroy the production database.",
+  "suppressed": "CKV_AWS_129 (RDS logs not enabled) is flagged by the scanner but is pre-existing infrastructure configuration unrelated to this encryption change, not a new issue introduced by this PR.",
+  "findings": [
+    {
+      "address": "aws_db_instance.main",
+      "category": "data-loss",
+      "severity": "critical",
+      "evidence_ref": "Change from `storage_encrypted = false` to `storage_encrypted = true` on an existing RDS instance",
+      "explanation": "AWS RDS does not support modifying encryption at rest on an existing instance. Terraform will attempt to replace the database (destroy and recreate), destroying all data in the production database. The PR description describes this as a simple configuration change but does not mention the data loss and downtime this will cause."
+    }
+  ]
+}

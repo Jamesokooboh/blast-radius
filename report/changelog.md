@@ -16,6 +16,7 @@ model anywhere in this project.
 | **B1′** | The same prompt on Haiku 4.5, to test whether the result is about the task or the model. | worse than B1 | **F1 0.900** — precision 0.900, recall 0.900, noise 7 of 7 suppressed | **The new bar.** The cheap model won |
 | **B2** | General agent with tools and no task structure: reads the whole working directory, runs the scanner, decides for itself when to stop. Haiku 4.5. | F1 0.55 | **F1 0.636** — precision 0.583, recall 0.700, band C recall 0.57, $0.133/PR | Keep. Worse than one prompt, at 19× the cost |
 | **I1** | Add the plan's changed resources to B1′. Same model, same instructions, same code path — the plan is the only variable. | 0.68, the project's central hypothesis | **F1 0.667** — precision 0.636, recall 0.700, **band C recall 0.57**, verdict accuracy 0.467 | **Remove.** The plan makes the review worse |
+| **I2** | Add the scanner's output to B1′, framed as claims to adjudicate rather than findings to repeat. | regression, via parroting | **F1 0.842** — precision 0.889, recall 0.800, **noise 7 of 7 suppressed**, all cost findings lost | **Remove.** Right prediction, wrong mechanism |
 
 ## Stage notes
 
@@ -142,6 +143,50 @@ strongest fair version of the alternative. That means the agent now has to beat
 F1 0.900 at $0.007 per pull request, which is a far harder target than the 0.320
 it started with and than the 0.80 that was pre-registered. The pre-registered
 target is left where it is; the bar is what moved.
+
+### I2 — the prediction was right, the mechanism was wrong, and the result is sharper for it
+
+Recorded before this ran: *"I2 will also regress. It adds context of exactly the
+kind that has now failed twice, and the failure mode it invites — defending the
+scanner's findings rather than judging them — is the one flagged in the original
+plan."*
+
+It regressed: **F1 0.842 against B1′'s 0.900.** But the predicted mechanism did
+not happen at all. The "claims to adjudicate" framing worked exactly as intended
+— **noise suppression stayed at 7 of 7** and precision held at 0.889 against
+0.900. The agent did not parrot the scanner once.
+
+It lost on recall instead: 0.900 → 0.800. Breaking the loss down by category
+makes it unambiguous.
+
+| category | labelled | B1′ found | I2 found | scanner has a check? |
+| --- | --- | --- | --- | --- |
+| network-exposure | 3 | 3 | 3 | yes |
+| privilege-escalation | 2 | 2 | 2 | yes |
+| data-loss | 1 | 1 | 1 | no |
+| guardrail | 1 | 1 | 1 | no |
+| reliability | 1 | 1 | 1 | no |
+| **cost** | **2** | **1** | **0** | **no** |
+
+Every category held at parity except one. **The entire regression is the cost
+findings, and I2 lost all of them.** On case 11 — a pull request that adds a
+second NAT gateway, roughly $400/year, described only as an availability
+improvement — B1′ raised it as a cost finding and I2 returned `approve` with
+nothing to say. The scanner had reported nothing against that pull request's
+resources, because Checkov has no concept of money.
+
+The mechanism is not parroting but **anchoring**. Shown the output of a security
+scanner, the review became security-shaped. Risk-shaped categories the scanner
+also cannot see — data loss, a removed guardrail, a fleet that will not scale —
+all survived, because they still look like the kind of thing a scanner is for.
+Cost is the only labelled category that is not a risk at all, and it is the one
+that fell out.
+
+**Decision: remove.** Not because the framing failed — it succeeded, and that is
+worth keeping as a finding in its own right: telling a model it may rule against
+a tool does stop it deferring to that tool. But supplying the tool's output at
+all narrowed what the model went looking for, and the cost was higher than the
+benefit, which was zero because B1′ already suppressed perfectly.
 
 ### I1 — the plan makes the review worse, and B2 had already shown it
 
@@ -306,19 +351,19 @@ it from Band A for the diff-reading baselines.
 
 ## Every stage measured so far
 
-| | Raw Checkov | Scoped Checkov | B1 Sonnet | **B1′ Haiku** | I1 + plan | B2 + tools |
-| --- | --- | --- | --- | --- | --- | --- |
-| **F1** | 0.052 | 0.320 | 0.783 | **0.900** | 0.667 | 0.636 |
-| precision | 0.028 | 0.267 | 0.692 | **0.900** | 0.636 | 0.583 |
-| recall | 0.400 | 0.400 | 0.900 | **0.900** | 0.700 | 0.700 |
-| verdict accuracy | 0.467 | 0.467 | **0.733** | 0.667 | 0.467 | 0.600 |
-| band A recall | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
-| band C recall | 0.14 | 0.14 | 0.86 | **0.86** | 0.57 | 0.57 |
-| noise suppressed | 1 of 7 | 1 of 7 | 4 of 7 | **7 of 7** | 5 of 7 | 6 of 7 |
-| false blocks (band D) | 1 | 1 | 0 | 0 | 0 | 0 |
-| findings per PR | 9.5 | 0.9 | 0.9 | 0.7 | 0.7 | 0.9 |
-| cost per PR | $0 | $0 | $0.015 | **$0.007** | $0.009 | $0.133 |
-| steps per PR | — | — | 1 | 1 | 1 | 7.2 |
+| | Raw Checkov | Scoped Checkov | B1 Sonnet | **B1′ Haiku** | I1 + plan | I2 + scanner | B2 + tools |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| **F1** | 0.052 | 0.320 | 0.783 | **0.900** | 0.667 | 0.842 | 0.636 |
+| precision | 0.028 | 0.267 | 0.692 | **0.900** | 0.636 | 0.889 | 0.583 |
+| recall | 0.400 | 0.400 | 0.900 | **0.900** | 0.700 | 0.800 | 0.700 |
+| verdict accuracy | 0.467 | 0.467 | **0.733** | 0.667 | 0.467 | 0.600 | 0.600 |
+| band A recall | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
+| band C recall | 0.14 | 0.14 | 0.86 | **0.86** | 0.57 | 0.71 | 0.57 |
+| noise suppressed | 1 of 7 | 1 of 7 | 4 of 7 | **7 of 7** | 5 of 7 | **7 of 7** | 6 of 7 |
+| cost findings found | 0 of 2 | 0 of 2 | 1 of 2 | **1 of 2** | 0 of 2 | **0 of 2** | 0 of 2 |
+| false blocks (band D) | 1 | 1 | 0 | 0 | 0 | 0 | 0 |
+| cost per PR | $0 | $0 | $0.015 | **$0.007** | $0.009 | $0.007 | $0.133 |
+| steps per PR | — | — | 1 | 1 | 1 | 1 | 7.2 |
 
 Every addition after the simplest possible thing has made the result worse. The
 best reviewer measured in this project is one prompt, the diff, the pull request
@@ -390,6 +435,15 @@ unconstrained agent would do.
 
 **Context is not free, and it is not neutral. Adding it reframes the question.**
 
+Three additions, three regressions, three different reframings — and in each one
+the model started answering a slightly different question than the one asked:
+
+| addition | what the review became about | what fell out |
+| --- | --- | --- |
+| the terraform plan | the resource lifecycle | data loss (case 08 recategorised) |
+| a security scanner's output | security | **every cost finding** |
+| file and scanner tools | the codebase | focus on the change itself |
+
 The plan is strictly more accurate than the diff. It is machine-generated, it is
 what Terraform will actually do, and it states the RDS replacement in as many
 words. Supplying it made the review worse in two independent architectures, by
@@ -410,18 +464,28 @@ treat every subsequent addition as a hypothesis that must beat it, rather than a
 progress. This project pre-registered six iterations on the assumption they would
 stack. Two have been measured and both regress.
 
+## What one thing did work
+
+I2's framing. Told that the scanner's output was a set of claims it was expected
+to rule against where context warranted, the agent suppressed 7 of 7 and deferred
+to the scanner zero times. The original plan predicted the opposite -- that
+naming a finding would make a model defend it. That prediction was wrong, and the
+technique is worth keeping even though the stage that carried it is not.
+
 ## Still to run
 
-I2 (scanner output as claims to adjudicate), I3 (citation verification),
-I4 (cost tool), I5 (review memory), I6 (the multi-agent split).
+I3 (citation verification), I4 (cost tool), I5 (review memory), I6 (the
+multi-agent split).
 
-**Prediction, recorded before running: I2 will also regress.** It adds context of
-exactly the kind that has now failed twice, and the failure mode it invites --
-defending the scanner's findings rather than judging them -- is the one flagged
-in the original plan. If it does regress, the project's finding is not "the plan
-specifically is bad" but the more general claim in the hot take above.
+**Predictions, recorded before running.** I3 only *removes* findings that cannot
+cite real evidence, so it cannot lose recall it does not already have; B1′ has
+no invented citations to remove, so the expectation is a flat result, which is
+the point -- a technique that does nothing on a clean baseline is still worth
+measuring once. I4 supplies a cost tool, which is the one addition with a
+specific reason to help: cost is the single category every configuration keeps
+losing, and it is lost for lack of attention rather than lack of ability. I6
+adds orchestration on top of a task where every addition so far has hurt, and is
+expected to be the worst result in the project.
 
-The remaining candidates that do not add context are I3 (verification, which only
-removes findings) and better prompting for verdict calibration, where the
-measured headroom actually is: B1′ has precision 0.900 and verdict accuracy
-0.667.
+The measured headroom is verdict accuracy, which no configuration has taken above
+0.733, and where nothing tried so far has been aimed.

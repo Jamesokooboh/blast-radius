@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "Production data bucket protection is being removed to work around a CI failure instead of fixing the root cause",
+  "suppressed": "Static scanner finding about missing event notifications (CKV2_AWS_62) \u2014 this is a pre-existing resource configuration issue unrelated to this pull request's changes, not a finding about what this PR introduces.",
+  "findings": [
+    {
+      "address": "aws_s3_bucket.data",
+      "category": "guardrail",
+      "severity": "high",
+      "evidence_ref": "Removal of `lifecycle { prevent_destroy = true }` block from aws_s3_bucket.data in data_stores.tf",
+      "explanation": "The prevent_destroy guard prevents accidental deletion of this bucket. Removing it means the bucket can now be destroyed by code changes, exposing production data to loss."
+    }
+  ]
+}

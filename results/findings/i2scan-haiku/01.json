@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "SSH is opened to the entire internet to solve an incident response problem. The operational need is real, but the implementation creates significant attack surface until Session Manager (INFRA-2291) is deployed.",
+  "suppressed": "CKV_AWS_24 scanner flag is correct but the context shows this is a deliberate trade-off: the on-call team needs direct access to respond to incidents, and a proper solution (Session Manager) is explicitly planned in follow-up work. The risk is accepted here, but INFRA-2291 must not slip.",
+  "findings": [
+    {
+      "address": "aws_security_group.app",
+      "category": "network-exposure",
+      "severity": "high",
+      "evidence_ref": "New ingress rule on port 22 with cidr_blocks = [\"0.0.0.0/0\"]",
+      "explanation": "SSH is now reachable from anywhere on the internet, making app instances vulnerable to brute-force attacks and reconnaissance. This is a material increase in attack surface."
+    }
+  ]
+}

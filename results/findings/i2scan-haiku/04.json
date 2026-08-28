@@ -1,0 +1,6 @@
+{
+  "verdict": "approve",
+  "headline": "HTTP-to-HTTPS redirect is correctly configured and port 80 must be open to function",
+  "suppressed": "The CKV_AWS_260 scanner finding about port 80 being open to 0.0.0.0/0 is expected and appropriate in this context. The ALB is a public-facing load balancer whose stated purpose includes accepting plain HTTP traffic to redirect it to HTTPS. Port 80 must be open for this redirect to work, and the 301 redirect ensures no unencrypted traffic is transmitted. This is standard practice for user-friendly HTTPS configuration.",
+  "findings": []
+}
