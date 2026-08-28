@@ -3,9 +3,16 @@ verdict: approve
 primary_reason: null
 notes: >
   Scanners apply the same load balancer rules regardless of scheme, so an
-  internal ALB gets flagged for having no WAF and no internet-facing hardening.
-  The resource is not reachable from outside the VPC, which is the whole point
-  of the change. Suppress.
+  internal ALB gets flagged for having no WAF, no internet-facing hardening, and
+  a listener that speaks plain HTTP. The resource is not reachable from outside
+  the VPC, which is the whole point of the change. Suppress.
+
+  CORRECTED after the first B1 run. The original overlay added the load balancer
+  with no listener and no target group, which is a genuine reliability defect --
+  an ALB with no listener routes nothing. B1 spotted it and was scored as a
+  false positive for being right. A case meant to measure suppression must not
+  contain a real finding, so the overlay now includes the target group and
+  listener that make the change complete.
 
 findings:
   - address: aws_lb.internal
@@ -16,3 +23,10 @@ findings:
       internal = true, and the subnets are the two private ones. WAF and
       internet-facing protections do not apply to a load balancer with no public
       address.
+  - address: aws_lb_listener.internal
+    category: noise
+    severity: none
+    linter_catches: true
+    evidence: >
+      Listener protocol is HTTP rather than HTTPS. It carries traffic only
+      between private subnets inside the VPC, addressed by internal DNS.

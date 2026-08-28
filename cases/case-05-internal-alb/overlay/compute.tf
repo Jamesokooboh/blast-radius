@@ -91,3 +91,28 @@ resource "aws_lb" "internal" {
     Name = "${var.name_prefix}-internal"
   }
 }
+
+resource "aws_lb_target_group" "internal" {
+  name     = "${var.name_prefix}-internal"
+  port     = 8080
+  protocol = "HTTP"
+  vpc_id   = aws_vpc.main.id
+
+  health_check {
+    path    = "/healthz"
+    matcher = "200"
+  }
+}
+
+# Plain HTTP: this listener only ever carries traffic between subnets inside
+# the VPC, and the worker fleet calls it by its internal DNS name.
+resource "aws_lb_listener" "internal" {
+  load_balancer_arn = aws_lb.internal.arn
+  port              = 8080
+  protocol          = "HTTP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.internal.arn
+  }
+}

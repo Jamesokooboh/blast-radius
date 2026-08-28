@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "New staging bucket has no public-access block; user-uploaded content could be exposed if a policy or ACL is later misconfigured.",
+  "suppressed": "Lifecycle expiry of 1 day with an empty filter correctly covers all objects as intended; no versioning or replication concern because the bucket is designed as transient scratch space.",
+  "findings": [
+    {
+      "address": "aws_s3_bucket.tmp_uploads",
+      "category": "network-exposure",
+      "severity": "medium",
+      "evidence_ref": "data_stores.tf: aws_s3_bucket.tmp_uploads is added with no accompanying aws_s3_bucket_public_access_block resource",
+      "explanation": "Without an explicit public-access block, an inadvertent bucket policy or ACL change could make browser-uploaded files publicly readable; the existing artifacts bucket pattern should be followed by adding a block_public_acls/block_public_policy resource for this bucket."
+    }
+  ]
+}

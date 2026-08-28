@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "prevent_destroy removed from the production data bucket \u2014 the guard was working, not broken",
+  "suppressed": "CostCenter tag addition is cosmetic and safe \u2014 not reported.",
+  "findings": [
+    {
+      "address": "aws_s3_bucket.data",
+      "category": "guardrail",
+      "severity": "high",
+      "evidence_ref": "data_stores.tf: lifecycle { prevent_destroy = true } block deleted from aws_s3_bucket.data",
+      "explanation": "prevent_destroy on a data bucket exists to catch plans that would destroy it. A CI plan failing because of this guard almost always means something in that plan *would* destroy the bucket \u2014 removing the guard unblocks CI by silencing the warning, not by fixing the underlying cause. Once merged, a future terraform apply could delete the bucket and its contents without any barrier."
+    }
+  ]
+}

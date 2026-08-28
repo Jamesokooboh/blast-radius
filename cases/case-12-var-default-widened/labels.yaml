@@ -21,6 +21,7 @@ findings:
   - address: aws_iam_role_policy.app_data
     also:
       - app_data_bucket_arns
+      - variable.app_data_bucket_arns
     category: privilege-escalation
     severity: critical
     linter_catches: true

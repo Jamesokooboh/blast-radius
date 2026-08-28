@@ -1,0 +1,14 @@
+{
+  "verdict": "block",
+  "headline": "Flipping storage_encrypted on a live RDS instance forces destroy-and-recreate, wiping all production data",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_db_instance.main",
+      "category": "data-loss",
+      "severity": "critical",
+      "evidence_ref": "data_stores.tf: storage_encrypted changed false \u2192 true on an existing aws_db_instance. storage_encrypted is a ForceNew attribute in the AWS Terraform provider; Terraform's plan will show a -/+ replace action that destroys the current instance and creates a blank encrypted one.",
+      "explanation": "AWS cannot enable encryption in-place on an existing unencrypted RDS instance. Applying this diff will delete the production database and all its data before standing up a new, empty, encrypted instance. The correct migration path is: snapshot the instance, copy the snapshot with encryption enabled, then restore a new instance from that encrypted snapshot and cut over."
+    }
+  ]
+}

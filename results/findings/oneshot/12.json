@@ -1,0 +1,14 @@
+{
+  "verdict": "block",
+  "headline": "App IAM role will get read/write access to every S3 bucket in the account, not just the new reporting buckets",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "variable.app_data_bucket_arns",
+      "category": "privilege-escalation",
+      "severity": "critical",
+      "evidence_ref": "variables.tf: default changed from [\"arn:aws:s3:::acme-prod-data\", \"arn:aws:s3:::acme-prod-data/*\"] to [\"*\"]",
+      "explanation": "The variable comment says it is consumed by iam.tf to grant the application role read and write access. Replacing the specific production bucket ARNs with \"*\" will cause any IAM policy built from this variable to allow the app role to read and write every S3 bucket in the account, including buckets with no relation to analytics reporting."
+    }
+  ]
+}

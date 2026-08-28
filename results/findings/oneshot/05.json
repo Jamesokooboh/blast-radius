@@ -1,0 +1,21 @@
+{
+  "verdict": "warn",
+  "headline": "Internal ALB is correctly isolated, but reuses the app security group and carries unencrypted API traffic",
+  "suppressed": "The internal=true flag plus private-only subnets are genuine controls against internet exposure, so the HTTP-only scheme and lack of a public IP are not flagged as network-exposure on their own. No data stores are touched, so no data-loss risk.",
+  "findings": [
+    {
+      "address": "aws_lb.internal",
+      "category": "network-exposure",
+      "severity": "medium",
+      "evidence_ref": "compute.tf: security_groups = [aws_security_group.app.id] \u2014 the same SG is assigned to the internal ALB and the application instances",
+      "explanation": "Any principal already permitted to reach app instances (e.g. bastion, other VPC peers, shared-SG workloads) is implicitly allowed to address this new ALB listener; a dedicated security group for the internal ALB would limit blast radius without extra effort."
+    },
+    {
+      "address": "aws_lb_listener.internal",
+      "category": "guardrail",
+      "severity": "low",
+      "evidence_ref": "compute.tf: protocol = \"HTTP\" on the new listener carrying service-to-service API calls",
+      "explanation": "Traffic between workers and the API is unencrypted in transit; a compromised or noisy workload elsewhere in the VPC can inspect or tamper with those calls \u2014 acceptable only if the API carries no sensitive data or mTLS is handled at the application layer."
+    }
+  ]
+}

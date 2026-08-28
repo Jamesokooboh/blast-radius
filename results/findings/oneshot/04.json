@@ -1,0 +1,6 @@
+{
+  "verdict": "approve",
+  "headline": "Standard HTTP-to-HTTPS redirect wiring \u2014 nothing here needs to block this.",
+  "suppressed": "Port 80 open to 0.0.0.0/0 looks alarming in isolation, but it is the correct complement to an ALB redirect listener; connections are immediately 301'd to HTTPS and no plaintext traffic reaches the application.",
+  "findings": []
+}

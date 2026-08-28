@@ -101,20 +101,22 @@
     "05": {
       "band": "B",
       "tp": 0,
-      "fp": 10,
+      "fp": 12,
       "fn": 0,
       "precision": 0.0,
       "recall": 1.0,
       "f1": 0.0,
-      "reported": 10,
+      "reported": 12,
       "verdict_ok": false,
-      "noise_total": 1,
+      "noise_total": 2,
       "noise_suppressed": 0,
       "missed": [],
       "spurious": [
         "aws_db_instance.main:hygiene",
         "aws_lb.internal:hygiene",
         "aws_lb.main:hygiene",
+        "aws_lb_listener.internal:hygiene",
+        "aws_lb_target_group.internal:hygiene",
         "aws_s3_bucket.artifacts:hygiene",
         "aws_s3_bucket.data:hygiene",
         "aws_s3_bucket.static_site:hygiene",
@@ -391,11 +393,11 @@
     }
   },
   "aggregate": {
-    "precision": 0.028169014084507043,
+    "precision": 0.027777777777777776,
     "recall": 0.4,
-    "f1": 0.05263157894736842,
+    "f1": 0.051948051948051945,
     "verdict_accuracy": 0.4666666666666667,
-    "findings_per_pr": 9.466666666666667,
+    "findings_per_pr": 9.6,
     "band_recall": {
       "A": 1.0,
       "B": 1.0,
@@ -403,6 +405,6 @@
       "D": 1.0
     },
     "noise_suppressed": 1,
-    "noise_total": 6
+    "noise_total": 7
   }
 }

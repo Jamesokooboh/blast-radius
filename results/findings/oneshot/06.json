@@ -1,0 +1,6 @@
+{
+  "verdict": "approve",
+  "headline": "Public read on a static-site assets bucket is the stated intent and the scope is correct \u2014 no customer data, GetObject only.",
+  "suppressed": "Principal=* with s3:GetObject looks alarming but the PR description confirms this is an intentional public marketing site hosting compiled HTML/CSS/images with no customer data. The policy is scoped to GetObject only and matches the standard S3 static website pattern.",
+  "findings": []
+}

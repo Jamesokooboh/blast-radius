@@ -1,0 +1,14 @@
+{
+  "verdict": "block",
+  "headline": "desired_capacity=1 is below min_size=3; AWS will reject or immediately override this, so the scaling change will never take effect",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_autoscaling_group.app",
+      "category": "reliability",
+      "severity": "high",
+      "evidence_ref": "compute.tf: desired_capacity changed from 3 to 1 while min_size remains 3",
+      "explanation": "AWS requires min_size \u2264 desired_capacity \u2264 max_size. Setting desired_capacity to 1 with min_size of 3 is an invalid configuration; AWS will either reject the API call or immediately raise desired_capacity back to 3, so the intended cost saving will not happen."
+    }
+  ]
+}

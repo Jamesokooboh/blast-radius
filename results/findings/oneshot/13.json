@@ -1,0 +1,6 @@
+{
+  "verdict": "approve",
+  "headline": "Clean rename with correct moved blocks \u2014 no resource changes, no data risk.",
+  "suppressed": "Bucket has no versioning or replication, but the comment explicitly documents it as ephemeral pipeline cache expired after a week, so this is intentional and not worth reporting.",
+  "findings": []
+}

@@ -16,6 +16,13 @@
       "evidence_ref": "\\compute.tf:83 Ensure that ALB drops HTTP headers"
     },
     {
+      "address": "aws_lb_listener.internal",
+      "category": "hygiene",
+      "severity": "unknown",
+      "check_id": "CKV_AWS_2",
+      "evidence_ref": "\\compute.tf:109 Ensure ALB protocol is HTTPS"
+    },
+    {
       "address": "aws_db_instance.main",
       "category": "hygiene",
       "severity": "unknown",
@@ -63,6 +70,13 @@
       "severity": "unknown",
       "check_id": "CKV2_AWS_62",
       "evidence_ref": "\\data_stores.tf:70 Ensure S3 buckets should have event notifications enabled"
+    },
+    {
+      "address": "aws_lb_target_group.internal",
+      "category": "hygiene",
+      "severity": "unknown",
+      "check_id": "CKV_AWS_378",
+      "evidence_ref": "\\compute.tf:95 Ensure AWS Load Balancer doesn't use HTTP protocol"
     },
     {
       "address": "aws_vpc.main",

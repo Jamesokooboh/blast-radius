@@ -1,0 +1,14 @@
+{
+  "verdict": "block",
+  "headline": "Production RDS instance is being made publicly accessible on the internet as a temporary workaround \u2014 this should be blocked until VPC peering is in place.",
+  "suppressed": "The existing security group (aws_security_group.db) may restrict inbound access to known CIDRs, but that does not change the verdict: a publicly routable production database endpoint should not exist even temporarily, so no credit is given for a security group we cannot see.",
+  "findings": [
+    {
+      "address": "aws_db_instance.main",
+      "category": "network-exposure",
+      "severity": "critical",
+      "evidence_ref": "data_stores.tf: `publicly_accessible` changed from `false` to `true` on a multi-AZ production database instance",
+      "explanation": "Setting `publicly_accessible = true` causes RDS to assign the instance a public DNS endpoint routable from the internet; even with a security group, the production database is now one misconfiguration or leaked credential away from direct external access, and the PR author explicitly states this is a stopgap while proper VPC peering is arranged."
+    }
+  ]
+}

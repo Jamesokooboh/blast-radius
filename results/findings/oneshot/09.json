@@ -1,0 +1,28 @@
+{
+  "verdict": "block",
+  "headline": "Private subnets are now on the public route table, destroying the private/public boundary and likely breaking outbound egress for instances that have no public IP",
+  "suppressed": "Did not flag the existing NAT gateway or security groups \u2014 those are pre-existing and unmodified by this PR.",
+  "findings": [
+    {
+      "address": "aws_route_table_association.private_a",
+      "category": "network-exposure",
+      "severity": "critical",
+      "evidence_ref": "network.tf: route_table_id changed from aws_route_table.private.id to aws_route_table.public.id for aws_subnet.private_a",
+      "explanation": "Any instance in private_a that carries a public or Elastic IP is now directly reachable from the internet; the private subnet boundary that was deliberately separating application/data tier from the internet no longer exists."
+    },
+    {
+      "address": "aws_route_table_association.private_b",
+      "category": "network-exposure",
+      "severity": "critical",
+      "evidence_ref": "network.tf: route_table_id changed from aws_route_table.private.id to aws_route_table.public.id for aws_subnet.private_b",
+      "explanation": "Same exposure as private_a \u2014 both app subnets lose their isolation simultaneously, maximising blast radius."
+    },
+    {
+      "address": "aws_route_table_association.private_a",
+      "category": "reliability",
+      "severity": "high",
+      "evidence_ref": "Public route table routes 0.0.0.0/0 via the Internet Gateway; private instances have no public IP",
+      "explanation": "An Internet Gateway only forwards traffic for instances that own a public IP address; private instances without one will have their outbound traffic silently dropped, so the stated goal of relieving NAT rate-limiting will not be achieved by this change alone."
+    }
+  ]
+}

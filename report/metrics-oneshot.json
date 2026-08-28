@@ -48,144 +48,130 @@
     "04": {
       "band": "B",
       "tp": 0,
-      "fp": 1,
+      "fp": 0,
       "fn": 0,
-      "precision": 0.0,
+      "precision": 1.0,
       "recall": 1.0,
-      "f1": 0.0,
-      "reported": 1,
-      "verdict_ok": false,
+      "f1": 1.0,
+      "reported": 0,
+      "verdict_ok": true,
       "noise_total": 2,
-      "noise_suppressed": 1,
+      "noise_suppressed": 2,
       "missed": [],
-      "spurious": [
-        "aws_security_group.alb:network-exposure"
-      ]
+      "spurious": []
     },
     "05": {
       "band": "B",
       "tp": 0,
-      "fp": 3,
+      "fp": 2,
       "fn": 0,
       "precision": 0.0,
       "recall": 1.0,
       "f1": 0.0,
-      "reported": 3,
+      "reported": 2,
       "verdict_ok": false,
       "noise_total": 2,
       "noise_suppressed": 0,
       "missed": [],
       "spurious": [
-        "aws_lb.internal:hygiene",
-        "aws_lb_listener.internal:hygiene",
-        "aws_lb_target_group.internal:hygiene"
+        "aws_lb.internal:network-exposure",
+        "aws_lb_listener.internal:guardrail"
       ]
     },
     "06": {
       "band": "B",
       "tp": 0,
-      "fp": 2,
+      "fp": 0,
       "fn": 0,
-      "precision": 0.0,
+      "precision": 1.0,
       "recall": 1.0,
-      "f1": 0.0,
-      "reported": 2,
-      "verdict_ok": false,
+      "f1": 1.0,
+      "reported": 0,
+      "verdict_ok": true,
       "noise_total": 2,
-      "noise_suppressed": 0,
+      "noise_suppressed": 2,
       "missed": [],
-      "spurious": [
-        "aws_s3_bucket_policy.static_site:network-exposure",
-        "aws_s3_bucket_public_access_block.static_site:network-exposure"
-      ]
+      "spurious": []
     },
     "07": {
       "band": "B",
       "tp": 0,
-      "fp": 2,
+      "fp": 1,
       "fn": 0,
       "precision": 0.0,
       "recall": 1.0,
       "f1": 0.0,
-      "reported": 2,
+      "reported": 1,
       "verdict_ok": false,
       "noise_total": 1,
       "noise_suppressed": 0,
       "missed": [],
       "spurious": [
-        "aws_s3_bucket.tmp_uploads:hygiene",
-        "aws_s3_bucket_lifecycle_configuration.tmp_uploads:hygiene"
+        "aws_s3_bucket.tmp_uploads:network-exposure"
       ]
     },
     "08": {
       "band": "C",
-      "tp": 0,
-      "fp": 1,
-      "fn": 1,
-      "precision": 0.0,
-      "recall": 0.0,
-      "f1": 0.0,
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
       "reported": 1,
       "verdict_ok": true,
       "noise_total": 0,
       "noise_suppressed": 0,
-      "missed": [
-        "aws_db_instance.main:data-loss"
-      ],
-      "spurious": [
-        "aws_db_instance.main:hygiene"
-      ]
+      "missed": [],
+      "spurious": []
     },
     "09": {
       "band": "C",
-      "tp": 0,
-      "fp": 0,
-      "fn": 2,
-      "precision": 0.0,
-      "recall": 0.0,
-      "f1": 0.0,
-      "reported": 0,
-      "verdict_ok": false,
+      "tp": 1,
+      "fp": 1,
+      "fn": 1,
+      "precision": 0.5,
+      "recall": 0.5,
+      "f1": 0.5,
+      "reported": 3,
+      "verdict_ok": true,
       "noise_total": 0,
       "noise_suppressed": 0,
       "missed": [
-        "aws_nat_gateway.main:cost",
-        "aws_route_table.public:network-exposure"
+        "aws_nat_gateway.main:cost"
       ],
-      "spurious": []
+      "spurious": [
+        "aws_route_table_association.private_a:reliability"
+      ]
     },
     "10": {
       "band": "C",
-      "tp": 0,
+      "tp": 1,
       "fp": 0,
-      "fn": 1,
-      "precision": 0.0,
-      "recall": 0.0,
-      "f1": 0.0,
-      "reported": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "reported": 1,
       "verdict_ok": false,
       "noise_total": 0,
       "noise_suppressed": 0,
-      "missed": [
-        "aws_autoscaling_group.app:reliability"
-      ],
+      "missed": [],
       "spurious": []
     },
     "11": {
       "band": "C",
-      "tp": 0,
+      "tp": 1,
       "fp": 0,
-      "fn": 1,
-      "precision": 0.0,
-      "recall": 0.0,
-      "f1": 0.0,
-      "reported": 0,
-      "verdict_ok": false,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "reported": 1,
+      "verdict_ok": true,
       "noise_total": 0,
       "noise_suppressed": 0,
-      "missed": [
-        "aws_eip.nat_b:cost"
-      ],
+      "missed": [],
       "spurious": []
     },
     "12": {
@@ -221,53 +207,47 @@
     "14": {
       "band": "D",
       "tp": 0,
-      "fp": 1,
+      "fp": 0,
       "fn": 0,
-      "precision": 0.0,
+      "precision": 1.0,
       "recall": 1.0,
-      "f1": 0.0,
+      "f1": 1.0,
+      "reported": 0,
+      "verdict_ok": true,
+      "noise_total": 0,
+      "noise_suppressed": 0,
+      "missed": [],
+      "spurious": []
+    },
+    "15": {
+      "band": "C",
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
       "reported": 1,
       "verdict_ok": false,
       "noise_total": 0,
       "noise_suppressed": 0,
       "missed": [],
-      "spurious": [
-        "aws_vpc.main:hygiene"
-      ]
-    },
-    "15": {
-      "band": "C",
-      "tp": 0,
-      "fp": 1,
-      "fn": 1,
-      "precision": 0.0,
-      "recall": 0.0,
-      "f1": 0.0,
-      "reported": 1,
-      "verdict_ok": true,
-      "noise_total": 0,
-      "noise_suppressed": 0,
-      "missed": [
-        "aws_s3_bucket.data:guardrail"
-      ],
-      "spurious": [
-        "aws_s3_bucket.data:hygiene"
-      ]
+      "spurious": []
     }
   },
   "aggregate": {
-    "precision": 0.26666666666666666,
-    "recall": 0.4,
-    "f1": 0.32,
-    "verdict_accuracy": 0.4666666666666667,
-    "findings_per_pr": 1.0,
+    "precision": 0.6923076923076923,
+    "recall": 0.9,
+    "f1": 0.7826086956521738,
+    "verdict_accuracy": 0.7333333333333333,
+    "findings_per_pr": 0.9333333333333333,
     "band_recall": {
       "A": 1.0,
       "B": 1.0,
-      "C": 0.14285714285714285,
+      "C": 0.8571428571428571,
       "D": 1.0
     },
-    "noise_suppressed": 1,
+    "noise_suppressed": 4,
     "noise_total": 7
   }
 }

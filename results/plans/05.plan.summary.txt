@@ -1,3 +1,5 @@
             create  aws_lb.internal
+            create  aws_lb_listener.internal
+            create  aws_lb_target_group.internal
 
 dropped 1 phantom update(s): aws_db_instance.main

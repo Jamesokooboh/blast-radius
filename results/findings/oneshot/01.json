@@ -1,0 +1,14 @@
+{
+  "verdict": "block",
+  "headline": "SSH opened to 0.0.0.0/0 exposes every app instance to the public internet",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_security_group.app",
+      "category": "network-exposure",
+      "severity": "critical",
+      "evidence_ref": "security.tf: new ingress rule sets cidr_blocks = [\"0.0.0.0/0\"] on port 22/tcp",
+      "explanation": "Any host on the internet can now attempt to authenticate to the app instances over SSH; the stated goal (on-call access) does not require an open-world CIDR \u2014 restricting to the on-call team's egress IPs, a VPN range, or a bastion security group would achieve the same result without the exposure."
+    }
+  ]
+}

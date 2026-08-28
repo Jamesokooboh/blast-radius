@@ -1,0 +1,21 @@
+{
+  "verdict": "warn",
+  "headline": "Production database is being exposed to the internet with no mechanism to ensure it's temporary.",
+  "suppressed": "Security group rules not visible in this diff\u2014the restriction to specific Metabase IPs (if configured) would mitigate but not eliminate the risk.",
+  "findings": [
+    {
+      "address": "aws_db_instance.main",
+      "category": "network-exposure",
+      "severity": "high",
+      "evidence_ref": "Line 27: `publicly_accessible = true` (changed from false)",
+      "explanation": "The production database will be assigned a public IP and reachable from anywhere on the internet. This is a significant security surface even if the security group restricts inbound traffic."
+    },
+    {
+      "address": "aws_db_instance.main",
+      "category": "guardrail",
+      "severity": "high",
+      "evidence_ref": "No code change creates a timeline or automated rollback for removing public accessibility.",
+      "explanation": "The PR describes this as temporary while VPC peering is built, but nothing in the code enforces that. This configuration will persist indefinitely until manually reverted, likely after someone forgets about it."
+    }
+  ]
+}

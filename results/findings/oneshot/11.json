@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "Change is architecturally correct but adds a persistent cost that should be acknowledged",
+  "suppressed": "The route_table_id change on aws_route_table_association.private_b looks disruptive but AWS performs subnet route-table reassociation atomically, so no connectivity interruption is expected. Not reported.",
+  "findings": [
+    {
+      "address": "aws_nat_gateway.b",
+      "category": "cost",
+      "severity": "medium",
+      "evidence_ref": "network.tf: new aws_nat_gateway.b + aws_eip.nat_b added",
+      "explanation": "A second NAT gateway costs roughly $32/month in base charges plus $0.045/GB in data-processing fees on top of whatever the existing gateway already costs; this is a permanent, recurring spend increase that should be approved by whoever owns the budget."
+    }
+  ]
+}

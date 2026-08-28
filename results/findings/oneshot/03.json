@@ -1,0 +1,14 @@
+{
+  "verdict": "block",
+  "headline": "CodeBuild deploy role has full AdministratorAccess \u2014 any build job can do anything in the account",
+  "suppressed": "The CodeBuild service principal in the trust policy is expected for a pipeline deploy role and is not reported on its own.",
+  "findings": [
+    {
+      "address": "aws_iam_role_policy.deploy",
+      "category": "privilege-escalation",
+      "severity": "critical",
+      "evidence_ref": "iam.tf: new aws_iam_role_policy.deploy sets Action \"*\" / Resource \"*\" on aws_iam_role.deploy",
+      "explanation": "The policy is functionally identical to AdministratorAccess. Any CodeBuild job that assumes this role \u2014 including a compromised or hijacked build \u2014 can create IAM users, exfiltrate secrets, delete production databases, or backdoor the account with no further escalation needed."
+    }
+  ]
+}
