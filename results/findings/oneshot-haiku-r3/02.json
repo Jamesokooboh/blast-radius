@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "Production database is being exposed to the internet, even if temporarily",
+  "suppressed": "The PR description indicates this is intended as a temporary workaround pending VPC peering setup. Flagging as warn rather than block since intent is stated, but the merging person needs to explicitly understand they're making a production database internet-accessible and must have a concrete plan and timeline for reverting this change.",
+  "findings": [
+    {
+      "address": "aws_db_instance.main",
+      "category": "network-exposure",
+      "severity": "high",
+      "evidence_ref": "data_stores.tf: publicly_accessible changed from false to true on aws_db_instance.main",
+      "explanation": "Setting publicly_accessible=true exposes the production database to the internet. Even with restrictive security groups, this significantly increases the attack surface and the risk of credential compromise or unauthorized access."
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "verdict": "warn",
+  "headline": "Private subnets become directly internet-routable, bypassing the NAT gateway security boundary",
+  "suppressed": "Vendor API rate-limiting is a real constraint, and distributing egress IPs across instances instead of a single NAT is a valid approach, but this PR frames an architecture downgrade (private to public subnets) as a mere routing fix. The PR needs to acknowledge what's actually changing: security boundary shifts always warrant explicit architectural review, not just implementation discussion.",
+  "findings": [
+    {
+      "address": "aws_route_table_association.private_a",
+      "category": "network-exposure",
+      "severity": "high",
+      "evidence_ref": "Lines 123: route_table_id changed from aws_route_table.private.id to aws_route_table.public.id",
+      "explanation": "Subnets named private_a and private_b are no longer routing through a NAT gateway; they now route directly through the internet gateway. This makes any instances with public IPs in these subnets directly reachable from the internet, a significant change from the previous private-subnet security model."
+    },
+    {
+      "address": "aws_route_table_association.private_b",
+      "category": "network-exposure",
+      "severity": "high",
+      "evidence_ref": "Lines 128: route_table_id changed from aws_route_table.private.id to aws_route_table.public.id",
+      "explanation": "Same exposure as private_a: direct internet routing instead of NAT outbound-only. Combined with PR #01's finding that SSH is already open to the internet, this puts application instances at much higher risk of compromise."
+    },
+    {
+      "address": "aws_route_table_association.private_a",
+      "category": "guardrail",
+      "severity": "medium",
+      "evidence_ref": "Subnets aws_subnet.private_a and aws_subnet.private_b are now associated with aws_route_table.public",
+      "explanation": "Subnets named 'private' now use the public route table, creating a confusing pattern where the name no longer matches the network behavior. Future engineers will misunderstand the security posture and may misconfigure related resources."
+    }
+  ]
+}

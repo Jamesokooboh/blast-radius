@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "SSH is being opened to the entire internet on production app instances; even as a temporary measure, this is a significant attack surface expansion that should be reconsidered",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_security_group.app",
+      "category": "network-exposure",
+      "severity": "high",
+      "evidence_ref": "New ingress rule in security.tf: port 22 with cidr_blocks = [\"0.0.0.0/0\"]",
+      "explanation": "SSH on the app security group is now reachable from anywhere on the internet. This exposes the management plane to brute force and SSH vulnerability exploitation, dramatically increasing attack surface on production instances."
+    }
+  ]
+}

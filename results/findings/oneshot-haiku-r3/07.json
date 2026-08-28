@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "Staging bucket lacks public access guardrails for a resource receiving browser uploads",
+  "suppressed": "The 1-day lifecycle expiry is correct for its stated purpose of cleaning up failed uploads, not a data loss risk.",
+  "findings": [
+    {
+      "address": "aws_s3_bucket.tmp_uploads",
+      "category": "guardrail",
+      "severity": "medium",
+      "evidence_ref": "aws_s3_bucket.tmp_uploads created without aws_s3_bucket_public_access_block configuration",
+      "explanation": "This bucket receives browser uploads but has no explicit block on public ACLs or bucket policies. If an upload mechanism inadvertently makes this bucket public, it becomes an open file repository. Add aws_s3_bucket_public_access_block with all four block_* flags set to true."
+    }
+  ]
+}

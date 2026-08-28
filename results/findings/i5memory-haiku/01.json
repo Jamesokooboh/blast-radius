@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "SSH is open to the entire internet, not just on-call. This needs IP restrictions or it shouldn't merge.",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_security_group.app",
+      "category": "network-exposure",
+      "severity": "critical",
+      "evidence_ref": "New ingress rule on port 22 with cidr_blocks = [\"0.0.0.0/0\"]",
+      "explanation": "SSH is now reachable from anywhere on the internet. This opens the app instances to automated SSH brute-force and reconnaissance, and should be restricted to the on-call team's actual IP addresses or a specific VPN CIDR at minimum."
+    }
+  ]
+}

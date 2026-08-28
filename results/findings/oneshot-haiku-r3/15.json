@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "Removing data-protection guardrail to work around CI failures, rather than fixing the underlying issue",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_s3_bucket.data",
+      "category": "guardrail",
+      "severity": "high",
+      "evidence_ref": "Removal of `lifecycle { prevent_destroy = true }` block in data_stores.tf",
+      "explanation": "The S3 bucket named 'data' is losing its protection against accidental destruction. Once this guard is gone, a mistaken `terraform destroy` or similar operation could permanently delete the bucket and its contents. The stated reason for removal (unblocking CI) is a workaround for a CI problem, not a legitimate reason to remove data protection."
+    }
+  ]
+}

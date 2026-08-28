@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "Production database exposed to the internet with no expiration mechanism.",
+  "suppressed": "The security group still applies to inbound traffic, and authentication is still required to access the database. These are reasonable controls but do not eliminate the risk of internet-facing infrastructure on a high-value target. PR #01 rejected open SSH access to enforce network isolation, which makes this inconsistent with the stated security posture.",
+  "findings": [
+    {
+      "address": "aws_db_instance.main",
+      "category": "network-exposure",
+      "severity": "high",
+      "evidence_ref": "publicly_accessible changed from false to true in data_stores.tf:27",
+      "explanation": "The production RDS instance is now reachable from anywhere on the internet. The PR describes this as temporary while VPC peering is configured, but there is no code enforcement or timeline to revert it\u2014this configuration could easily become permanent."
+    }
+  ]
+}

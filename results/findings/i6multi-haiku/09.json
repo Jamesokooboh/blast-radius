@@ -1,0 +1,35 @@
+{
+  "verdict": "warn",
+  "headline": "App subnets lose private network isolation to enable direct internet egress\u2014confirms this is acceptable for your security posture.",
+  "suppressed": "Cost reviewer noted NAT gateway charges are eliminated by this change, which is correct but secondary to the security boundary implications.",
+  "findings": [
+    {
+      "address": "aws_route_table_association.private_a",
+      "category": "network-exposure",
+      "severity": "high",
+      "evidence_ref": "route_table_id changed from aws_route_table.private.id to aws_route_table.public.id",
+      "explanation": "Instances now egress directly to the internet via IGW instead of through the NAT gateway. If an instance is compromised, attackers gain direct outbound internet access without NAT-based IP filtering or logging."
+    },
+    {
+      "address": "aws_route_table_association.private_b",
+      "category": "network-exposure",
+      "severity": "high",
+      "evidence_ref": "route_table_id changed from aws_route_table.private.id to aws_route_table.public.id",
+      "explanation": "Same egress exposure as private_a\u2014both subnets converted simultaneously, so any workload in either now has direct internet access."
+    },
+    {
+      "address": "aws_route_table_association.private_a",
+      "category": "guardrail",
+      "severity": "high",
+      "evidence_ref": "subnet associated with public route table instead of private route table",
+      "explanation": "Associating private_a with the public route table removes the fundamental private subnet isolation boundary. Instances become inbound-routable from the internet if they ever receive public IPs."
+    },
+    {
+      "address": "aws_route_table_association.private_b",
+      "category": "guardrail",
+      "severity": "high",
+      "evidence_ref": "subnet associated with public route table instead of private route table",
+      "explanation": "Same isolation removal as private_a. The subnets trade private network segmentation for direct IGW access to solve rate-limiting, which is a significant architectural shift."
+    }
+  ]
+}

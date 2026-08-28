@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "Adding second NAT gateway doubles hourly egress costs",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_nat_gateway.b",
+      "category": "cost",
+      "severity": "medium",
+      "evidence_ref": "New aws_nat_gateway.b resource and aws_eip.nat_b with associated route table",
+      "explanation": "Adding a second NAT gateway increases infrastructure costs by approximately $0.32/hour plus data processing charges. This material cost increase is not mentioned in the PR description and should be budgeted."
+    }
+  ]
+}

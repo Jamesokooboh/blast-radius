@@ -1,0 +1,6 @@
+{
+  "verdict": "approve",
+  "headline": "Clean rename with proper state migration. All references updated, no configuration changes.",
+  "suppressed": null,
+  "findings": []
+}

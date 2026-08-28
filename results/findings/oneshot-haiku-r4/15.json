@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "Removing prevent_destroy guard on the data bucket without addressing the stated root cause",
+  "suppressed": "The CostCenter tag addition is routine maintenance and raises no concerns.",
+  "findings": [
+    {
+      "address": "aws_s3_bucket.data",
+      "category": "guardrail",
+      "severity": "high",
+      "evidence_ref": "Removal of lifecycle { prevent_destroy = true } block in data_stores.tf",
+      "explanation": "The prevent_destroy lifecycle rule on the data bucket is being removed to unblock CI. However, a prevent_destroy block should not cause Terraform plan failures on its own\u2014this suggests the real issue is elsewhere, and removing the guard masks rather than solves the problem while leaving the bucket vulnerable to accidental deletion."
+    }
+  ]
+}

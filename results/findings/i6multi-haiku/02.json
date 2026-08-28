@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "Production database is now internet-facing with no expiration mechanism to enforce the stated temporary nature",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_db_instance.main",
+      "category": "network-exposure",
+      "severity": "high",
+      "evidence_ref": "Line 27: `publicly_accessible = false` \u2192 `publicly_accessible = true` in aws_db_instance.main",
+      "explanation": "The production RDS instance is now reachable from any IP on the internet. While the intent is temporary, there is nothing in the code to enforce reversion\u2014this change easily becomes permanent, leaving production data exposed to credential attacks and database exploits."
+    }
+  ]
+}

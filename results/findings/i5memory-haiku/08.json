@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "Enabling encryption on an existing RDS instance requires destroying and recreating the database\u2014this will cause downtime and data loss if not migrated carefully. The PR description misses this critical detail.",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_db_instance.main",
+      "category": "data-loss",
+      "severity": "high",
+      "evidence_ref": "storage_encrypted changed from false to true in data_stores.tf. AWS RDS requires database replacement to enable encryption on an existing instance.",
+      "explanation": "Terraform will destroy and recreate this production database to apply the encryption setting. This will cause downtime and data loss unless you perform a backup-and-restore migration first. The PR description treats this as a simple one-line change, which is dangerous."
+    }
+  ]
+}

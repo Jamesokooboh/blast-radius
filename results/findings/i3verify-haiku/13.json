@@ -1,0 +1,6 @@
+{
+  "verdict": "approve",
+  "headline": "Clean refactoring with proper state migration. Bucket name and configuration unchanged, moved blocks in place.",
+  "suppressed": null,
+  "findings": []
+}

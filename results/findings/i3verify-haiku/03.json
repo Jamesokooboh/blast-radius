@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "CodeBuild deploy role has unrestricted permissions across all AWS services and resources",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_iam_role_policy.deploy",
+      "category": "privilege-escalation",
+      "severity": "high",
+      "evidence_ref": "aws_iam_role_policy.deploy grants Action: \"*\" on Resource: \"*\"",
+      "explanation": "The CodeBuild service gains unrestricted access to every AWS action on every resource. This violates the principle of least privilege and exposes your infrastructure to wider compromise if CodeBuild is compromised or misconfigured. Even temporary overly-broad permissions create risk while waiting for scoping."
+    }
+  ]
+}

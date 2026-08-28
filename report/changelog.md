@@ -4,20 +4,43 @@ Predictions were written before each stage ran and are kept visible next to the
 measurement, including where they were wrong.
 
 Primary metric: **F1 over labelled findings**, matched by (resource address,
-category) across 15 pull requests carrying 10 real findings and 6 findings a
+category) across 15 pull requests carrying 10 real findings and 7 findings a
 good reviewer suppresses. Scoring is set intersection — no model grades another
 model anywhere in this project.
 
-| Stage | What ran, and why | Predicted | Measured | Decision |
+> ## Correction, applied after the fact
+>
+> Every stage below was originally measured once and compared against a single
+> B1′ run scoring **0.900**. That run was later repeated three more times under
+> identical conditions and scored **0.737, 0.762, 0.737** — mean **0.784**,
+> standard deviation **0.078**, range **0.737–0.900**. The number this project
+> compared everything against was the best of four.
+>
+> Four of the six iterations land *inside* that range and are therefore
+> **indistinguishable from doing nothing**. The mechanism stories originally
+> written for I2, I4 and I5 are not supported by the data and have been struck
+> through rather than deleted. What survives is stated below each one.
+>
+> This correction is the most useful result in the project. See the hot take.
+
+
+
+**Baseline noise floor: B1′ = 0.784 ± 0.078 (n=4), range 0.737–0.900.** A stage
+is only distinguishable from the baseline if it falls outside that range.
+
+| Stage | What ran, and why | Predicted | Measured | Verdict against the noise floor |
 | --- | --- | --- | --- | --- |
 | **B0** | Raw Checkov, exactly as CI runs it today: whole-stack static scan, no plan, no PR description. The status quo. | F1 0.35 | **F1 0.053** — precision 0.028, recall 0.400, **9.5 findings per PR** | Keep as the honest status-quo number |
 | **B0′** | Checkov scoped to the resources the plan actually changes, as a competent CI integration would. A deliberately *stronger* baseline. | — | **F1 0.320** — precision 0.267, recall 0.400, **0.9 findings per PR** | Keep as the scanner baseline |
 | **B1** | One direct prompt over the diff and PR description. Sonnet 4.6, no plan, no scanner, no tools. | F1 0.45 | **F1 0.783** — precision 0.692, recall 0.900, band C recall 0.86 | Keep. Prediction badly wrong; see below |
-| **B1′** | The same prompt on Haiku 4.5, to test whether the result is about the task or the model. | worse than B1 | **F1 0.900** — precision 0.900, recall 0.900, noise 7 of 7 suppressed | **The new bar.** The cheap model won |
+| **B1′** | The same prompt on Haiku 4.5, to test whether the result is about the task or the model. | worse than B1 | **F1 0.784 ± 0.078** over 4 runs (0.900, 0.762, 0.737, 0.737) | The bar. The cheap model matched or beat Sonnet |
 | **B2** | General agent with tools and no task structure: reads the whole working directory, runs the scanner, decides for itself when to stop. Haiku 4.5. | F1 0.55 | **F1 0.636** — precision 0.583, recall 0.700, band C recall 0.57, $0.133/PR | Keep. Worse than one prompt, at 19× the cost |
-| **I1** | Add the plan's changed resources to B1′. Same model, same instructions, same code path — the plan is the only variable. | 0.68, the project's central hypothesis | **F1 0.667** — precision 0.636, recall 0.700, **band C recall 0.57**, verdict accuracy 0.467 | **Remove.** The plan makes the review worse |
-| **I2** | Add the scanner's output to B1′, framed as claims to adjudicate rather than findings to repeat. | regression, via parroting | **F1 0.842** — precision 0.889, recall 0.800, **noise 7 of 7 suppressed**, all cost findings lost | **Remove.** Right prediction, wrong mechanism |
-| **I4** | Add a computed monthly cost delta to B1′. The one addition with a specific reason to help: cost is the category every configuration keeps losing. | improvement on cost | **F1 0.842** — and **0 of 2 cost findings**, down from B1′'s 1 of 2 | **Remove.** The fix for the known weakness completed it |
+| **I1** | Add the plan's changed resources to B1′. Same model, same instructions, same code path — the plan is the only variable. | 0.68, the project's central hypothesis | **F1 0.667**, band C recall 0.57 | **Remove.** Below every B1′ run (−1.5 sd). Survives the correction |
+| **I2** | Add the scanner's output to B1′, framed as claims to adjudicate rather than findings to repeat. | regression, via parroting | **F1 0.842**, noise 7 of 7 suppressed | **No measurable effect.** Inside the B1′ range |
+| **I3** | Drop any finding not tied to the plan's change set or the diff. Deterministic, no model call. | flat | **F1 0.900**, 0 findings dropped, **$0.00** | **No measurable effect**, as predicted. Keep — it is free and cannot reduce recall |
+| **I4** | Add a computed monthly cost delta to B1′. | improvement on cost | **F1 0.842**, 0 of 2 cost findings | **No measurable effect.** Inside the B1′ range |
+| **I5** | Carry review decisions forward between pull requests. | uncertain | **F1 0.800**, noise 7 of 7 | **No measurable effect.** Inside the B1′ range |
+| **I6** | Split the review across security, cost and reliability specialists, merged by a lead. | the worst result in the project | **F1 0.583**, precision 0.500, 1.0 findings per PR | **Remove.** Below every B1′ run (−2.6 sd). The worst configuration measured |
 
 ## Stage notes
 
@@ -144,6 +167,50 @@ strongest fair version of the alternative. That means the agent now has to beat
 F1 0.900 at $0.007 per pull request, which is a far harder target than the 0.320
 it started with and than the 0.80 that was pre-registered. The pre-registered
 target is left where it is; the bar is what moved.
+
+### The variance check, and what it cost this project
+
+Three additional B1′ runs, identical in every respect to the first:
+
+| run | F1 | cost findings found |
+| --- | --- | --- |
+| 1 (the one reported throughout) | **0.900** | 1 of 2 |
+| 2 | 0.737 | 1 of 2 |
+| 3 | 0.762 | 1 of 2 |
+| 4 | 0.737 | **0 of 2** |
+
+Mean 0.784, standard deviation 0.078. **The baseline this project measured
+everything against was the best of four samples**, and no repeat measurement was
+taken until every stage had already been run, written up and committed.
+
+Placing each stage against that distribution:
+
+| stage | F1 | verdict |
+| --- | --- | --- |
+| scoped Checkov | 0.320 | below every run (−5.9 sd) — **real** |
+| I6 multi-agent | 0.583 | below every run (−2.6 sd) — **real** |
+| B2 agent + tools | 0.636 | below every run (−1.9 sd) — **real** |
+| I1 plan | 0.667 | below every run (−1.5 sd) — **real** |
+| I5 memory | 0.800 | inside the range — **no effect** |
+| I2 scanner | 0.842 | inside the range — **no effect** |
+| I4 cost | 0.842 | inside the range — **no effect** |
+| I3 verification | 0.900 | inside the range — **no effect** |
+
+Four of six iterations cannot be distinguished from doing nothing. Three
+regressions survive, and they are the three largest.
+
+**The I4 cost finding does not survive, and it was the headline.** The claim was
+that supplying a cost figure drove cost findings from 1 of 2 to 0 of 2. Run 4 of
+the *unmodified baseline* also found 0 of 2. With two labelled findings in that
+category, "1" and "0" are the same measurement. The observation that the model
+wrote "expected cost" while approving a $438/year increase is still real and
+still worth reading — but it is an anecdote about one response, not evidence that
+the cost table caused anything.
+
+What survives from the earlier analysis is narrower and better supported: the
+case 08 recategorisation from `data-loss` to `reliability` happened in both I1
+and B2, which reached the plan by different routes, and both of those stages are
+independently below the noise floor.
 
 ### I4 — the intervention aimed at the known weakness made the weakness total
 
@@ -477,6 +544,35 @@ unconstrained agent would do.
 
 ## Hot take, provisional
 
+**A single run is not a measurement, and this project nearly published four that
+were not.**
+
+Six iterations were built, run once each, and compared against one baseline
+number. Four regression stories were written, each with a plausible mechanism,
+each committed with confidence. Then the baseline was repeated three times and
+scored 0.737, 0.762 and 0.737 against the original 0.900 — and three of those
+four stories evaporated, including the one with the best narrative and the most
+quotable model output.
+
+Nothing about the method was careless in an obvious way: the scoring is
+deterministic, the labels were fixed before any run, no model grades another
+model, and every prediction was recorded in advance. The missing control was the
+cheapest one available — running the same thing twice. It cost $0.33 and twelve
+minutes, and it should have been the second measurement in the project rather
+than the twenty-second.
+
+The reason it is easy to skip is that a temperature-zero-feeling pipeline
+*looks* deterministic. Structured outputs, a fixed prompt, set-intersection
+scoring: everything downstream of the model is reproducible, which quietly
+suggests the model is too. On 15 cases carrying 10 findings, one finding moving
+is 0.05–0.10 of F1. The noise floor was wider than five of the eight effects
+being measured.
+
+**What we would do differently: measure the noise floor before measuring
+anything else, and refuse to interpret any difference smaller than it.**
+
+The secondary finding, which does survive:
+
 **Context is not free, and it is not neutral. Adding it reframes the question.**
 
 Three additions, three regressions, three different reframings — and in each one
@@ -489,11 +585,11 @@ the model started answering a slightly different question than the one asked:
 | **a computed cost table** | **money already accounted for** | **every cost finding** |
 | file and scanner tools | the codebase | focus on the change itself |
 
-The cost table is the one that should not have happened. It was aimed precisely
-at the category that kept going missing, it supplied a true and relevant number,
-and it drove that category to zero — because a reviewer raises an unannounced
-cost out of surprise, and a number printed in the prompt is no longer a surprise.
-**Information that answers a question also removes the reason to ask it.**
+Of these, only the plan row and the tools row survive the variance check as
+measured effects. The scanner and cost rows are inside the noise floor and are
+listed as observations about individual responses, not as measured regressions.
+The cost table's "expected cost" approval remains the single most striking thing
+a model said in this project, and it remains unproven.
 
 The plan is strictly more accurate than the diff. It is machine-generated, it is
 what Terraform will actually do, and it states the RDS replacement in as many

@@ -1,0 +1,39 @@
+{
+  "case": "08",
+  "stage": "B1 one-shot",
+  "model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+  "aws_account": "313951301623",
+  "effort": null,
+  "system": "You are reviewing a Terraform pull request against production infrastructure. You\nare the last human-equivalent checkpoint before this change reaches production.\n\nYour job is not to list everything that could be improved about this stack. It is\nto decide what the person merging this pull request needs to know about *this\nchange*, and to say it in few enough words that they actually read it.\n\n## What to report\n\nReport at most **five** findings. Fewer is better. If the change is safe, report\nnone and say so \u2014 a review that invents problems to look useful is worse than no\nreview.\n\nA finding must be about this pull request: something it introduces, removes, or\ncauses. Pre-existing conditions elsewhere in the stack are not findings, however\ntrue they are.\n\nRank findings by what would actually go wrong, not by how a scanner would score\nthem. Consider at least:\n\n- What the change does to something that already exists and holds data.\n- Whether the effect of the change appears somewhere other than the lines edited.\n- Whether the stated intent in the description matches what the code does.\n- Whether a protection, guard, or constraint is being removed.\n- Whether the change costs money nobody has been told about.\n\n## Ruling against a scanner\n\nConfigurations that look alarming in isolation are often correct in context. A\nload balancer open to the internet is doing its job. A bucket documented as a\npublic marketing site is meant to be public. Storage that is deleted within a day\ndoes not need versioning or replication.\n\nWhen context \u2014 a tag, a comment, the pull request description, the resource's\nevident purpose \u2014 shows an alarming-looking configuration is intended and\nproportionate, do not report it. Say nothing about it at all.\n\n## Categories\n\nEvery finding takes exactly one category:\n\n- `network-exposure` \u2014 something becomes reachable, or reachable more widely\n- `privilege-escalation` \u2014 an identity gains permissions beyond what it needs\n- `data-loss` \u2014 data is destroyed, replaced, or put at risk of being destroyed\n- `guardrail` \u2014 a protection or constraint is weakened or removed\n- `reliability` \u2014 the change will not work as intended, or degrades availability\n- `cost` \u2014 a material and unannounced increase in spend\n\n## Evidence\n\nEvery finding must cite something real: a file and what changed in it, or a\nspecific action in the plan. If you cannot point at the evidence, do not report\nthe finding.\n\n## Address\n\nUse the Terraform resource address the finding is about \u2014 for example\n`aws_db_instance.main`, `aws_security_group.app`. Use the address of the resource\nthat carries the problem, not the file that was edited.\n\n## Verdict\n\n- `block` \u2014 merging this as-is would cause real harm\n- `warn` \u2014 mergeable, but the author needs to see something first\n- `approve` \u2014 nothing here needs their attention\n",
+  "prompt": "Review this Terraform pull request.\n\n## Pull request description\n\n# Enable encryption at rest on the production database\n\nCloses INFRA-1804. The security review flagged that the production Postgres\ninstance is unencrypted at rest, which we need to fix before the SOC 2 window\ncloses at the end of the month.\n\nOne-line change: `storage_encrypted = true`.\n\n\n## Diff\n\n```diff\ndiff --git a/C:/Users/DELL/Documents/projects/Hackerthon/infra/base/data_stores.tf b/C:/Users/DELL/Documents/projects/Hackerthon/cases/case-08-rds-encrypt-in-place/overlay/data_stores.tf\nindex 7ffb97e..9dd0585 100644\n--- a/C:/Users/DELL/Documents/projects/Hackerthon/infra/base/data_stores.tf\n+++ b/C:/Users/DELL/Documents/projects/Hackerthon/cases/case-08-rds-encrypt-in-place/overlay/data_stores.tf\n@@ -3,8 +3,7 @@ resource \"aws_db_subnet_group\" \"main\" {\n   subnet_ids = [aws_subnet.private_a.id, aws_subnet.private_b.id]\n }\n \n-# The production database. Predates the encryption-at-rest policy; migrating it\n-# is tracked in INFRA-1804.\n+# The production database. Encryption at rest enabled per INFRA-1804.\n resource \"aws_db_instance\" \"main\" {\n   identifier     = \"${var.name_prefix}-db\"\n   engine         = \"postgres\"\n@@ -13,7 +12,7 @@ resource \"aws_db_instance\" \"main\" {\n \n   allocated_storage = 100\n   storage_type      = \"gp3\"\n-  storage_encrypted = false\n+  storage_encrypted = true\n \n   db_name  = \"appdb\"\n   username = \"appuser\"\n\n```\n",
+  "response": {
+    "verdict": "warn",
+    "headline": "Enabling encryption on an existing RDS instance requires replacing the database, causing production downtime.",
+    "suppressed": null,
+    "findings": [
+      {
+        "address": "aws_db_instance.main",
+        "category": "reliability",
+        "severity": "high",
+        "evidence_ref": "Change from `storage_encrypted = false` to `storage_encrypted = true` in data_stores.tf. This property is marked as `ForceNew` in the AWS provider, requiring database replacement.",
+        "explanation": "AWS does not support enabling encryption on an existing unencrypted RDS instance in place. Terraform will destroy and recreate the database, causing production downtime and a migration window where data is at risk. The PR description treats this as a simple one-line change and does not mention the operational impact."
+      }
+    ]
+  },
+  "usage": {
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 0,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "inference_geo": null,
+    "input_tokens": 1902,
+    "output_tokens": 1052,
+    "output_tokens_details": null,
+    "server_tool_use": null,
+    "service_tier": null
+  },
+  "elapsed_s": 12.8,
+  "cost_usd": 0.0072
+}

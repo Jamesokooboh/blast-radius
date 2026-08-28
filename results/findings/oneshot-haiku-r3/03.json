@@ -1,0 +1,14 @@
+{
+  "verdict": "block",
+  "headline": "CodeBuild is being granted admin access to the entire AWS account. Even as a temporary measure, this creates an unacceptable security gap.",
+  "suppressed": "The PR description notes this is temporary pending scope-down. However, 'temporary' overly-broad permissions are a well-documented source of persistent production vulnerabilities. This needs to be scoped to actual required permissions before merge.",
+  "findings": [
+    {
+      "address": "aws_iam_role_policy.deploy",
+      "category": "privilege-escalation",
+      "severity": "critical",
+      "evidence_ref": "Policy grants `Action = \"*\"` on `Resource = \"*\"`, giving CodeBuild administrative permissions across the entire AWS account",
+      "explanation": "The new deploy role grants unrestricted permissions to all AWS services and resources. If CodeBuild is compromised or a build script is malicious, it can modify or destroy any infrastructure in the account. This violates the principle of least privilege and creates an unacceptable blast radius."
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "verdict": "block",
+  "headline": "SSH opened to the entire internet instead of just on-call staff IPs\u2014this creates a brute force attack surface on production app instances.",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_security_group.app",
+      "category": "network-exposure",
+      "severity": "critical",
+      "evidence_ref": "Diff shows new ingress rule with `cidr_blocks = [\"0.0.0.0/0\"]` for port 22",
+      "explanation": "The rule allows SSH from anywhere on the internet, not from the on-call rotation's actual IP addresses or ranges. This exposes app instances to brute force attacks, credential stuffing, and SSH exploitation from anywhere globally."
+    }
+  ]
+}

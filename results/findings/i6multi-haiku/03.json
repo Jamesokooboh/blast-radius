@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "CodeBuild deploy role has unrestricted admin permissions with no timeline or mechanism to narrow them",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_iam_role_policy.deploy",
+      "category": "privilege-escalation",
+      "severity": "high",
+      "evidence_ref": "aws_iam_role_policy.deploy: Action = \"*\", Resource = \"*\"",
+      "explanation": "The role permits CodeBuild (or anything that can assume it) to perform any AWS action on any resource, including modifying IAM, deleting data, or disabling infrastructure. The PR description acknowledges this is broad and temporary, but there is no protection, guard, or stated timeline to enforce narrowing before this reaches production."
+    }
+  ]
+}

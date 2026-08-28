@@ -1,0 +1,21 @@
+{
+  "verdict": "warn",
+  "headline": "App subnets lose NAT protection and become directly internet-facing",
+  "suppressed": "The vendor rate-limiting problem is real and the solution does solve it by providing multiple source IPs. However, this solves it by making private subnets public rather than by adding NAT gateways or using more selective routing. Confirm this trade-off is intentional and that inbound filtering is in place.",
+  "findings": [
+    {
+      "address": "aws_route_table_association.private_a",
+      "category": "network-exposure",
+      "severity": "high",
+      "evidence_ref": "route_table_id changed from aws_route_table.private.id to aws_route_table.public.id",
+      "explanation": "Instances in private_a subnet now egress directly via the Internet Gateway instead of through NAT, and can receive inbound connections from the internet if security groups permit. This removes the outbound-only isolation these subnets had."
+    },
+    {
+      "address": "aws_route_table_association.private_b",
+      "category": "network-exposure",
+      "severity": "high",
+      "evidence_ref": "route_table_id changed from aws_route_table.private.id to aws_route_table.public.id",
+      "explanation": "Instances in private_b subnet now egress directly via the Internet Gateway instead of through NAT, and can receive inbound connections from the internet if security groups permit. This removes the outbound-only isolation these subnets had."
+    }
+  ]
+}

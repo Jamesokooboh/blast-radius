@@ -1,0 +1,24 @@
+{
+  "case": "03",
+  "stage": "I5 one-shot + review memory",
+  "model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+  "aws_account": "313951301623",
+  "memory_entries": 2,
+  "prompt": "Review this Terraform pull request.\n\n## Pull request description\n\n# Add a deploy role for CodeBuild\n\nOur pipeline needs a role it can assume to run deployments. Broad permissions\nfor now so we stop getting blocked on missing actions mid-deploy; we will scope\nit down once we know exactly what it touches.\n\n\n## Diff\n\n```diff\ndiff --git a/C:/Users/DELL/Documents/projects/Hackerthon/infra/base/iam.tf b/C:/Users/DELL/Documents/projects/Hackerthon/cases/case-03-iam-wildcard/overlay/iam.tf\nindex 08c2fcb..935213a 100644\n--- a/C:/Users/DELL/Documents/projects/Hackerthon/infra/base/iam.tf\n+++ b/C:/Users/DELL/Documents/projects/Hackerthon/cases/case-03-iam-wildcard/overlay/iam.tf\n@@ -38,3 +38,30 @@ resource \"aws_iam_instance_profile\" \"app\" {\n   name = \"${var.name_prefix}-app\"\n   role = aws_iam_role.app.name\n }\n+\n+resource \"aws_iam_role\" \"deploy\" {\n+  name = \"${var.name_prefix}-deploy\"\n+\n+  assume_role_policy = jsonencode({\n+    Version = \"2012-10-17\"\n+    Statement = [{\n+      Effect    = \"Allow\"\n+      Action    = \"sts:AssumeRole\"\n+      Principal = { Service = \"codebuild.amazonaws.com\" }\n+    }]\n+  })\n+}\n+\n+resource \"aws_iam_role_policy\" \"deploy\" {\n+  name = \"${var.name_prefix}-deploy\"\n+  role = aws_iam_role.deploy.id\n+\n+  policy = jsonencode({\n+    Version = \"2012-10-17\"\n+    Statement = [{\n+      Effect   = \"Allow\"\n+      Action   = \"*\"\n+      Resource = \"*\"\n+    }]\n+  })\n+}\n\n```\n\n## Earlier reviews of this stack\n\nDecisions you have already made on previous pull requests against this\nsame infrastructure. Do not relitigate a question that has been settled,\nand do not treat a past decision as binding if this change alters the\nfacts behind it.\n\n- PR #01: warn \u2014 SSH is open to the entire internet, not just on-call. This needs IP restrictions or it shouldn't merge.\n- PR #02: warn \u2014 Production database exposed to the internet with no expiration mechanism.\n    chose not to raise: The security group still applies to inbound traffic, and authentication is still required to access the database. These are reasonable controls but do not eliminate the risk of internet-facing infrastructure on a high-va\n",
+  "response": {
+    "verdict": "block",
+    "headline": "Wildcard IAM permissions policy grants the deploy role unrestricted access to all AWS resources",
+    "suppressed": null,
+    "findings": [
+      {
+        "address": "aws_iam_role_policy.deploy",
+        "category": "privilege-escalation",
+        "severity": "critical",
+        "evidence_ref": "The policy in aws_iam_role_policy.deploy grants Action: \"*\" and Resource: \"*\", giving the role permission to perform any action on any resource in the AWS account",
+        "explanation": "This policy grants the CodeBuild deployment role full AWS permissions with no restrictions. Even constrained to CodeBuild execution, this violates the principle of least privilege and creates a significant attack surface if the role is compromised or misused in the pipeline."
+      }
+    ]
+  },
+  "elapsed_s": 13.2,
+  "cost_usd": 0.0077
+}

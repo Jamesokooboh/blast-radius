@@ -1,0 +1,14 @@
+{
+  "verdict": "block",
+  "headline": "Enabling encryption on an existing production RDS instance forces database replacement and will cause production downtime. This change requires a coordinated migration plan, not just a configuration change.",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_db_instance.main",
+      "category": "reliability",
+      "severity": "critical",
+      "evidence_ref": "storage_encrypted = false \u2192 storage_encrypted = true on existing production RDS instance",
+      "explanation": "AWS RDS cannot enable encryption on an existing unencrypted instance in-place. AWS will force a replacement: the database is destroyed and recreated from a snapshot. This causes production downtime and requires a migration window, backup verification, and application failover plan that this PR does not document or plan for."
+    }
+  ]
+}

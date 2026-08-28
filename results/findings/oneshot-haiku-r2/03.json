@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "CodeBuild role has admin permissions; needs immediate scope-down plan",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_iam_role_policy.deploy",
+      "category": "privilege-escalation",
+      "severity": "critical",
+      "evidence_ref": "Policy statement grants `\"Action\": \"*\"` on `\"Resource\": \"*\"`",
+      "explanation": "This grants CodeBuild admin permissions on all AWS resources. While the PR notes this is temporary, admin access should never reach production even briefly\u2014establish exactly what permissions are needed and deploy scoped policies immediately after first use."
+    }
+  ]
+}

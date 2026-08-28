@@ -1,0 +1,6 @@
+{
+  "verdict": "approve",
+  "headline": "Internal ALB is correctly isolated; internal traffic will stay in VPC as intended.",
+  "suppressed": null,
+  "findings": []
+}

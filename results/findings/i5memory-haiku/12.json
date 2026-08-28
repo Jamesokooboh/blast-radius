@@ -1,0 +1,14 @@
+{
+  "verdict": "block",
+  "headline": "Application role gains read-write access to every S3 bucket in the account, not just data buckets",
+  "suppressed": "The underlying problem\u2014having to manually maintain bucket ARNs every time analytics creates a new one\u2014is real. But the solution is to scope the wildcard to a naming pattern like arn:aws:s3:::acme-prod-* and arn:aws:s3:::acme-prod-*/*, or to implement a process that automatically updates IAM policies for properly-tagged buckets, not to grant access to everything.",
+  "findings": [
+    {
+      "address": "aws_iam_role_policy (consuming app_data_bucket_arns)",
+      "category": "privilege-escalation",
+      "severity": "critical",
+      "evidence_ref": "variables.tf: app_data_bucket_arns default changed from [\"arn:aws:s3:::acme-prod-data\", \"arn:aws:s3:::acme-prod-data/*\"] to [\"*\"]",
+      "explanation": "The wildcard default grants the application role read and write permissions to all S3 buckets in the AWS account, including sensitive buckets it should never access. This violates least privilege and mirrors the privilege-escalation block decision in PR #03."
+    }
+  ]
+}

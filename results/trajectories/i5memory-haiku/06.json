@@ -1,0 +1,16 @@
+{
+  "case": "06",
+  "stage": "I5 one-shot + review memory",
+  "model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+  "aws_account": "313951301623",
+  "memory_entries": 5,
+  "prompt": "Review this Terraform pull request.\n\n## Pull request description\n\n# Serve the marketing site from S3\n\nMarketing wants to publish the static site straight from the bucket instead of\ngoing through the app. Adding a public read policy and relaxing the public\naccess block on the marketing bucket only.\n\nThe bucket holds compiled site assets: HTML, CSS, images. No customer data has\never been written to it.\n\n\n## Diff\n\n```diff\ndiff --git a/C:/Users/DELL/Documents/projects/Hackerthon/infra/base/data_stores.tf b/C:/Users/DELL/Documents/projects/Hackerthon/cases/case-06-static-site-public/overlay/data_stores.tf\nindex 7ffb97e..5817152 100644\n--- a/C:/Users/DELL/Documents/projects/Hackerthon/infra/base/data_stores.tf\n+++ b/C:/Users/DELL/Documents/projects/Hackerthon/cases/case-06-static-site-public/overlay/data_stores.tf\n@@ -90,3 +90,27 @@ resource \"aws_s3_bucket_lifecycle_configuration\" \"artifacts\" {\n     }\n   }\n }\n+\n+resource \"aws_s3_bucket_public_access_block\" \"static_site\" {\n+  bucket = aws_s3_bucket.static_site.id\n+\n+  block_public_acls       = false\n+  block_public_policy     = false\n+  ignore_public_acls      = false\n+  restrict_public_buckets = false\n+}\n+\n+resource \"aws_s3_bucket_policy\" \"static_site\" {\n+  bucket = aws_s3_bucket.static_site.id\n+\n+  policy = jsonencode({\n+    Version = \"2012-10-17\"\n+    Statement = [{\n+      Sid       = \"PublicReadForMarketingSite\"\n+      Effect    = \"Allow\"\n+      Principal = \"*\"\n+      Action    = \"s3:GetObject\"\n+      Resource  = \"${aws_s3_bucket.static_site.arn}/*\"\n+    }]\n+  })\n+}\n\n```\n\n## Earlier reviews of this stack\n\nDecisions you have already made on previous pull requests against this\nsame infrastructure. Do not relitigate a question that has been settled,\nand do not treat a past decision as binding if this change alters the\nfacts behind it.\n\n- PR #01: warn \u2014 SSH is open to the entire internet, not just on-call. This needs IP restrictions or it shouldn't merge.\n- PR #02: warn \u2014 Production database exposed to the internet with no expiration mechanism.\n    chose not to raise: The security group still applies to inbound traffic, and authentication is still required to access the database. These are reasonable controls but do not eliminate the risk of internet-facing infrastructure on a high-va\n- PR #03: block \u2014 Wildcard IAM permissions policy grants the deploy role unrestricted access to all AWS resources\n- PR #04: approve \u2014 Standard HTTP-to-HTTPS redirect with no security issues\n- PR #05: approve \u2014 Internal ALB correctly configured for VPC-local traffic\u2014nothing exposed, nothing at risk.\n",
+  "response": {
+    "verdict": "approve",
+    "headline": "Intentional, scoped, and correctly configured public access for a static marketing site with no customer data.",
+    "suppressed": null,
+    "findings": []
+  },
+  "elapsed_s": 14.2,
+  "cost_usd": 0.0076
+}

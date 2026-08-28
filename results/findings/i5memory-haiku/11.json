@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "High availability improvement is sound, but cost impact from second NAT gateway should be acknowledged",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_nat_gateway.b",
+      "category": "cost",
+      "severity": "medium",
+      "evidence_ref": "New aws_nat_gateway.b and aws_eip.nat_b added in diff; NAT gateways cost approximately $0.045/hour (~$32-45/month) plus per-gigabyte data processing charges",
+      "explanation": "Adding a second NAT gateway materially increases infrastructure costs, but the PR description does not mention this financial impact. The architectural benefit (eliminating the AZ-level SPOF) is real and valuable, but the cost should be explicit in planning."
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "verdict": "warn",
+  "headline": "New route table for private_b has only a default route \u2014 verify it includes all required routes from the original shared table",
+  "suppressed": "The change in route_table association itself is sound: private_b subnet now has per-AZ egress, which matches the stated intent. The design is correct if the new route table is complete.",
+  "findings": [
+    {
+      "address": "aws_route_table.private_b",
+      "category": "reliability",
+      "severity": "high",
+      "evidence_ref": "resource aws_route_table.private_b created with only a single route (0.0.0.0/0 to NAT gateway). The private_b subnet is being switched from aws_route_table.private to this new table.",
+      "explanation": "If the original shared route table (aws_route_table.private, still used by private_a) contains routes beyond the default (to internal resources, peering connections, VPN, etc.), those won't be in the new private_b route table, and workloads there will lose connectivity."
+    },
+    {
+      "address": "aws_eip.nat_b",
+      "category": "cost",
+      "severity": "low",
+      "evidence_ref": "New aws_eip and aws_nat_gateway created; each NAT gateway costs ~$32/month plus data processing fees",
+      "explanation": "The PR adds a second NAT gateway for fault tolerance, which is intentional, but the monthly cost increase is not mentioned in the description."
+    }
+  ]
+}

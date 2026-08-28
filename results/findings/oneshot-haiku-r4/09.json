@@ -1,0 +1,28 @@
+{
+  "verdict": "warn",
+  "headline": "App instances move from NAT gateway (private) to direct internet access (public). This is a significant security posture change that may break upstream assumptions.",
+  "suppressed": "The rate-limiting justification provided in the PR description is legitimate. However, consider whether a smaller set of instances (or a separate app tier) could use the public route while keeping the main app tier private, rather than converting both subnets wholesale.",
+  "findings": [
+    {
+      "address": "aws_route_table_association.private_a",
+      "category": "network-exposure",
+      "severity": "high",
+      "evidence_ref": "route_table_id changed from aws_route_table.private.id to aws_route_table.public.id",
+      "explanation": "App instances in these subnets now have direct internet access via the IGW instead of going through the NAT gateway. They are now directly routable from the internet if security groups permit inbound traffic."
+    },
+    {
+      "address": "aws_route_table_association.private_b",
+      "category": "network-exposure",
+      "severity": "high",
+      "evidence_ref": "route_table_id changed from aws_route_table.private.id to aws_route_table.public.id",
+      "explanation": "App instances in these subnets now have direct internet access via the IGW instead of going through the NAT gateway. They are now directly routable from the internet if security groups permit inbound traffic."
+    },
+    {
+      "address": "aws_subnet.private_a",
+      "category": "guardrail",
+      "severity": "medium",
+      "evidence_ref": "Subnets named private_a and private_b are now associated with the public route table",
+      "explanation": "The subnets are semantically private but now functionally public. This naming mismatch will confuse operators and risks future misconfiguration by someone treating these as private subnets."
+    }
+  ]
+}

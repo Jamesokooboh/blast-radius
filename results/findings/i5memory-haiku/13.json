@@ -1,0 +1,6 @@
+{
+  "verdict": "approve",
+  "headline": "Clean resource rename with proper state migration. The moved blocks ensure no destroy/recreate.",
+  "suppressed": null,
+  "findings": []
+}

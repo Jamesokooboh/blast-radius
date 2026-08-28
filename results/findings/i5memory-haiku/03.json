@@ -1,0 +1,14 @@
+{
+  "verdict": "block",
+  "headline": "Wildcard IAM permissions policy grants the deploy role unrestricted access to all AWS resources",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_iam_role_policy.deploy",
+      "category": "privilege-escalation",
+      "severity": "critical",
+      "evidence_ref": "The policy in aws_iam_role_policy.deploy grants Action: \"*\" and Resource: \"*\", giving the role permission to perform any action on any resource in the AWS account",
+      "explanation": "This policy grants the CodeBuild deployment role full AWS permissions with no restrictions. Even constrained to CodeBuild execution, this violates the principle of least privilege and creates a significant attack surface if the role is compromised or misused in the pipeline."
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "verdict": "approve",
+  "headline": "Clean refactor with proper state migration. The moved blocks ensure the physical S3 bucket stays in place; only the Terraform resource address changes.",
+  "suppressed": null,
+  "findings": []
+}

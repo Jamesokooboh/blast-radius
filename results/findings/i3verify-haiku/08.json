@@ -1,0 +1,14 @@
+{
+  "verdict": "block",
+  "headline": "Enabling encryption on an existing unencrypted RDS instance requires destroying and recreating it \u2014 this will drop the production database.",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_db_instance.main",
+      "category": "data-loss",
+      "severity": "critical",
+      "evidence_ref": "Change of `storage_encrypted = false` to `storage_encrypted = true` on an existing aws_db_instance",
+      "explanation": "AWS does not support modifying storage_encrypted in-place on an existing RDS instance. Terraform will destroy the current database and create a new encrypted one, resulting in data loss unless migrated via snapshot first. The PR description misrepresents this as a one-line configuration fix."
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "verdict": "approve",
+  "headline": "The change correctly implements the stated goal: one NAT gateway per AZ eliminates the single point of failure.",
+  "suppressed": null,
+  "findings": []
+}

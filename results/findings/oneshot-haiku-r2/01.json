@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "SSH is opened to the entire internet (0.0.0.0/0). This enables brute force and exploit attempts against a production instance, even if INFRA-2291 later moves it behind Session Manager.",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_security_group.app",
+      "category": "network-exposure",
+      "severity": "high",
+      "evidence_ref": "New ingress rule with from_port=22, to_port=22, protocol=tcp, cidr_blocks=[\"0.0.0.0/0\"]",
+      "explanation": "SSH is exposed to the entire internet, enabling brute force attacks and attempts to exploit SSH vulnerabilities. Even as a temporary measure, this is internet-facing attack surface that should be constrained to known on-call IP ranges or a bastion host."
+    }
+  ]
+}

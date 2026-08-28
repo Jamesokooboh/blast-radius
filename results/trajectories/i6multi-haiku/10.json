@@ -1,0 +1,65 @@
+{
+  "case": "10",
+  "stage": "I6 multi-agent split",
+  "model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+  "aws_account": "313951301623",
+  "specialists": {
+    "security": {
+      "verdict": "approve",
+      "headline": "No security concerns. This is a cost optimization that reduces capacity during off-peak hours.",
+      "suppressed": null,
+      "findings": []
+    },
+    "cost": {
+      "verdict": "block",
+      "headline": "Desired capacity will be overridden by minimum size; no cost savings will occur",
+      "suppressed": null,
+      "findings": [
+        {
+          "address": "aws_autoscaling_group.app",
+          "category": "cost",
+          "severity": "high",
+          "evidence_ref": "compute.tf: desired_capacity set to 1 while min_size remains 3",
+          "explanation": "Auto Scaling Groups enforce min_size as a floor. With min_size=3, the ASG will launch and maintain 3 instances regardless of the desired_capacity=1 setting. This change will not reduce running instances or costs as the PR describes."
+        }
+      ]
+    },
+    "reliability": {
+      "verdict": "warn",
+      "headline": "Desired capacity will be ignored; ASG will maintain min_size instances instead",
+      "suppressed": null,
+      "findings": [
+        {
+          "address": "aws_autoscaling_group.app",
+          "category": "reliability",
+          "severity": "high",
+          "evidence_ref": "desired_capacity set to 1 while min_size remains 3 in the same resource",
+          "explanation": "AWS Auto Scaling Groups enforce desired_capacity \u2265 min_size. Setting desired_capacity below min_size has no effect; the group will maintain all 3 instances, defeating the cost-saving goal. You must also reduce min_size to 1, or use scheduled scaling instead."
+        }
+      ]
+    }
+  },
+  "merged": {
+    "verdict": "block",
+    "headline": "This change has no effect \u2014 Auto Scaling Groups enforce min_size as a hard floor, so the ASG will still run 3 instances and save nothing.",
+    "suppressed": null,
+    "findings": [
+      {
+        "address": "aws_autoscaling_group.app",
+        "category": "cost",
+        "severity": "high",
+        "evidence_ref": "desired_capacity changed from 3 to 1 in compute.tf, but min_size remains 3",
+        "explanation": "AWS Auto Scaling Groups ignore desired_capacity when it falls below min_size. The ASG will maintain 3 instances regardless, defeating the stated cost-saving goal. To scale down overnight, either reduce min_size to 1 or use scheduled scaling instead."
+      },
+      {
+        "address": "aws_autoscaling_group.app",
+        "category": "reliability",
+        "severity": "high",
+        "evidence_ref": "The PR description states 'scale the app fleet down to one instance' but the code change cannot achieve this",
+        "explanation": "The change as written will not reduce running instances, so the application's actual capacity will not match what the PR claims. The mismatch will cause confusion and prevent the cost savings mentioned in the PR description."
+      }
+    ]
+  },
+  "elapsed_s": 35.2,
+  "cost_usd": 0.0231
+}

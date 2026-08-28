@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "Second NAT gateway improves availability but adds ~$32/month in recurring costs, not mentioned in the PR description",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_nat_gateway.b",
+      "category": "cost",
+      "severity": "high",
+      "evidence_ref": "PR adds aws_nat_gateway.b and aws_eip.nat_b, a second NAT gateway that incurs ~$32/month in data processing charges",
+      "explanation": "The change duplicates NAT infrastructure for AZ redundancy, which is sound, but the PR description omits that this doubles monthly egress costs from one to two gateways (approximately $394/year recurring)."
+    }
+  ]
+}

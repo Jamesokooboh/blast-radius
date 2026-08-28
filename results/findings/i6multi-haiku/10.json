@@ -1,0 +1,21 @@
+{
+  "verdict": "block",
+  "headline": "This change has no effect \u2014 Auto Scaling Groups enforce min_size as a hard floor, so the ASG will still run 3 instances and save nothing.",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_autoscaling_group.app",
+      "category": "cost",
+      "severity": "high",
+      "evidence_ref": "desired_capacity changed from 3 to 1 in compute.tf, but min_size remains 3",
+      "explanation": "AWS Auto Scaling Groups ignore desired_capacity when it falls below min_size. The ASG will maintain 3 instances regardless, defeating the stated cost-saving goal. To scale down overnight, either reduce min_size to 1 or use scheduled scaling instead."
+    },
+    {
+      "address": "aws_autoscaling_group.app",
+      "category": "reliability",
+      "severity": "high",
+      "evidence_ref": "The PR description states 'scale the app fleet down to one instance' but the code change cannot achieve this",
+      "explanation": "The change as written will not reduce running instances, so the application's actual capacity will not match what the PR claims. The mismatch will cause confusion and prevent the cost savings mentioned in the PR description."
+    }
+  ]
+}

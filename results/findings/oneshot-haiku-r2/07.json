@@ -1,0 +1,6 @@
+{
+  "verdict": "approve",
+  "headline": "Staging bucket for uploads implements the stated design correctly with appropriate lifecycle rules",
+  "suppressed": null,
+  "findings": []
+}

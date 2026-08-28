@@ -1,0 +1,6 @@
+{
+  "verdict": "approve",
+  "headline": "HTTP-to-HTTPS redirect is a standard pattern, properly implemented.",
+  "suppressed": null,
+  "findings": []
+}

@@ -1,0 +1,14 @@
+{
+  "verdict": "block",
+  "headline": "SSH is opened to the entire internet, not just on-call \u2014 this is an unintended attack surface on production app instances",
+  "suppressed": "The follow-up ticket to move this behind Session Manager is noted, but does not resolve the security problem introduced by this change. Either restrict this to known on-call IPs now, or do not merge it yet.",
+  "findings": [
+    {
+      "address": "aws_security_group.app",
+      "category": "network-exposure",
+      "severity": "critical",
+      "evidence_ref": "New ingress rule: port 22, protocol tcp, cidr_blocks = [\"0.0.0.0/0\"]",
+      "explanation": "SSH access to app instances is now reachable from anywhere on the internet. The stated goal is to help on-call get in, but on-call has specific IPs or identity \u2014 they do not need access from 0.0.0.0/0. This creates a direct attack vector on production."
+    }
+  ]
+}

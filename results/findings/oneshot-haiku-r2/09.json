@@ -1,0 +1,21 @@
+{
+  "verdict": "warn",
+  "headline": "Application tier subnets converted from private to public internet routing, exposing instances directly to the internet",
+  "suppressed": "The rate-limiting problem is real and direct egress is a valid solution, but this needs security group review and explicit sign-off that application instances are safe to expose directly to the internet.",
+  "findings": [
+    {
+      "address": "aws_route_table_association.private_a",
+      "category": "network-exposure",
+      "severity": "critical",
+      "evidence_ref": "route_table_id changed from aws_route_table.private.id to aws_route_table.public.id in network.tf",
+      "explanation": "Subnets named 'private_a' and 'private_b' are being reassociated to the public route table. This converts them to effectively public subnets with direct internet routing, exposing instances to inbound internet traffic and direct attacks, not just outbound API calls."
+    },
+    {
+      "address": "aws_route_table_association.private_b",
+      "category": "network-exposure",
+      "severity": "critical",
+      "evidence_ref": "route_table_id changed from aws_route_table.private.id to aws_route_table.public.id in network.tf",
+      "explanation": "Subnets named 'private_a' and 'private_b' are being reassociated to the public route table. This converts them to effectively public subnets with direct internet routing, exposing instances to inbound internet traffic and direct attacks, not just outbound API calls."
+    }
+  ]
+}

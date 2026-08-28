@@ -1,0 +1,14 @@
+{
+  "verdict": "block",
+  "headline": "Application role granted unrestricted access to all S3 buckets to avoid operational overhead",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "variable.app_data_bucket_arns",
+      "category": "privilege-escalation",
+      "severity": "critical",
+      "evidence_ref": "default changed from two named bucket ARNs to [\"*\"] in variables.tf",
+      "explanation": "The application role changes from accessing two specific buckets to accessing every S3 bucket in the account. A compromised application can now read and write arbitrary data, including backups, other applications' data, and any future buckets created."
+    }
+  ]
+}

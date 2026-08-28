@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "Deploy role has unrestricted permissions across all AWS services and resources",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_iam_role_policy.deploy",
+      "category": "privilege-escalation",
+      "severity": "critical",
+      "evidence_ref": "Lines 44-45 of the added policy: Action = \"*\", Resource = \"*\"",
+      "explanation": "The CodeBuild deploy role can perform any action on any AWS resource, including creating/modifying IAM policies, deleting data, and escalating its own permissions. A compromise of the CodeBuild environment grants complete AWS account access. The PR acknowledges this is temporary, but there must be a concrete plan and timeline to scope this down immediately."
+    }
+  ]
+}

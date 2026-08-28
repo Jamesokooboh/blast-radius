@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "desired_capacity cannot be less than min_size \u2014 this won't scale down",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_autoscaling_group.app",
+      "category": "reliability",
+      "severity": "high",
+      "evidence_ref": "compute.tf line 29: desired_capacity changed to 1, but min_size remains 3",
+      "explanation": "When desired_capacity is set below min_size, AWS ignores it and maintains min_size instances instead. The ASG will keep running 3 instances, defeating the cost savings goal. To scale down overnight, min_size must also be reduced to 1, or use scheduled actions to set different min/desired/max at different times."
+    }
+  ]
+}

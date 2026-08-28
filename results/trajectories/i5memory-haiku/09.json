@@ -1,0 +1,38 @@
+{
+  "case": "09",
+  "stage": "I5 one-shot + review memory",
+  "model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+  "aws_account": "313951301623",
+  "memory_entries": 8,
+  "prompt": "Review this Terraform pull request.\n\n## Pull request description\n\n# Give the app subnets direct internet access\n\nThe vendor API we integrate with rate-limits by source IP, and our NAT gateway's\nsingle address keeps getting throttled. Pointing the app subnets at the public\nroute table so instances egress directly.\n\n\n## Diff\n\n```diff\ndiff --git a/C:/Users/DELL/Documents/projects/Hackerthon/infra/base/network.tf b/C:/Users/DELL/Documents/projects/Hackerthon/cases/case-09-subnet-igw-route/overlay/network.tf\nindex 4edc044..7f771f7 100644\n--- a/C:/Users/DELL/Documents/projects/Hackerthon/infra/base/network.tf\n+++ b/C:/Users/DELL/Documents/projects/Hackerthon/cases/case-09-subnet-igw-route/overlay/network.tf\n@@ -120,10 +120,10 @@ resource \"aws_route_table_association\" \"public_b\" {\n \n resource \"aws_route_table_association\" \"private_a\" {\n   subnet_id      = aws_subnet.private_a.id\n-  route_table_id = aws_route_table.private.id\n+  route_table_id = aws_route_table.public.id\n }\n \n resource \"aws_route_table_association\" \"private_b\" {\n   subnet_id      = aws_subnet.private_b.id\n-  route_table_id = aws_route_table.private.id\n+  route_table_id = aws_route_table.public.id\n }\n\n```\n\n## Earlier reviews of this stack\n\nDecisions you have already made on previous pull requests against this\nsame infrastructure. Do not relitigate a question that has been settled,\nand do not treat a past decision as binding if this change alters the\nfacts behind it.\n\n- PR #01: warn \u2014 SSH is open to the entire internet, not just on-call. This needs IP restrictions or it shouldn't merge.\n- PR #02: warn \u2014 Production database exposed to the internet with no expiration mechanism.\n    chose not to raise: The security group still applies to inbound traffic, and authentication is still required to access the database. These are reasonable controls but do not eliminate the risk of internet-facing infrastructure on a high-va\n- PR #03: block \u2014 Wildcard IAM permissions policy grants the deploy role unrestricted access to all AWS resources\n- PR #04: approve \u2014 Standard HTTP-to-HTTPS redirect with no security issues\n- PR #05: approve \u2014 Internal ALB correctly configured for VPC-local traffic\u2014nothing exposed, nothing at risk.\n- PR #06: approve \u2014 Intentional, scoped, and correctly configured public access for a static marketing site with no customer data.\n- PR #07: approve \u2014 Temporary staging bucket with automatic cleanup\u2014appropriate for its purpose and correctly configured\n- PR #08: warn \u2014 Enabling encryption on an existing RDS instance requires destroying and recreating the database\u2014this will cause downtime and data loss if not migrated carefully. The PR description misses this critical detail.\n",
+  "response": {
+    "verdict": "warn",
+    "headline": "Private subnets become directly internet-routable, bypassing the NAT gateway security boundary",
+    "suppressed": "Vendor API rate-limiting is a real constraint, and distributing egress IPs across instances instead of a single NAT is a valid approach, but this PR frames an architecture downgrade (private to public subnets) as a mere routing fix. The PR needs to acknowledge what's actually changing: security boundary shifts always warrant explicit architectural review, not just implementation discussion.",
+    "findings": [
+      {
+        "address": "aws_route_table_association.private_a",
+        "category": "network-exposure",
+        "severity": "high",
+        "evidence_ref": "Lines 123: route_table_id changed from aws_route_table.private.id to aws_route_table.public.id",
+        "explanation": "Subnets named private_a and private_b are no longer routing through a NAT gateway; they now route directly through the internet gateway. This makes any instances with public IPs in these subnets directly reachable from the internet, a significant change from the previous private-subnet security model."
+      },
+      {
+        "address": "aws_route_table_association.private_b",
+        "category": "network-exposure",
+        "severity": "high",
+        "evidence_ref": "Lines 128: route_table_id changed from aws_route_table.private.id to aws_route_table.public.id",
+        "explanation": "Same exposure as private_a: direct internet routing instead of NAT outbound-only. Combined with PR #01's finding that SSH is already open to the internet, this puts application instances at much higher risk of compromise."
+      },
+      {
+        "address": "aws_route_table_association.private_a",
+        "category": "guardrail",
+        "severity": "medium",
+        "evidence_ref": "Subnets aws_subnet.private_a and aws_subnet.private_b are now associated with aws_route_table.public",
+        "explanation": "Subnets named 'private' now use the public route table, creating a confusing pattern where the name no longer matches the network behavior. Future engineers will misunderstand the security posture and may misconfigure related resources."
+      }
+    ]
+  },
+  "elapsed_s": 16.0,
+  "cost_usd": 0.011
+}

@@ -1,0 +1,6 @@
+{
+  "verdict": "approve",
+  "headline": "Well-designed internal ALB that keeps service-to-service traffic inside the VPC, with appropriate safeguards documented.",
+  "suppressed": null,
+  "findings": []
+}

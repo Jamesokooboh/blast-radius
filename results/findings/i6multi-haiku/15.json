@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "Removing a production data guard without investigating the actual problem \u2014 this appears to be masking rather than fixing the CI failure",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_s3_bucket.data",
+      "category": "guardrail",
+      "severity": "high",
+      "evidence_ref": "Removal of `lifecycle { prevent_destroy = true }` block in data_stores.tf",
+      "explanation": "The lifecycle guard protected this production data bucket from accidental destruction. It is being removed to unblock CI, but the PR does not explain why Terraform is attempting to destroy the bucket in the first place. Removing the guard masks a real problem rather than solving it, leaving data vulnerable to accidents if the underlying issue resurfaces."
+    }
+  ]
+}

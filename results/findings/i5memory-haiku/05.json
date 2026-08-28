@@ -1,0 +1,6 @@
+{
+  "verdict": "approve",
+  "headline": "Internal ALB correctly configured for VPC-local traffic\u2014nothing exposed, nothing at risk.",
+  "suppressed": null,
+  "findings": []
+}

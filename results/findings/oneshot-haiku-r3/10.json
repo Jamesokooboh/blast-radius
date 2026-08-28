@@ -1,0 +1,14 @@
+{
+  "verdict": "block",
+  "headline": "desired_capacity below min_size makes this configuration invalid and won't achieve the scaling goal",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_autoscaling_group.app",
+      "category": "reliability",
+      "severity": "critical",
+      "evidence_ref": "desired_capacity changed to 1, but min_size remains 3",
+      "explanation": "AWS ASG requires desired_capacity to fall between min_size and max_size. This configuration is invalid\u2014the ASG will ignore the desired_capacity=1 and maintain at least 3 instances, defeating the cost savings goal. You need to also reduce min_size to 1."
+    }
+  ]
+}

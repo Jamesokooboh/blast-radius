@@ -1,0 +1,14 @@
+{
+  "verdict": "block",
+  "headline": "Desired capacity cannot be lower than minimum size; this configuration will be ignored and capacity will remain at 3 instances.",
+  "suppressed": "The goal of cost savings overnight is sound, but the implementation needs either min_size reduced to 1 or a scheduled action to temporarily adjust these values during off-peak hours.",
+  "findings": [
+    {
+      "address": "aws_autoscaling_group.app",
+      "category": "reliability",
+      "severity": "high",
+      "evidence_ref": "desired_capacity = 1 with min_size = 3 in the same resource",
+      "explanation": "AWS Auto Scaling Groups enforce that desired_capacity must be between min_size and max_size. This change will have no effect; the ASG will ignore the desired_capacity of 1 and immediately scale to 3 instances to meet the minimum requirement, negating the cost savings goal."
+    }
+  ]
+}

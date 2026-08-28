@@ -1,0 +1,21 @@
+{
+  "verdict": "block",
+  "headline": "Application role gains unrestricted S3 access; a compromise now exposes entire data estate instead of specific buckets",
+  "suppressed": "The PR author wants to avoid manual updates when analytics creates new buckets. This is a valid operational pain point, but the solution trades security for convenience. Better alternatives exist: use bucket name patterns (arn:aws:s3:::acme-prod-*), tag-based access control, or automatic variable updates via CI/CD, each of which solves the real problem without exposing the entire S3 estate.",
+  "findings": [
+    {
+      "address": "aws_iam_role_policy",
+      "category": "privilege-escalation",
+      "severity": "critical",
+      "evidence_ref": "variables.tf line 30-31: app_data_bucket_arns default changed from specific bucket ARNs to [\"*\"]",
+      "explanation": "The application role now has read/write access to every S3 bucket in the account, not just acme-prod-data. Any compromise of the app grants attackers access to backups, logs, and sensitive data across the entire S3 estate."
+    },
+    {
+      "address": "aws_iam_role_policy",
+      "category": "guardrail",
+      "severity": "critical",
+      "evidence_ref": "variables.tf: removal of specific bucket ARN restrictions in favor of wildcard",
+      "explanation": "The guardrail limiting the app role to specific known buckets is being removed entirely. This is a permanent loosening of the security perimeter, not a temporary workaround for operational friction."
+    }
+  ]
+}

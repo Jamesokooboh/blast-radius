@@ -1,0 +1,50 @@
+{
+  "case": "11",
+  "stage": "I6 multi-agent split",
+  "model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+  "aws_account": "313951301623",
+  "specialists": {
+    "security": {
+      "verdict": "approve",
+      "headline": "Adding a second NAT gateway for redundancy per AZ. No new security exposure.",
+      "suppressed": null,
+      "findings": []
+    },
+    "cost": {
+      "verdict": "warn",
+      "headline": "Second NAT gateway doubles egress costs by ~$32/month; PR description does not mention this",
+      "suppressed": null,
+      "findings": [
+        {
+          "address": "aws_nat_gateway.b",
+          "category": "cost",
+          "severity": "high",
+          "evidence_ref": "Pull request adds aws_nat_gateway.b and aws_eip.nat_b resources. NAT gateway costs $0.045/hour; adding a second increases monthly NAT costs from ~$32 to ~$64.",
+          "explanation": "The PR description focuses on high availability but does not disclose that doubling from one to two NAT gateways increases recurring infrastructure costs by approximately $32/month or $394/year. This cost increase requires budget owner awareness."
+        }
+      ]
+    },
+    "reliability": {
+      "verdict": "approve",
+      "headline": "Change improves availability by adding AZ-redundant NAT gateway. No reliability concerns.",
+      "suppressed": null,
+      "findings": []
+    }
+  },
+  "merged": {
+    "verdict": "warn",
+    "headline": "Second NAT gateway improves availability but adds ~$32/month in recurring costs, not mentioned in the PR description",
+    "suppressed": null,
+    "findings": [
+      {
+        "address": "aws_nat_gateway.b",
+        "category": "cost",
+        "severity": "high",
+        "evidence_ref": "PR adds aws_nat_gateway.b and aws_eip.nat_b, a second NAT gateway that incurs ~$32/month in data processing charges",
+        "explanation": "The change duplicates NAT infrastructure for AZ redundancy, which is sound, but the PR description omits that this doubles monthly egress costs from one to two gateways (approximately $394/year recurring)."
+      }
+    ]
+  },
+  "elapsed_s": 42.8,
+  "cost_usd": 0.0264
+}

@@ -1,0 +1,14 @@
+{
+  "verdict": "block",
+  "headline": "Application role granted access to all S3 buckets in the account instead of just specific data buckets",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "var.app_data_bucket_arns",
+      "category": "privilege-escalation",
+      "severity": "critical",
+      "evidence_ref": "default changed from specific ARNs (`acme-prod-data`) to `[\"*\"]` in variables.tf",
+      "explanation": "The application role will now have read/write access to every S3 bucket in the AWS account, including logging, billing, backups, and other applications' data. This violates the principle of least privilege and creates a severe security risk if the application or its credentials are compromised."
+    }
+  ]
+}

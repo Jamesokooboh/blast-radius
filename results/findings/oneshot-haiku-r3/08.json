@@ -1,0 +1,14 @@
+{
+  "verdict": "block",
+  "headline": "This change will fail: AWS RDS does not support enabling encryption on an existing unencrypted database in-place.",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_db_instance.main",
+      "category": "reliability",
+      "severity": "critical",
+      "evidence_ref": "diff shows storage_encrypted: false \u2192 true on existing aws_db_instance.main",
+      "explanation": "AWS RDS does not allow encryption to be enabled on an already-provisioned, unencrypted database through modification. This Terraform apply will fail. Encryption must be added by restoring from a snapshot to a new encrypted instance, then migrating traffic."
+    }
+  ]
+}

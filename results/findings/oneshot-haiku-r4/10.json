@@ -1,0 +1,14 @@
+{
+  "verdict": "block",
+  "headline": "Desired capacity cannot go below minimum size \u2014 this configuration will not scale down and you'll keep paying for 3 instances.",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_autoscaling_group.app",
+      "category": "reliability",
+      "severity": "critical",
+      "evidence_ref": "desired_capacity set to 1 while min_size remains 3 in the same resource",
+      "explanation": "AWS will keep the ASG at min_size (3 instances) regardless of the desired_capacity setting. Your stated goal of scaling down to save costs on overnight traffic will silently fail, and you will continue paying for 3 instances."
+    }
+  ]
+}

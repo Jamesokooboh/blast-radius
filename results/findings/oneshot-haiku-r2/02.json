@@ -1,0 +1,14 @@
+{
+  "verdict": "block",
+  "headline": "Production database is being made publicly accessible to the internet instead of fixing the access problem properly",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_db_instance.main",
+      "category": "network-exposure",
+      "severity": "critical",
+      "evidence_ref": "data_stores.tf line 27: publicly_accessible changed from false to true",
+      "explanation": "The production database is now routable from the public internet. This is a well-known attack vector that defeats encryption in transit and allows credential compromise; VPC peering should be used instead."
+    }
+  ]
+}

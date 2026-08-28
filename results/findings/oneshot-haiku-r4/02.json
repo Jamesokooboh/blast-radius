@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "Production database will be internet-accessible. Security group rules must be carefully reviewed.",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_db_instance.main",
+      "category": "network-exposure",
+      "severity": "high",
+      "evidence_ref": "publicly_accessible changed from false to true in data_stores.tf",
+      "explanation": "The production database becomes reachable from the internet. While the security group provides filtering, this significantly expands the attack surface. Ensure the security group rules are as restrictive as needed for Metabase to connect."
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "Enabling encryption on existing RDS instance requires database recreation and downtime, not just a config change",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_db_instance.main",
+      "category": "reliability",
+      "severity": "high",
+      "evidence_ref": "Change from `storage_encrypted = false` to `storage_encrypted = true` on an existing aws_db_instance resource",
+      "explanation": "AWS RDS cannot enable encryption on an existing database instance in place. This change will force Terraform to destroy and recreate the database, causing production downtime and requiring data migration. The PR description treats this as a one-line fix, but it is actually a significant operational change."
+    }
+  ]
+}

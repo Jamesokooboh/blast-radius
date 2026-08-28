@@ -1,0 +1,24 @@
+{
+  "case": "01",
+  "stage": "I5 one-shot + review memory",
+  "model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+  "aws_account": "313951301623",
+  "memory_entries": 0,
+  "prompt": "Review this Terraform pull request.\n\n## Pull request description\n\n# Allow SSH to app instances for on-call\n\nOn-call could not get onto the app boxes during Tuesday's incident and had to\nwait for someone with VPN access to wake up. Opening 22 on the app security\ngroup so the rotation can get in directly.\n\nFollow-up ticket INFRA-2291 will move this behind Session Manager.\n\n\n## Diff\n\n```diff\ndiff --git a/C:/Users/DELL/Documents/projects/Hackerthon/infra/base/security.tf b/C:/Users/DELL/Documents/projects/Hackerthon/cases/case-01-ssh-open/overlay/security.tf\nindex d11da40..ef2af09 100644\n--- a/C:/Users/DELL/Documents/projects/Hackerthon/infra/base/security.tf\n+++ b/C:/Users/DELL/Documents/projects/Hackerthon/cases/case-01-ssh-open/overlay/security.tf\n@@ -38,6 +38,14 @@ resource \"aws_security_group\" \"app\" {\n     security_groups = [aws_security_group.alb.id]\n   }\n \n+  ingress {\n+    description = \"SSH for the on-call rotation\"\n+    from_port   = 22\n+    to_port     = 22\n+    protocol    = \"tcp\"\n+    cidr_blocks = [\"0.0.0.0/0\"]\n+  }\n+\n   egress {\n     from_port   = 0\n     to_port     = 0\n\n```\n",
+  "response": {
+    "verdict": "warn",
+    "headline": "SSH is open to the entire internet, not just on-call. This needs IP restrictions or it shouldn't merge.",
+    "suppressed": null,
+    "findings": [
+      {
+        "address": "aws_security_group.app",
+        "category": "network-exposure",
+        "severity": "critical",
+        "evidence_ref": "New ingress rule on port 22 with cidr_blocks = [\"0.0.0.0/0\"]",
+        "explanation": "SSH is now reachable from anywhere on the internet. This opens the app instances to automated SSH brute-force and reconnaissance, and should be restricted to the on-call team's actual IP addresses or a specific VPN CIDR at minimum."
+      }
+    ]
+  },
+  "elapsed_s": 12.4,
+  "cost_usd": 0.0065
+}

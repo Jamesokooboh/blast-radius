@@ -1,0 +1,58 @@
+{
+  "case": "01",
+  "stage": "I6 multi-agent split",
+  "model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+  "aws_account": "313951301623",
+  "specialists": {
+    "security": {
+      "verdict": "block",
+      "headline": "Production app instances now SSH-accessible from the entire internet",
+      "suppressed": null,
+      "findings": [
+        {
+          "address": "aws_security_group.app",
+          "category": "network-exposure",
+          "severity": "critical",
+          "evidence_ref": "Ingress rule added with `cidr_blocks = [\"0.0.0.0/0\"]` on port 22",
+          "explanation": "The app security group now accepts SSH connections from any IP address on the internet. This dramatically expands the attack surface of production instances and should never be open to 0.0.0.0/0, even temporarily."
+        }
+      ]
+    },
+    "cost": {
+      "verdict": "approve",
+      "headline": "No cost impact from this security group rule.",
+      "suppressed": null,
+      "findings": []
+    },
+    "reliability": {
+      "verdict": "warn",
+      "headline": "SSH is being opened to the entire internet, not just the on-call rotation",
+      "suppressed": "The PR acknowledges this is temporary with a follow-up ticket (INFRA-2291) to move to Session Manager. That's good intent, but without SLA/timeline enforcement or a feature flag, temporary often becomes permanent. The risk is moderate because it's SSH (remote code execution) rather than just network visibility.",
+      "findings": [
+        {
+          "address": "aws_security_group.app",
+          "category": "guardrail",
+          "severity": "high",
+          "evidence_ref": "New ingress rule with cidr_blocks = [\"0.0.0.0/0\"] on port 22",
+          "explanation": "The rule opens SSH to any source on the internet. The PR description says this is for the on-call rotation, but the configuration gives access to everyone, not just known IPs or rotation members."
+        }
+      ]
+    }
+  },
+  "merged": {
+    "verdict": "block",
+    "headline": "SSH to production app instances is open to the entire internet, not just the on-call rotation",
+    "suppressed": null,
+    "findings": [
+      {
+        "address": "aws_security_group.app",
+        "category": "network-exposure",
+        "severity": "critical",
+        "evidence_ref": "New ingress rule: port 22, protocol tcp, cidr_blocks = [\"0.0.0.0/0\"]",
+        "explanation": "The rule opens SSH to any IP address on the internet, not to the on-call rotation as described. This dramatically expands the attack surface of production instances. The implementation must be restricted to known IPs, a VPN CIDR, or the follow-up Session Manager solution before merging."
+      }
+    ]
+  },
+  "elapsed_s": 39.6,
+  "cost_usd": 0.0234
+}

@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "Removing prevent_destroy from a data bucket to work around CI failures, rather than fixing the root cause",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_s3_bucket.data",
+      "category": "guardrail",
+      "severity": "high",
+      "evidence_ref": "Removed lifecycle { prevent_destroy = true } block from aws_s3_bucket.data in data_stores.tf",
+      "explanation": "The prevent_destroy lifecycle rule protected this bucket from accidental deletion. Removing it means a terraform destroy or resource removal will now succeed without warning, risking data loss on a bucket explicitly named 'data'. The PR description indicates this is a workaround for CI failures rather than an intentional operational change."
+    }
+  ]
+}

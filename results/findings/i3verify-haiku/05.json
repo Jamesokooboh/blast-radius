@@ -1,0 +1,6 @@
+{
+  "verdict": "approve",
+  "headline": "Internal ALB configuration is sound and matches the stated purpose of keeping service-to-service traffic within the VPC.",
+  "suppressed": null,
+  "findings": []
+}

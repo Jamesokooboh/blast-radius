@@ -1,0 +1,16 @@
+{
+  "case": "04",
+  "stage": "I5 one-shot + review memory",
+  "model": "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+  "aws_account": "313951301623",
+  "memory_entries": 3,
+  "prompt": "Review this Terraform pull request.\n\n## Pull request description\n\n# Redirect plain HTTP to HTTPS\n\nPeople typing the hostname without a scheme currently get a connection refused.\nAdding a listener on 80 that 301s to the HTTPS listener, and opening 80 on the\nload balancer security group so the redirect is reachable.\n\n\n## Diff\n\n```diff\ndiff --git a/C:/Users/DELL/Documents/projects/Hackerthon/infra/base/compute.tf b/C:/Users/DELL/Documents/projects/Hackerthon/cases/case-04-http-redirect/overlay/compute.tf\nindex 2fd68d6..210a60a 100644\n--- a/C:/Users/DELL/Documents/projects/Hackerthon/infra/base/compute.tf\n+++ b/C:/Users/DELL/Documents/projects/Hackerthon/cases/case-04-http-redirect/overlay/compute.tf\n@@ -77,3 +77,20 @@ resource \"aws_lb_listener\" \"https\" {\n     target_group_arn = aws_lb_target_group.app.arn\n   }\n }\n+\n+# Sends anyone who arrives on http:// to the https:// listener above.\n+resource \"aws_lb_listener\" \"http_redirect\" {\n+  load_balancer_arn = aws_lb.main.arn\n+  port              = 80\n+  protocol          = \"HTTP\"\n+\n+  default_action {\n+    type = \"redirect\"\n+\n+    redirect {\n+      port        = \"443\"\n+      protocol    = \"HTTPS\"\n+      status_code = \"HTTP_301\"\n+    }\n+  }\n+}\ndiff --git a/C:/Users/DELL/Documents/projects/Hackerthon/infra/base/security.tf b/C:/Users/DELL/Documents/projects/Hackerthon/cases/case-04-http-redirect/overlay/security.tf\nindex d11da40..b4483a8 100644\n--- a/C:/Users/DELL/Documents/projects/Hackerthon/infra/base/security.tf\n+++ b/C:/Users/DELL/Documents/projects/Hackerthon/cases/case-04-http-redirect/overlay/security.tf\n@@ -13,6 +13,14 @@ resource \"aws_security_group\" \"alb\" {\n     cidr_blocks = [\"0.0.0.0/0\"]\n   }\n \n+  ingress {\n+    description = \"HTTP, redirected to HTTPS by the listener\"\n+    from_port   = 80\n+    to_port     = 80\n+    protocol    = \"tcp\"\n+    cidr_blocks = [\"0.0.0.0/0\"]\n+  }\n+\n   egress {\n     from_port   = 0\n     to_port     = 0\n\n```\n\n## Earlier reviews of this stack\n\nDecisions you have already made on previous pull requests against this\nsame infrastructure. Do not relitigate a question that has been settled,\nand do not treat a past decision as binding if this change alters the\nfacts behind it.\n\n- PR #01: warn \u2014 SSH is open to the entire internet, not just on-call. This needs IP restrictions or it shouldn't merge.\n- PR #02: warn \u2014 Production database exposed to the internet with no expiration mechanism.\n    chose not to raise: The security group still applies to inbound traffic, and authentication is still required to access the database. These are reasonable controls but do not eliminate the risk of internet-facing infrastructure on a high-va\n- PR #03: block \u2014 Wildcard IAM permissions policy grants the deploy role unrestricted access to all AWS resources\n",
+  "response": {
+    "verdict": "approve",
+    "headline": "Standard HTTP-to-HTTPS redirect with no security issues",
+    "suppressed": null,
+    "findings": []
+  },
+  "elapsed_s": 10.9,
+  "cost_usd": 0.0067
+}

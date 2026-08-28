@@ -1,0 +1,14 @@
+{
+  "verdict": "block",
+  "headline": "The configuration is invalid: desired_capacity cannot be less than min_size",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_autoscaling_group.app",
+      "category": "reliability",
+      "severity": "high",
+      "evidence_ref": "compute.tf diff sets desired_capacity = 1 while min_size = 3",
+      "explanation": "AWS requires desired_capacity \u2265 min_size. This configuration will fail to apply. To scale overnight, also reduce min_size to 1, or use a scheduled action to temporarily adjust both values during low-traffic hours."
+    }
+  ]
+}
