@@ -12,7 +12,7 @@ import os
 import pathlib
 from typing import List, Literal, Optional
 
-from anthropic import AnthropicBedrockMantle
+from anthropic import AnthropicBedrock
 from pydantic import BaseModel, Field
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
@@ -22,17 +22,26 @@ REGION = os.environ.get("AWS_REGION", "us-east-1")
 # the profile is explicit rather than whatever `default` happens to point at.
 PROFILE = os.environ.get("AWS_PROFILE", "Joseph")
 
-# Bedrock model ids carry an `anthropic.` prefix, and the Messages (Mantle)
-# endpoint wants them UNDATED. `bedrock:ListFoundationModels` returns dated ids
-# like `anthropic.claude-haiku-4-5-20251001-v1` -- those are for the legacy
-# InvokeModel API and 404 here. Don't "fix" these by copying from that listing.
+# Model ids are INFERENCE PROFILE ids, with a `us.` prefix. Measured on this
+# account (313951301623), three id forms behave differently:
+#
+#   anthropic.claude-sonnet-5      -> 403 on the Messages/Mantle endpoint
+#   us.anthropic.claude-sonnet-5   -> 404 on Mantle, AccessDenied on InvokeModel
+#   us.anthropic.claude-sonnet-4-6 -> works, via the InvokeModel path
+#
+# So this uses AnthropicBedrock (the bedrock-runtime InvokeModel client), not
+# AnthropicBedrockMantle. The Claude 5 family, 4.7 and 4.8 are all AccessDenied
+# on this account; 4.6 and 4.5 are granted. See report/changelog.md.
+# Opus 4.6 is available on this account but deliberately unused: two models is
+# enough to answer "does the cheap one hold up", and a third only adds spend.
 MODELS = {
-    "sonnet": "anthropic.claude-sonnet-5",   # reported runs
-    "opus": "anthropic.claude-opus-5",       # spot-checking the hard cases
-    "haiku": "anthropic.claude-haiku-4-5",   # cheap runs while debugging plumbing
+    "sonnet": "us.anthropic.claude-sonnet-4-6",              # reported runs
+    "haiku": "us.anthropic.claude-haiku-4-5-20251001-v1:0",  # cheap runs, and the
+                                                             # cheaper-model comparison
 }
 
 # Haiku 4.5 predates adaptive thinking and rejects output_config.effort.
+# Sonnet 4.6 and Opus 4.6 both accept adaptive thinking and effort -- verified.
 LEGACY_THINKING = {"haiku"}
 
 CATEGORIES = (
@@ -82,7 +91,7 @@ def whoami():
 
 def client():
     os.environ["AWS_PROFILE"] = PROFILE
-    return AnthropicBedrockMantle(aws_region=REGION)
+    return AnthropicBedrock(aws_region=REGION)
 
 
 def review_instructions():
@@ -133,10 +142,9 @@ def to_findings_json(review):
 
 def usage_cost(response, model="sonnet"):
     """Dollars for one call, from the response's own usage figures."""
-    rates = {  # $ per million tokens, Anthropic first-party list rates
-        "sonnet": (2.0, 10.0),
-        "opus": (5.0, 25.0),
-        "haiku": (1.0, 5.0),
+    rates = {  # $ per million tokens, list rates for the models actually used
+        "sonnet": (3.0, 15.0),   # Sonnet 4.6
+        "haiku": (1.0, 5.0),     # Haiku 4.5
     }
     rate_in, rate_out = rates[model]
     u = response.usage

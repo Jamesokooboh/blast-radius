@@ -91,6 +91,47 @@ Band C is the project's reason for existing and the scanner scores 0.14 there,
 finding one case out of seven labelled findings. Band D shows the other half of
 the problem: Checkov blocks case 14, a pull request that adds two tags.
 
+## Model access: what actually runs, and why
+
+Runs go through **Amazon Bedrock** on AWS account 313951301623, authenticated by
+the ordinary AWS credential chain, so no API key exists anywhere in this
+repository. Reproducing this needs an AWS account with Anthropic model access,
+not an Anthropic API key.
+
+Three things cost time here and are recorded so nobody repeats them:
+
+1. **Bedrock serves newer Claude models through inference profiles.** The id
+   must carry a `us.` prefix and go through the `bedrock-runtime` InvokeModel
+   path (`AnthropicBedrock`), not the Messages/Mantle endpoint
+   (`AnthropicBedrockMantle`). Measured on this account:
+
+   | id | result |
+   | --- | --- |
+   | `anthropic.claude-sonnet-5` | 403 on Mantle |
+   | `us.anthropic.claude-sonnet-5` | 404 on Mantle, AccessDenied on InvokeModel |
+   | `us.anthropic.claude-sonnet-4-6` | works |
+
+2. **`ListFoundationModels` returns ids for the wrong endpoint.** It lists dated
+   forms like `anthropic.claude-haiku-4-5-20251001-v1`, which 404 on the
+   Messages endpoint. Copying ids from that listing makes things worse.
+
+3. **The Claude 5 family is not available on either account tested.** Sonnet 5,
+   Opus 5, Fable 5, Opus 4.7 and Opus 4.8 all return AccessDenied; 4.6 and 4.5
+   are granted. The Bedrock console's "Model access" page has been retired and
+   its replacement auto-enables on first invocation, so there is no form to fill
+   in -- the denial is account eligibility, not a missing opt-in.
+
+So the reported runs use **Claude Sonnet 4.6** (`us.anthropic.claude-sonnet-4-6`,
+$3/$15 per MTok) and the cheap comparison runs use **Claude Haiku 4.5**
+(`us.anthropic.claude-haiku-4-5-20251001-v1:0`, $1/$5). Opus 4.6 is available and
+deliberately unused: two models answer "does the cheaper one hold up", and a
+third only adds spend.
+
+Verified on this path: adaptive thinking, `output_config.effort`, and structured
+outputs all work on Sonnet 4.6. Haiku 4.5 rejects `effort` and takes
+`thinking: {type: "enabled", budget_tokens: N}` instead, which `tools/model.py`
+handles.
+
 ## Still to run
 
-B1 and B2 need `ANTHROPIC_API_KEY`. Nothing about the harness blocks them.
+B2, the general agent with shell access.
