@@ -1,0 +1,14 @@
+{
+  "verdict": "block",
+  "headline": "Enabling encryption on existing RDS instance requires database recreation, which will cause data loss",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_db_instance.main",
+      "category": "data-loss",
+      "severity": "critical",
+      "evidence_ref": "storage_encrypted = false \u2192 true in data_stores.tf",
+      "explanation": "AWS RDS does not support enabling encryption on an existing unencrypted database by toggling `storage_encrypted`. This parameter is immutable after instance creation; Terraform will attempt to destroy and recreate the database, resulting in data loss."
+    }
+  ]
+}

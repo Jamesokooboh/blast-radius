@@ -17,11 +17,13 @@ stages is what information reaches the model. That is the experiment.
 import argparse
 import json
 import pathlib
+import re
 import sys
 import time
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
 import model as M  # noqa: E402
+import pricing  # noqa: E402
 
 ROOT = M.ROOT
 
@@ -45,7 +47,14 @@ def changed_resources(cid):
             if c.get("change", {}).get("actions") != ["no-op"]]
 
 
-def build_prompt(cid, with_plan=False, with_scanner=False):
+def instance_type(cid):
+    """The launch template's instance type, for pricing the autoscaling group."""
+    tf = (ROOT / ".work" / cid / "compute.tf")
+    m = re.search(r'instance_type\s*=\s*"([^"]+)"', tf.read_text(encoding="utf-8")) if tf.exists() else None
+    return m.group(1) if m else None
+
+
+def build_prompt(cid, with_plan=False, with_scanner=False, with_cost=False):
     d = case_dir(cid)
     diff = (ROOT / "results" / "diffs" / f"{cid}.diff").read_text(encoding="utf-8", errors="replace")
     pr = (d / "pr_description.md").read_text(encoding="utf-8")
@@ -56,6 +65,20 @@ def build_prompt(cid, with_plan=False, with_scanner=False):
         "## Diff\n\n"
         f"```diff\n{diff}\n```\n"
     )
+    if with_cost:
+        # I4. Cost is the one category every configuration measured so far keeps
+        # dropping, and it is dropped for lack of attention rather than lack of
+        # ability -- so this supplies the number rather than a capability.
+        table = pricing.as_text(changed_resources(cid), instance_type(cid))
+        prompt += (
+            "\n## Estimated cost impact\n\n"
+            "Approximate us-east-1 on-demand list prices for the resources this "
+            "plan creates and destroys. Usage-based charges (data transfer, S3 "
+            "storage, load balancer capacity units) are not included, so treat "
+            "these as a floor rather than a total.\n\n"
+            f"```\n{table}\n```\n"
+        )
+
     if with_scanner:
         # The scoped scanner output: findings on resources this PR actually
         # changes. That is the fair version -- the same one B0' is scored on --
@@ -109,6 +132,8 @@ def main():
                     help="I1: also supply the plan's changed resources")
     ap.add_argument("--with-scanner", action="store_true",
                     help="I2: also supply the scanner output, as claims to adjudicate")
+    ap.add_argument("--with-cost", action="store_true",
+                    help="I4: also supply the monthly cost delta of the plan")
     ap.add_argument("--dry-run", action="store_true",
                     help="build the prompts and report their size without calling")
     ap.add_argument("--mode", default=None,
@@ -117,7 +142,8 @@ def main():
     args = ap.parse_args()
     M.use_profile(args.profile)
 
-    stem = ("i2scan" if args.with_scanner else
+    stem = ("i4cost" if args.with_cost else
+            "i2scan" if args.with_scanner else
             "i1plan" if args.with_plan else "oneshot")
     mode = args.mode or (stem if args.model == "sonnet" else f"{stem}-{args.model}")
     out = ROOT / "results" / "findings" / mode
@@ -137,7 +163,7 @@ def main():
         print(f"  system instructions: {len(instructions):,} chars")
         total = 0
         for cid in ids:
-            p = build_prompt(cid, args.with_plan, args.with_scanner)
+            p = build_prompt(cid, args.with_plan, args.with_scanner, args.with_cost)
             total += len(p) + len(instructions)
             print(f"  case {cid}: prompt {len(p):>6,} chars  "
                   f"(~{(len(p)+len(instructions))/3.6/1000:.1f}k tokens)")
@@ -151,7 +177,7 @@ def main():
 
     total_cost, total_s = 0.0, 0.0
     for cid in ids:
-        prompt = build_prompt(cid, args.with_plan, args.with_scanner)
+        prompt = build_prompt(cid, args.with_plan, args.with_scanner, args.with_cost)
         t0 = time.time()
         review, response = M.call(prompt, model=args.model, effort=args.effort)
         elapsed = time.time() - t0
@@ -162,7 +188,8 @@ def main():
         (out / f"{cid}.json").write_text(json.dumps(M.to_findings_json(review), indent=2))
         (traj / f"{cid}.json").write_text(json.dumps({
             "case": cid,
-            "stage": ("I2 one-shot + scanner" if args.with_scanner else
+            "stage": ("I4 one-shot + cost" if args.with_cost else
+                      "I2 one-shot + scanner" if args.with_scanner else
                       "I1 one-shot + plan" if args.with_plan else "B1 one-shot"),
             "model": M.MODELS[args.model],
             "aws_account": who["account"],

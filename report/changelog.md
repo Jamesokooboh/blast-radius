@@ -17,6 +17,7 @@ model anywhere in this project.
 | **B2** | General agent with tools and no task structure: reads the whole working directory, runs the scanner, decides for itself when to stop. Haiku 4.5. | F1 0.55 | **F1 0.636** — precision 0.583, recall 0.700, band C recall 0.57, $0.133/PR | Keep. Worse than one prompt, at 19× the cost |
 | **I1** | Add the plan's changed resources to B1′. Same model, same instructions, same code path — the plan is the only variable. | 0.68, the project's central hypothesis | **F1 0.667** — precision 0.636, recall 0.700, **band C recall 0.57**, verdict accuracy 0.467 | **Remove.** The plan makes the review worse |
 | **I2** | Add the scanner's output to B1′, framed as claims to adjudicate rather than findings to repeat. | regression, via parroting | **F1 0.842** — precision 0.889, recall 0.800, **noise 7 of 7 suppressed**, all cost findings lost | **Remove.** Right prediction, wrong mechanism |
+| **I4** | Add a computed monthly cost delta to B1′. The one addition with a specific reason to help: cost is the category every configuration keeps losing. | improvement on cost | **F1 0.842** — and **0 of 2 cost findings**, down from B1′'s 1 of 2 | **Remove.** The fix for the known weakness completed it |
 
 ## Stage notes
 
@@ -143,6 +144,46 @@ strongest fair version of the alternative. That means the agent now has to beat
 F1 0.900 at $0.007 per pull request, which is a far harder target than the 0.320
 it started with and than the 0.80 that was pre-registered. The pre-registered
 target is left where it is; the bar is what moved.
+
+### I4 — the intervention aimed at the known weakness made the weakness total
+
+Cost was the one category every configuration kept dropping, and the diagnosis
+was attention rather than ability: B1′ can price a NAT gateway, it just does not
+always think to. So I4 supplies the number directly — a computed monthly and
+annual delta for the resources the plan creates and destroys, from
+`tools/pricing.py`. It was the only stage in this project with a mechanism
+arguing in advance that it should help.
+
+**It found zero cost findings. B1′, given no cost information whatsoever, found
+one.**
+
+Case 11 is the whole result in one row. The pull request adds a second NAT
+gateway, about $438 a year, and its description mentions only availability.
+
+| | cost data supplied | verdict | headline |
+| --- | --- | --- | --- |
+| B1′ | none | **warn** | "Good reliability improvement, but adding NAT gateway doubles nat…" |
+| I2 | none (scanner output instead) | approve | "…no problems with the implementation" |
+| I4 | **+$438/year, stated explicitly** | approve | "High-availability NAT improves reliability with **expected cost**" |
+
+Shown the number, the model called the cost *expected* and approved. Not
+missed — acknowledged, and dismissed.
+
+The mechanism is worth stating carefully, because it is the most transferable
+thing this project found. **Information that answers a question also removes the
+reason to ask it.** A reviewer flags an unannounced cost because nobody has
+accounted for it; the finding is the surprise, not the arithmetic. Presenting the
+figure as a computed, labelled section of the prompt made it read as already
+accounted for. The harness did the noticing, so the reviewer stopped.
+
+Two honest limits on this claim. The cost category carries only two labelled
+findings, so the effect is legible rather than statistically strong — it is case
+11's headline, in the model's own words, that makes it more than noise. And the
+table genuinely could not reach case 09, where a NAT gateway is orphaned rather
+than created and so has no cost delta; that limitation was written into
+`pricing.py` before the run rather than discovered in the results.
+
+**Decision: remove.** Four additions, four regressions.
 
 ### I2 — the prediction was right, the mechanism was wrong, and the result is sharper for it
 
@@ -351,19 +392,22 @@ it from Band A for the diff-reading baselines.
 
 ## Every stage measured so far
 
-| | Raw Checkov | Scoped Checkov | B1 Sonnet | **B1′ Haiku** | I1 + plan | I2 + scanner | B2 + tools |
+| | Scoped Checkov | B1 Sonnet | **B1′ Haiku** | I1 plan | I2 scanner | I4 cost | B2 tools |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| **F1** | 0.052 | 0.320 | 0.783 | **0.900** | 0.667 | 0.842 | 0.636 |
-| precision | 0.028 | 0.267 | 0.692 | **0.900** | 0.636 | 0.889 | 0.583 |
-| recall | 0.400 | 0.400 | 0.900 | **0.900** | 0.700 | 0.800 | 0.700 |
-| verdict accuracy | 0.467 | 0.467 | **0.733** | 0.667 | 0.467 | 0.600 | 0.600 |
-| band A recall | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
-| band C recall | 0.14 | 0.14 | 0.86 | **0.86** | 0.57 | 0.71 | 0.57 |
-| noise suppressed | 1 of 7 | 1 of 7 | 4 of 7 | **7 of 7** | 5 of 7 | **7 of 7** | 6 of 7 |
-| cost findings found | 0 of 2 | 0 of 2 | 1 of 2 | **1 of 2** | 0 of 2 | **0 of 2** | 0 of 2 |
-| false blocks (band D) | 1 | 1 | 0 | 0 | 0 | 0 | 0 |
-| cost per PR | $0 | $0 | $0.015 | **$0.007** | $0.009 | $0.007 | $0.133 |
-| steps per PR | — | — | 1 | 1 | 1 | 1 | 7.2 |
+| **F1** | 0.320 | 0.783 | **0.900** | 0.667 | 0.842 | 0.842 | 0.636 |
+| precision | 0.267 | 0.692 | **0.900** | 0.636 | 0.889 | 0.889 | 0.583 |
+| recall | 0.400 | 0.900 | **0.900** | 0.700 | 0.800 | 0.800 | 0.700 |
+| verdict accuracy | 0.467 | **0.733** | 0.667 | 0.467 | 0.600 | 0.533 | 0.600 |
+| band C recall | 0.14 | 0.86 | **0.86** | 0.57 | 0.71 | 0.71 | 0.57 |
+| noise suppressed | 1 of 7 | 4 of 7 | **7 of 7** | 5 of 7 | **7 of 7** | **7 of 7** | 6 of 7 |
+| cost findings | 0 of 2 | 1 of 2 | **1 of 2** | 0 of 2 | 0 of 2 | **0 of 2** | 0 of 2 |
+| false blocks | 1 | 0 | 0 | 0 | 0 | 0 | 0 |
+| cost per PR | $0 | $0.015 | **$0.007** | $0.009 | $0.007 | $0.007 | $0.133 |
+| steps per PR | — | 1 | 1 | 1 | 1 | 1 | 7.2 |
+
+Nothing has beaten the first thing tried. The best reviewer measured in this
+project is one prompt, the diff, the pull request description, and the cheapest
+model available, at $0.007 per pull request.
 
 Every addition after the simplest possible thing has made the result worse. The
 best reviewer measured in this project is one prompt, the diff, the pull request
@@ -441,8 +485,15 @@ the model started answering a slightly different question than the one asked:
 | addition | what the review became about | what fell out |
 | --- | --- | --- |
 | the terraform plan | the resource lifecycle | data loss (case 08 recategorised) |
-| a security scanner's output | security | **every cost finding** |
+| a security scanner's output | security | every cost finding |
+| **a computed cost table** | **money already accounted for** | **every cost finding** |
 | file and scanner tools | the codebase | focus on the change itself |
+
+The cost table is the one that should not have happened. It was aimed precisely
+at the category that kept going missing, it supplied a true and relevant number,
+and it drove that category to zero — because a reviewer raises an unannounced
+cost out of surprise, and a number printed in the prompt is no longer a surprise.
+**Information that answers a question also removes the reason to ask it.**
 
 The plan is strictly more accurate than the diff. It is machine-generated, it is
 what Terraform will actually do, and it states the RDS replacement in as many
@@ -474,18 +525,14 @@ technique is worth keeping even though the stage that carried it is not.
 
 ## Still to run
 
-I3 (citation verification), I4 (cost tool), I5 (review memory), I6 (the
-multi-agent split).
+I3 (citation verification), I5 (review memory), I6 (the multi-agent split).
 
 **Predictions, recorded before running.** I3 only *removes* findings that cannot
 cite real evidence, so it cannot lose recall it does not already have; B1′ has
 no invented citations to remove, so the expectation is a flat result, which is
 the point -- a technique that does nothing on a clean baseline is still worth
-measuring once. I4 supplies a cost tool, which is the one addition with a
-specific reason to help: cost is the single category every configuration keeps
-losing, and it is lost for lack of attention rather than lack of ability. I6
-adds orchestration on top of a task where every addition so far has hurt, and is
-expected to be the worst result in the project.
+measuring once. I6 adds orchestration on top of a task where every addition so
+far has hurt, and is expected to be the worst result in the project.
 
 The measured headroom is verdict accuracy, which no configuration has taken above
 0.733, and where nothing tried so far has been aimed.

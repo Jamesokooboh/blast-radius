@@ -1,0 +1,6 @@
+{
+  "verdict": "approve",
+  "headline": "Sound architecture change. Internal ALB on private subnets correctly isolated and documented.",
+  "suppressed": null,
+  "findings": []
+}

@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "Role grants unrestricted permissions to CodeBuild; must be scoped down before use in production",
+  "suppressed": "The assume_role_policy correctly restricts assumption to CodeBuild only; the wildcard problem is in the permissions granted to the role, not in who can assume it.",
+  "findings": [
+    {
+      "address": "aws_iam_role_policy.deploy",
+      "category": "privilege-escalation",
+      "severity": "high",
+      "evidence_ref": "aws_iam_role_policy.deploy policy has Action: \"*\" and Resource: \"*\"",
+      "explanation": "CodeBuild can now perform any AWS action on any resource. If the CodeBuild environment or its source code is compromised, the attacker gains full account access. This must be scoped to specific actions and resources immediately, not after merging."
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "App subnets switched from private to public routing \u2014 instances now have direct internet egress, and inbound exposure if they have public IPs",
+  "suppressed": "The cost impact is nil as stated, and the core intent \u2014 getting more egress IPs to avoid rate limiting \u2014 does work as implemented. Confirm the team understands the change makes instances directly internet-reachable, not just outbound-capable.",
+  "findings": [
+    {
+      "address": "aws_route_table_association.private_a",
+      "category": "network-exposure",
+      "severity": "high",
+      "evidence_ref": "route_table_id changed from aws_route_table.private.id to aws_route_table.public.id",
+      "explanation": "Instances in private_a subnet now route to the internet directly via the IGW instead of through the NAT gateway. If any instance has a public IP or EIP, it is now directly reachable from the internet for both inbound and outbound traffic, not just outbound through NAT. The subnet is still named 'private' but is now topologically public."
+    }
+  ]
+}

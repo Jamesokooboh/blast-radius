@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "SSH is now open to the entire internet \u2014 should be restricted to known on-call IPs",
+  "suppressed": "The follow-up ticket INFRA-2291 to move this behind Session Manager is noted but has no committed timeline. Consider whether that ticket should be a hard dependency rather than a later fix.",
+  "findings": [
+    {
+      "address": "aws_security_group.app",
+      "category": "network-exposure",
+      "severity": "high",
+      "evidence_ref": "New ingress rule with `cidr_blocks = [\"0.0.0.0/0\"]` for port 22 in security.tf",
+      "explanation": "While the intent to enable on-call access is sound, opening SSH to 0.0.0.0/0 exposes the app instances to brute force attacks and vulnerability scanning from anywhere on the internet. Restrict this to a specific CIDR range of known on-call IPs, or make INFRA-2291 a blocker before this merges."
+    }
+  ]
+}

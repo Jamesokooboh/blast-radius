@@ -1,0 +1,21 @@
+{
+  "verdict": "warn",
+  "headline": "Production database exposed to public internet with no enforcement that this is temporary",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_db_instance.main",
+      "category": "network-exposure",
+      "severity": "high",
+      "evidence_ref": "publicly_accessible changed from false to true in aws_db_instance.main",
+      "explanation": "A production database is now reachable from the internet. Even with security group rules, this dramatically increases the attack surface and the risk of data breach or ransomware."
+    },
+    {
+      "address": "aws_db_instance.main",
+      "category": "guardrail",
+      "severity": "high",
+      "evidence_ref": "publicly_accessible = true is in the overlay configuration with no conditional or comment indicating it should be reverted",
+      "explanation": "The PR describes this as temporary ('while we work out VPC peering'), but the code has no safeguard preventing this from becoming permanent. Temporary security changes tend to stay unless explicitly reversed."
+    }
+  ]
+}

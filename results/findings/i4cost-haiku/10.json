@@ -1,0 +1,14 @@
+{
+  "verdict": "block",
+  "headline": "Desired capacity cannot be less than minimum size; this configuration will not achieve the stated goal",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_autoscaling_group.app",
+      "category": "reliability",
+      "severity": "critical",
+      "evidence_ref": "desired_capacity set to 1 while min_size remains 3 in compute.tf",
+      "explanation": "AWS will not allow desired capacity below the minimum size. The ASG will ignore this change and maintain 3 instances, defeating the stated goal of scaling down overnight and the projected cost savings."
+    }
+  ]
+}

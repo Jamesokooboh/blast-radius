@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "Removing prevent_destroy guardrail from data bucket to mask an undiagnosed CI failure",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_s3_bucket.data",
+      "category": "guardrail",
+      "severity": "high",
+      "evidence_ref": "Removal of `lifecycle { prevent_destroy = true }` block in data_stores.tf",
+      "explanation": "The lifecycle rule that prevents accidental destruction of the data bucket is being removed. The PR indicates CI has been failing for a week, but doesn't explain what the failure is or why removing the guard is the correct fix rather than investigating the root cause."
+    }
+  ]
+}
