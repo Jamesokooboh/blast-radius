@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "Good reliability improvement, but adding NAT gateway doubles nat egress costs",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_nat_gateway.b",
+      "category": "cost",
+      "severity": "medium",
+      "evidence_ref": "New aws_nat_gateway.b created; aws_eip.nat_b created for it",
+      "explanation": "This adds a second NAT gateway and elastic IP, increasing monthly infrastructure costs by roughly $32-50 depending on region and data transfer volume. The PR description doesn't mention cost implications."
+    }
+  ]
+}

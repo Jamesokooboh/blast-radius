@@ -13,6 +13,7 @@ model anywhere in this project.
 | **B0** | Raw Checkov, exactly as CI runs it today: whole-stack static scan, no plan, no PR description. The status quo. | F1 0.35 | **F1 0.053** — precision 0.028, recall 0.400, **9.5 findings per PR** | Keep as the honest status-quo number |
 | **B0′** | Checkov scoped to the resources the plan actually changes, as a competent CI integration would. A deliberately *stronger* baseline. | — | **F1 0.320** — precision 0.267, recall 0.400, **0.9 findings per PR** | Keep as the scanner baseline |
 | **B1** | One direct prompt over the diff and PR description. Sonnet 4.6, no plan, no scanner, no tools. | F1 0.45 | **F1 0.783** — precision 0.692, recall 0.900, band C recall 0.86 | Keep. Prediction badly wrong; see below |
+| **B1′** | The same prompt on Haiku 4.5, to test whether the result is about the task or the model. | worse than B1 | **F1 0.900** — precision 0.900, recall 0.900, noise 7 of 7 suppressed | **The new bar.** The cheap model won |
 | B2 | General agent with shell access, no task structure. | F1 0.55 | not yet run | — |
 
 ## Stage notes
@@ -89,6 +90,58 @@ which way the numbers fall:
 - The pre-registered target of F1 0.80 is retained rather than raised. Moving a
   target after seeing the baseline is how a project talks itself into a result.
 
+### B1′ — the cheaper model beat the more expensive one, and the reason is restraint
+
+Run to answer a narrow question: is B1's 0.783 a fact about the task or about
+Sonnet 4.6? The prediction was that Haiku 4.5, at a third of the price, would do
+noticeably worse on the judgment-heavy cases.
+
+It did better. **F1 0.900 against 0.783**, at $0.11 for the full fifteen cases
+versus $0.22, and faster per case.
+
+Where the two models are identical:
+
+| | Sonnet 4.6 | Haiku 4.5 |
+| --- | --- | --- |
+| recall | 0.900 | 0.900 |
+| band C recall | 0.86 | 0.86 |
+| band A recall | 1.00 | 1.00 |
+| false blocks on clean PRs | 0 | 0 |
+
+They find the same things. Detection is not what separates them.
+
+Where they differ, in opposite directions:
+
+| | Sonnet 4.6 | Haiku 4.5 |
+| --- | --- | --- |
+| precision | 0.692 | **0.900** |
+| noise correctly suppressed | 4 of 7 | **7 of 7** |
+| verdict accuracy | **0.733** | 0.667 |
+| findings per PR | 0.9 | 0.7 |
+
+Sonnet reprints three findings a good reviewer suppresses — plain HTTP on a
+listener that never leaves the VPC, an internal load balancer sharing a security
+group, a staging bucket whose contents expire in a day. Haiku suppresses all
+seven and says nothing about any of them.
+
+Haiku's failure is the mirror image. On cases 01, 02, 03, 09 and 10 it finds the
+right problem and then files it as `warn` where the label says `block`. It calls
+an unrestricted `Action: "*"` administrative policy a warning. It finds the
+right thing and under-calls it.
+
+So neither model is better at reviewing. One over-reports and escalates
+correctly; the other under-reports nothing and under-escalates everything. Both
+failure modes are calibration, and both look addressable by prompt and
+verification rather than by model capability — which is the strongest evidence
+so far for where the remaining work actually is.
+
+**B1′ becomes the bar the agent has to beat**, on the same principle that made
+scoped Checkov the baseline rather than raw Checkov: compare against the
+strongest fair version of the alternative. That means the agent now has to beat
+F1 0.900 at $0.007 per pull request, which is a far harder target than the 0.320
+it started with and than the 0.80 that was pre-registered. The pre-registered
+target is left where it is; the bar is what moved.
+
 ### A case in the set contained a real finding, and B1 found it
 
 Case 05 tests whether the agent suppresses scanner noise about an internal load
@@ -106,10 +159,10 @@ values throughout.
 This is the second defect found by reading outputs rather than scores, and the
 second correction that made the agent's job harder rather than easier.
 
-### The scoring methodology was wrong twice, and both fixes lowered the agent's future score
+### The scoring methodology was wrong three times
 
-Recorded because both were caught by looking at the baseline's output rather
-than at its score.
+Recorded because all three were caught by looking at outputs rather than scores,
+and every fix raised a baseline rather than the agent.
 
 1. **Address-only matching gave the scanner free recall.** Scoring the baseline
    generously — credit for naming the right resource, however it classified the
@@ -120,7 +173,15 @@ than at its score.
    entirely unrelated reasons. Replaced with a published check-id → category map
    (`tools/run_checkov.py`), under which Band C recall falls to 0.14.
 
-2. **Noise labels were matched by address *and* category, so miscategorising a
+2. **An input variable has three legitimate names and only one was accepted.**
+   Sonnet wrote `variable.app_data_bucket_arns`, Haiku wrote
+   `var.app_data_bucket_arns`, and the label carried the bare name — so case 12
+   scored zero for both while both had found exactly the right thing. Which form
+   a reviewer picks says nothing about review quality, so `norm()` now strips the
+   `var.` and `variable.` prefixes. This raised Haiku from 0.800 to 0.900 and had
+   already raised Sonnet from 0.727 to 0.818.
+
+3. **Noise labels were matched by address *and* category, so miscategorising a
    noise finding laundered it.** Checkov reports the case 06 public-bucket
    resources as `network-exposure` while the label carries category `noise`, so
    the keys never met and the harness reported 6/6 noise correctly suppressed
@@ -140,20 +201,25 @@ corrected to `linter_catches: true` and the case kept in Band C, since what it
 tests — reasoning about an effect absent from the diff — is still what separates
 it from Band A for the diff-reading baselines.
 
-## Band recall by stage
+## Every stage measured so far
 
-| Band | What it holds | Raw Checkov | Scoped Checkov | B1 one-shot |
+| | Raw Checkov | Scoped Checkov | B1 Sonnet 4.6 | B1′ Haiku 4.5 |
 | --- | --- | --- | --- | --- |
-| A — real problems the scanner catches | 3 cases | 1.00 | 1.00 | 1.00 |
-| B — correct but irrelevant findings | 4 cases, 7 noise labels | 1 of 7 suppressed | 1 of 7 | **4 of 7** |
-| C — cross-file, plan-transition, cost | 6 cases, 7 findings | 0.14 | 0.14 | **0.86** |
-| D — genuinely clean pull requests | 2 cases | 1 false block | 1 false block | **0 false blocks** |
-| — | findings per PR | 9.5 | 0.9 | 0.9 |
-| — | cost per PR | $0 | $0 | $0.015 |
+| **F1** | 0.052 | 0.320 | 0.783 | **0.900** |
+| precision | 0.028 | 0.267 | 0.692 | 0.900 |
+| recall | 0.400 | 0.400 | 0.900 | 0.900 |
+| verdict accuracy | 0.467 | 0.467 | **0.733** | 0.667 |
+| band A recall | 1.00 | 1.00 | 1.00 | 1.00 |
+| band C recall | 0.14 | 0.14 | 0.86 | 0.86 |
+| noise suppressed | 1 of 7 | 1 of 7 | 4 of 7 | **7 of 7** |
+| false blocks (band D) | 1 | 1 | 0 | 0 |
+| findings per PR | 9.5 | 0.9 | 0.9 | 0.7 |
+| cost per PR | $0 | $0 | $0.015 | $0.007 |
 
-Band C is the project's reason for existing. The scanner scores 0.14 there; a
-single prompt scores 0.86. Band B is where the difference now lies — nobody
-suppresses well, and that is the remaining problem.
+Band C is the project's reason for existing. The scanner scores 0.14 there; both
+models score 0.86 from the diff alone. The gap between the scanner and a single
+prompt is enormous; the gap between a single prompt and anything more elaborate
+is what remains to be shown.
 
 ## Model access: what actually runs, and why
 

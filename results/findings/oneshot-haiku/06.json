@@ -1,0 +1,6 @@
+{
+  "verdict": "approve",
+  "headline": "Marketing static site bucket is correctly configured as intended: read-only public access to compiled assets with no customer data",
+  "suppressed": null,
+  "findings": []
+}

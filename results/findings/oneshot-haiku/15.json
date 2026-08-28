@@ -1,0 +1,14 @@
+{
+  "verdict": "warn",
+  "headline": "Critical guardrail removed from production data bucket without addressing root cause",
+  "suppressed": null,
+  "findings": [
+    {
+      "address": "aws_s3_bucket.data",
+      "category": "guardrail",
+      "severity": "high",
+      "evidence_ref": "Removal of `lifecycle { prevent_destroy = true }` block in data_stores.tf",
+      "explanation": "The guardrail preventing accidental destruction of the data bucket is being removed to work around a CI failure, but this leaves production data vulnerable to deletion via `terraform destroy`. The root cause\u2014why the lifecycle rule is \"blocking every unrelated change\"\u2014appears undiagnosed."
+    }
+  ]
+}

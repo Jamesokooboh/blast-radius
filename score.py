@@ -23,14 +23,21 @@ import sys
 
 ROOT = pathlib.Path(__file__).parent
 INDEX = re.compile(r"\[[^\]]*\]")
+# A Terraform input variable is legitimately written three ways. They name the
+# same thing, and which one a reviewer picks says nothing about review quality.
+VAR_PREFIX = re.compile(r"^(var|variable)\.")
 
 # ponytail: micro-averaged over findings, which weights busy cases more heavily.
 # Switch to macro if the case set ever becomes lopsided.
 
 
 def norm(address):
-    """aws_security_group.web[0] and aws_security_group.web are one resource."""
-    return INDEX.sub("", (address or "").strip()).lower()
+    """aws_security_group.web[0] and aws_security_group.web are one resource.
+
+    Likewise var.x, variable.x and x are one input variable.
+    """
+    a = INDEX.sub("", (address or "").strip()).lower()
+    return VAR_PREFIX.sub("", a)
 
 
 MATCH = "strict"  # "strict" = address and category; "address" = address only
@@ -219,6 +226,15 @@ def selfcheck():
     q = score_case(labels, parrot)
     assert q["recall"] == 1.0 and q["precision"] == 0.5, q
     assert q["noise_suppressed"] == 0, q
+
+    # The three ways of writing an input variable are one address.
+    varlabels = {"band": "C", "verdict": "block", "findings": [
+        {"address": "app_data_bucket_arns", "category": "privilege-escalation"}]}
+    for form in ("app_data_bucket_arns", "var.app_data_bucket_arns",
+                 "variable.app_data_bucket_arns"):
+        r = score_case(varlabels, {"verdict": "block", "findings": [
+            {"address": form, "category": "privilege-escalation"}]})
+        assert r["f1"] == 1.0, (form, r)
 
     # Noise is matched by address, so miscategorising it does not launder it.
     miscategorised = score_case(labels, {"verdict": "block", "findings": [
