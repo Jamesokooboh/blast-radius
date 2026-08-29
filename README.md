@@ -30,7 +30,7 @@ everyone else.
 The diff does not tell you what will happen. A one-line change can destroy a
 database. A variable default edited in one file can widen an IAM policy defined
 in another. Meanwhile the scanner in CI reports on the whole stack every time —
-**9.5 findings per pull request in this fixture, regardless of what changed** —
+**9.6 findings per pull request in this fixture, regardless of what changed** —
 so the team learned months ago to scroll past it. The tooling is simultaneously
 too noisy to read and too shallow to catch what causes incidents.
 
@@ -68,8 +68,8 @@ own standard deviation is 0.078.
 
 | configuration | F1 | | $/PR |
 | --- | --- | --- | --- |
-| Raw Checkov — what CI runs today | 0.052 | 9.5 findings per PR | $0 |
-| Checkov scoped to the change | 0.320 | the fair scanner baseline | $0 |
+| Raw Checkov — what CI runs today | 0.052 | 9.6 findings per PR | $0 |
+| Checkov scoped to the change | 0.320 | 1.0 findings per PR | $0 |
 | **One prompt, Haiku 4.5** (n=4) | **0.784 ± 0.078** | **the best thing measured** | **$0.007** |
 | One prompt, Sonnet 4.6 | 0.783 | no better, 2× the price | $0.015 |
 | + terraform plan (n=4) | 0.674 ± 0.038 | **worse** (−0.110, no overlap) | $0.009 |

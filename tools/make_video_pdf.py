@@ -210,7 +210,7 @@ def build():
     s.append(beat("What the scanner says about case 08", 18, [
         "It does flag the database. For missing log exports.",
         "The right resource, an entirely unrelated reason, and nothing at all "
-        "about the deletion. Unscoped in real CI it reports nine and a half "
+        "about the deletion. Unscoped in real CI it reports nine point six "
         "findings on every pull request whatever changed, which is why nobody "
         "reads it.",
     ]))

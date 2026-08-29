@@ -35,8 +35,8 @@ is only distinguishable from the baseline if it falls outside that range.
 
 | Stage | What ran, and why | Predicted | Measured | Verdict against the noise floor |
 | --- | --- | --- | --- | --- |
-| **B0** | Raw Checkov, exactly as CI runs it today: whole-stack static scan, no plan, no PR description. The status quo. | F1 0.35 | **F1 0.053** — precision 0.028, recall 0.400, **9.5 findings per PR** | Keep as the honest status-quo number |
-| **B0′** | Checkov scoped to the resources the plan actually changes, as a competent CI integration would. A deliberately *stronger* baseline. | — | **F1 0.320** — precision 0.267, recall 0.400, **0.9 findings per PR** | Keep as the scanner baseline |
+| **B0** | Raw Checkov, exactly as CI runs it today: whole-stack static scan, no plan, no PR description. The status quo. | F1 0.35 | **F1 0.052** — precision 0.028, recall 0.400, **9.6 findings per PR** | Keep as the honest status-quo number |
+| **B0′** | Checkov scoped to the resources the plan actually changes, as a competent CI integration would. A deliberately *stronger* baseline. | — | **F1 0.320** — precision 0.267, recall 0.400, **1.0 findings per PR** | Keep as the scanner baseline |
 | **B1** | One direct prompt over the diff and PR description. Sonnet 4.6, no plan, no scanner, no tools. | F1 0.45 | **F1 0.783** — precision 0.692, recall 0.900, band C recall 0.86 | Keep. Prediction badly wrong; see below |
 | **B1′** | The same prompt on Haiku 4.5, to test whether the result is about the task or the model. | worse than B1 | **F1 0.784 ± 0.078** over 4 runs (0.900, 0.762, 0.737, 0.737) | The bar. The cheap model matched or beat Sonnet |
 | **B2** | General agent with tools and no task structure: reads the whole working directory, runs the scanner, decides for itself when to stop. Haiku 4.5. | F1 0.55 | **F1 0.636** — precision 0.583, recall 0.700, band C recall 0.57, $0.133/PR | Keep. Worse than one prompt, at 19× the cost |
@@ -51,11 +51,11 @@ is only distinguishable from the baseline if it falls outside that range.
 
 ### B0 — the status quo is worse than predicted, in the way that matters
 
-F1 0.053 against a predicted 0.35. The miss is entirely precision: 0.028. Recall
+F1 0.052 against a predicted 0.35. The miss is entirely precision: 0.028. Recall
 was as expected at 0.400.
 
 The reason is the thing the project exists to fix. Checkov reports on the whole
-stack on every run, so each of the 15 pull requests draws the same ~9.5 flagged
+stack on every run, so each of the 15 pull requests draws the same ~9.6 flagged
 resources regardless of what the change touched. Recall is unaffected, precision
 collapses, and the practical result is the one every team recognises — a CI
 check that is red on every pull request and therefore read on none.
@@ -71,7 +71,7 @@ Comparing an agent against an unreadable wall of output would be a strawman, so
 the baseline was strengthened rather than left where it fell. Restricting
 Checkov to the resources the plan changes is what a diff-aware CI integration
 does, and it is a much harder thing to beat: findings per pull request fall from
-9.5 to 0.9 and F1 rises from 0.053 to 0.348.
+9.6 to 1.0 and F1 rises from 0.052 to 0.320.
 
 **B0′ is the number the agent has to beat.** B0 is reported alongside it because
 it is what the user actually experiences today.

@@ -62,7 +62,7 @@ F1 of 0.32.
 It does flag the database. For missing log exports.
 
 The right resource, an entirely unrelated reason, and nothing at all about the
-deletion. Unscoped in real CI it reports nine and a half findings on every pull
+deletion. Unscoped in real CI it reports nine point six findings on every pull
 request whatever changed, which is why nobody reads it.
 
 ## `The agent: one prompt` — 12s
