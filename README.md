@@ -238,3 +238,8 @@ model-authored command is executed anywhere in this project.
 
 Nothing here corresponds to real infrastructure. The AWS account id in the
 fixtures is all zeros and the provider credentials are the literal string `test`.
+
+This project was built with Claude Code, and every one of its commits carries a
+`Co-Authored-By: Claude Opus 5` trailer. Nothing in the repository predates the
+challenge: the first commit creates the fixture stack from an empty directory,
+and the whole history is inspectable.
