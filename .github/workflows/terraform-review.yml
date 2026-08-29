@@ -45,8 +45,10 @@ jobs:
       - name: Install dependencies
         run: pip install "anthropic[bedrock]" boto3 pydantic
 
-      # OIDC rather than long-lived keys. The role needs exactly one permission:
-      # bedrock:InvokeModel on the model you choose.
+      # OIDC rather than long-lived keys. The role needs exactly one permission,
+      # bedrock:InvokeModel, and a trust policy whose `sub` matches GitHub's
+      # immutable-ID form -- see the note in REPRODUCE.md, it is not the format
+      # most tutorials show.
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:

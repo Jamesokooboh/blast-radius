@@ -255,6 +255,79 @@ hypothesis was that the second would beat the first.
 
 ---
 
+## Running it in CI
+
+[`.github/workflows/terraform-review.yml`](.github/workflows/terraform-review.yml)
+reviews every pull request touching `*.tf`. It needs one secret,
+`AWS_REVIEW_ROLE_ARN`, pointing at a role GitHub can assume.
+
+The role needs a single permission:
+
+```json
+{
+  "Effect": "Allow",
+  "Action": "bedrock:InvokeModel",
+  "Resource": [
+    "arn:aws:bedrock:*::foundation-model/anthropic.claude-haiku-4-5-20251001-v1:0",
+    "arn:aws:bedrock:*:ACCOUNT_ID:inference-profile/us.anthropic.claude-haiku-4-5-20251001-v1:0"
+  ]
+}
+```
+
+No state access, no `terraform` permissions, nothing else — because the
+reviewer never runs `terraform plan`.
+
+### The OIDC trust policy, which is not what the tutorials show
+
+This cost the most time of anything in the CI setup, so it is written down.
+
+Every guide gives the trust policy `sub` as `repo:OWNER/REPO:*`. That is not
+what GitHub sends. The actual claim, printed from a live run, is:
+
+```
+"sub": "repo:Jamesokooboh@210551242/blast-radius@1349869613:pull_request"
+```
+
+GitHub embeds **immutable numeric IDs** for the owner and the repository. A
+policy matching on names alone never matches, and the failure is the unhelpful
+`Not authorized to perform sts:AssumeRoleWithWebIdentity` — which looks like a
+permissions problem rather than a pattern mismatch.
+
+Match on the ID form. It is also *safer* than the name form: renaming the
+repository or the account does not change the IDs, and nobody can claim your
+old name to inherit the trust.
+
+```json
+"StringLike": {
+  "token.actions.githubusercontent.com:sub": [
+    "repo:OWNER@OWNER_ID/REPO@REPO_ID:*",
+    "repo:OWNER/REPO:*"
+  ]
+}
+```
+
+To find your IDs without guessing, add this step to the workflow temporarily and
+read the log:
+
+```yaml
+- name: Debug OIDC claims
+  run: |
+    TOKEN=$(curl -sH "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+      "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com" | jq -r .value)
+    echo "$TOKEN" | cut -d. -f2 | base64 -d | jq '{sub, aud, repository}'
+```
+
+### One more thing CI catches that a laptop does not
+
+`tools/model.py` defaults to a named AWS profile, because two accounts are
+configured on the development machine. A runner has no profile — credentials
+come from the assumed role — so the workflow sets `AWS_PROFILE: ""`. Setting
+that to an empty string previously made boto3 look for a profile *named* empty
+string and fail with `ProfileNotFound: The config profile () could not be
+found`. Empty or unset now means the ordinary credential chain.
+
+---
+
 ## About the state fixture
 
 `terraform plan` against an empty state reports every resource as `create`, so a

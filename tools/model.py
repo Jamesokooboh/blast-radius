@@ -18,9 +18,12 @@ from pydantic import BaseModel, Field
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 REGION = os.environ.get("AWS_REGION", "us-east-1")
 
-# Which AWS account gets billed. Two accounts are configured on this machine, so
-# the profile is explicit rather than whatever `default` happens to point at.
-PROFILE = os.environ.get("AWS_PROFILE", "Joseph")
+# Which AWS account gets billed. Two accounts are configured on the development
+# machine, so the profile is explicit rather than whatever `default` happens to
+# point at. On CI there is no profile at all -- credentials come from an assumed
+# role -- so an empty AWS_PROFILE means "use the ordinary credential chain", not
+# "use a profile named empty string", which is what boto3 would otherwise do.
+PROFILE = os.environ.get("AWS_PROFILE", "Joseph") or None
 
 # Model ids are INFERENCE PROFILE ids, with a `us.` prefix. Measured on this
 # account (313951301623), three id forms behave differently:
@@ -72,25 +75,35 @@ class Review(BaseModel):
     )
 
 
+def _apply_profile():
+    """Set AWS_PROFILE, or clear it entirely when there is no profile."""
+    if PROFILE:
+        os.environ["AWS_PROFILE"] = PROFILE
+    else:
+        os.environ.pop("AWS_PROFILE", None)
+
+
 def use_profile(profile=None):
     """Pin the AWS profile before any client is constructed."""
     global PROFILE
     if profile:
         PROFILE = profile
-    os.environ["AWS_PROFILE"] = PROFILE
+    _apply_profile()
     return PROFILE
 
 
 def whoami():
     """Account and identity that will be billed. Printed before anything spends."""
     import boto3
-    os.environ["AWS_PROFILE"] = PROFILE
-    ident = boto3.Session(profile_name=PROFILE).client("sts").get_caller_identity()
-    return {"profile": PROFILE, "account": ident["Account"], "arn": ident["Arn"]}
+    _apply_profile()
+    session = boto3.Session(profile_name=PROFILE) if PROFILE else boto3.Session()
+    ident = session.client("sts").get_caller_identity()
+    return {"profile": PROFILE or "(credential chain)",
+            "account": ident["Account"], "arn": ident["Arn"]}
 
 
 def client():
-    os.environ["AWS_PROFILE"] = PROFILE
+    _apply_profile()
     # Bedrock throttles hard on multi-step tool loops. The SDK default of 2
     # retries is not enough; a 15-case B2 run hit 429 at case 13.
     return AnthropicBedrock(aws_region=REGION, max_retries=8, timeout=180.0)
