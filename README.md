@@ -17,7 +17,9 @@ buried.
   recorded before its run, and the four that were withdrawn
 - **[REPRODUCE.md](REPRODUCE.md)** — clean-environment guide, exact commands,
   measured runtime and cost
-- **[report/video-script.md](report/video-script.md)** — the 5-minute walkthrough
+- **[report/blast-radius-video.mp4](report/blast-radius-video.mp4)** — the
+  5-minute walkthrough (10 MB); scripts for it are in
+  [report/video-script.md](report/video-script.md)
 
 ---
 
