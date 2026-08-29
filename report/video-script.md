@@ -9,6 +9,7 @@ the change that contributed most, and one experiment removed.
 **1. Record the terminal, silently.**
 
 ```bash
+cd ~/Documents/projects/Hackerthon   # wherever you cloned it
 ./demo.sh
 ```
 

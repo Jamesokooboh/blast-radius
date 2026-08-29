@@ -140,10 +140,14 @@ def build():
 
     s.append(Paragraph("Step 1 — record the terminal", H2))
     s.append(Paragraph(
-        "Open one terminal, maximised, in the repository root. Start your screen "
+        "Open <b>Git Bash</b> (not PowerShell), maximised. Change into the "
+        "repository first -- a bare <font face='Courier-Bold'>./demo.sh</font> "
+        "from your home directory just reports 'No such file or directory'. "
+        "Start your screen "
         "recorder, run the command below, and stop recording when the GitHub URL "
         "appears. That is about <b>4 minutes 50 seconds</b> of footage.", BODY))
-    s += code("./demo.sh")
+    s += code("cd ~/Documents/projects/Hackerthon   # wherever you cloned it\n"
+              "./demo.sh")
     s.append(Paragraph(
         "<b>Windows Game Bar</b> (Win+G) is enough and needs no install. OBS gives "
         "you a tighter crop if you want one.", BODY))
@@ -164,7 +168,7 @@ def build():
     s.append(Paragraph(
         "Run the whole thing in about fifteen seconds to check every beat renders "
         "on your machine before you start recording:", BODY))
-    s += code("SPEED=20 ./demo.sh")
+    s += code("SPEED=20 ./demo.sh")   # from inside the repo
 
     s.append(Paragraph("Step 2 — lay the voice over it", H2))
     s.append(Paragraph(
