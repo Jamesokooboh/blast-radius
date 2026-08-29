@@ -1,0 +1,81 @@
+name: Terraform review
+
+# Reviews the Terraform in a pull request and posts one comment.
+#
+# It does not run `terraform init` or `terraform plan`. That is a measured
+# decision, not a shortcut: supplying the plan dropped review quality from
+# F1 0.784 to 0.674 over four runs each (report/changelog.md). Reading only the
+# diff means this job needs no state backend, no provider downloads, and no
+# permissions on your infrastructure.
+#
+# It never fails the build. Verdict accuracy topped out at 0.733 in evaluation,
+# which is not good enough to block a merge on.
+
+on:
+  pull_request:
+    paths:
+      - "**.tf"
+      - "**.tfvars"
+
+# Least privilege: read the code, write one comment, mint an OIDC token.
+permissions:
+  contents: read
+  pull-requests: write
+  id-token: write
+
+concurrency:
+  # A new push supersedes the review in flight for the same pull request.
+  group: terraform-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The base branch must be present locally to diff against it.
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install "anthropic[bedrock]" boto3 pydantic
+
+      # OIDC rather than long-lived keys. The role needs exactly one permission:
+      # bedrock:InvokeModel on the model you choose.
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_REVIEW_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Review the change
+        env:
+          # A pull request body is untrusted text and can contain backticks or
+          # $(...). Passing it through the environment keeps it inert; writing
+          # it into the command line would not.
+          PR_BODY: ${{ github.event.pull_request.body }}
+          # tools/model.py defaults to a named local profile. On a runner the
+          # credentials come from the step above, so clear it.
+          AWS_PROFILE: ""
+        run: |
+          printf '%s' "$PR_BODY" > pr-description.md
+          python review.py \
+            --repo . \
+            --base "origin/${{ github.base_ref }}" \
+            --description pr-description.md \
+            --out review-comment.md
+
+      - name: Post or update the comment
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          # --edit-last keeps one comment per pull request instead of a new one
+          # on every push; it fails when there is nothing to edit, so fall back.
+          gh pr comment "$PR" --body-file review-comment.md --edit-last \
+            || gh pr comment "$PR" --body-file review-comment.md

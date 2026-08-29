@@ -23,6 +23,43 @@ buried.
 
 ---
 
+## Using it
+
+The winning configuration is packaged as a reviewer you can point at any
+Terraform repository:
+
+```bash
+python review.py --repo ../my-infra --base main
+```
+
+It prints a pull request comment: a verdict, at most five ranked findings with
+evidence, and a note on what it decided *not* to raise.
+[`.github/workflows/terraform-review.yml`](.github/workflows/terraform-review.yml)
+runs it on every pull request touching `*.tf` and posts one comment, updating it
+in place on each push.
+
+Two behaviours are inherited from the evaluation rather than chosen by taste:
+
+- **It never runs `terraform plan`.** Supplying the plan dropped F1 from 0.784
+  to 0.674 across four runs each with no overlap, so the reviewer reads the diff
+  only. It therefore needs no state backend, no provider downloads, and no
+  permissions on your infrastructure — the CI role needs `bedrock:InvokeModel`
+  and nothing else.
+- **It comments; it does not block.** Verdict accuracy never exceeded 0.733 in
+  any configuration measured. That is not good enough to fail a build on, so the
+  job always exits zero and the verdict is advice.
+
+The prompt it ships, [`prompts/review.md`](prompts/review.md), is byte-identical
+to the one scored below. Change it and re-run the 15 labelled cases to see what
+you broke:
+
+```bash
+python tools/run_oneshot.py --all --model haiku && python score.py --mode oneshot-haiku
+```
+
+That is the unusual part: the evaluation is not a write-up alongside the tool,
+it is the tool's regression test.
+
 ## The problem
 
 The user is whoever approves infrastructure pull requests on a small team —
