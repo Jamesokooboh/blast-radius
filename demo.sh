@@ -60,19 +60,25 @@ print(f\"  verdict: {d['verdict']}\")
 print(f\"  {f['address']}  [{f['category']}]\")
 print()
 import textwrap
-print(textwrap.fill(f['explanation'], 66, initial_indent='  ', subsequent_indent='  '))"
+print(textwrap.fill(f['explanation'], 56, initial_indent='  ', subsequent_indent='  '))"
 hold 30
 
 # ── 2:20 the experiment we removed ──────────────────────────────────────────
 banner "Iteration 1: add the terraform plan. Same case."
 python -c "
 import json,pathlib,textwrap
-for m,l in [('oneshot-haiku','WITHOUT the plan'),('i1plan-haiku','WITH the plan   ')]:
+def gist(t, cap=230):
+    out=''
+    for part in t.replace('. ', '.|').split('|'):
+        if out and len(out)+len(part) > cap: break
+        out = (out+' '+part).strip()
+    return out
+for m,l in [('oneshot-haiku','WITHOUT plan'),('i1plan-haiku','WITH plan   ')]:
     d=json.loads(pathlib.Path(f'results/findings/{m}/08.json').read_text())
     f=d['findings'][0]
-    print(f'  {l}   {d[\"verdict\"]:<6} {f[\"address\"]}  [{f[\"category\"].upper()}]')
-    print(textwrap.fill(f['explanation'], 62, initial_indent='      ', subsequent_indent='      '))
-    print()"
+    print(f'  {l}  {d[\"verdict\"]:<6} {f[\"address\"]}  [{f[\"category\"].upper()}]')
+    print(textwrap.fill(gist(f['explanation']), 54, initial_indent='     ', subsequent_indent='     '))
+    if m=='oneshot-haiku': print()"
 hold 40
 
 banner "Across all fifteen cases"
