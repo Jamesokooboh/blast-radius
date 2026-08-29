@@ -39,6 +39,11 @@ for _s in (sys.stdout, sys.stderr):
     except (AttributeError, ValueError):
         pass
 
+# A runaway diff (a vendored module, a generated file, a rebase gone wrong) is
+# both expensive and worse to review than its first few hunks. Roughly 30k
+# tokens of diff, which no measured case came close to.
+MAX_DIFF_CHARS = 120_000
+
 SEVERITY_ORDER = {"critical": 0, "high": 1, "medium": 2, "low": 3}
 VERDICT_NOTE = {
     "block": "Do not merge without addressing the finding above.",
@@ -74,6 +79,19 @@ def terraform_diff(repo, base):
     if not diff.strip():
         diff = git(repo, "diff", "--cached", *spec, "--", "*.tf", "*.tfvars")
     return diff
+
+
+def cap_diff(diff, limit=MAX_DIFF_CHARS):
+    """Truncate an oversized diff at a hunk boundary, and say so."""
+    if len(diff) <= limit:
+        return diff
+    cut = diff.rfind("\n@@ ", 0, limit)
+    if cut <= 0:  # no hunk header early enough; fall back to a line boundary
+        cut = diff.rfind("\n", 0, limit)
+    kept = diff[:cut] if cut > 0 else diff[:limit]
+    return (kept + "\n\n[diff truncated: %d of %d characters shown. Review "
+            "what is here and say in the headline that the change was too "
+            "large to read in full.]\n" % (len(kept), len(diff)))
 
 
 def build_prompt(diff, description):
@@ -121,6 +139,8 @@ def main():
     ap.add_argument("--base", default="main", help="base branch to diff against")
     ap.add_argument("--diff", help="read a diff from this file instead of git")
     ap.add_argument("--description", help="file holding the PR description")
+    ap.add_argument("--max-diff-chars", type=int, default=MAX_DIFF_CHARS,
+                    help="truncate diffs longer than this (0 disables)")
     ap.add_argument("--model", default="haiku", choices=list(M.MODELS))
     ap.add_argument("--profile", default=None, help="AWS profile to bill")
     ap.add_argument("--json", action="store_true", help="emit JSON, not markdown")
@@ -133,6 +153,13 @@ def main():
     if not diff.strip():
         print("No Terraform changes to review.", file=sys.stderr)
         return 0
+
+    if args.max_diff_chars:
+        capped = cap_diff(diff, args.max_diff_chars)
+        if capped != diff:
+            print(f"Diff is {len(diff)} characters; truncating to "
+                  f"{args.max_diff_chars}.", file=sys.stderr)
+            diff = capped
 
     description = (pathlib.Path(args.description).read_text(encoding="utf-8")
                    if args.description else None)
