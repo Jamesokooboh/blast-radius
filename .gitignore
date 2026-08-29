@@ -13,3 +13,8 @@ results/plans/*.plan.json
 
 # The competition brief is micro1's material, not ours to redistribute.
 *.pdf
+
+# Generated from the markdown by tools/md_to_pdf.py
+README.pdf
+REPRODUCE.pdf
+report/changelog.pdf
