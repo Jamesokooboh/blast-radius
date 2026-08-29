@@ -1,0 +1,195 @@
+BLAST RADIUS - VOICEOVER SCRIPT FOR TEXT TO SPEECH
+==================================================
+
+For CapCut's Text-to-speech rather than a recorded voice. Every block below is
+plain speakable text: no markdown, no underscores, no symbols a synthetic voice
+reads out loud or stumbles over. Numbers are spelled the way they should sound.
+
+Each block is written to fit its beat at roughly 130 to 150 words per minute,
+which is a comfortable pace for a synthetic narrator on technical material. A
+first draft of this script needed 180 words per minute to fit and had to be cut.
+
+HOW TO USE IT IN CAPCUT
+  1. Import Blast-radius-small.mp4 to the timeline.
+  2. For each block: add a Text element, paste the block, then use
+     Text -> Text to speech to generate the audio.
+  3. Delete the text element afterwards if you do not want subtitles on screen.
+     The generated audio stays.
+  4. Drag each audio clip to start where its blue banner appears in the footage.
+  5. Audio may run a second or two past a banner change. That is fine and looks
+     natural. Do not speed the voice up to force an exact fit.
+
+VOICE: pick a calm, slower narration voice. This is a technical result, not an
+advert. Avoid the energetic "social media" presets.
+
+The heading above each block is the blue banner you will see in the footage.
+The time is how long that banner stays on screen.
+
+
+------------------------------------------------------------------
+BEAT 1  -  "A pull request against production infrastructure"  (20s)
+------------------------------------------------------------------
+
+This is a pull request against production infrastructure. It says: enable
+encryption at rest on the production database, to close a compliance finding.
+
+It's a security improvement. It's correct. And it's one line.
+
+
+------------------------------------------------------------------
+BEAT 2  -  "The entire change"  (20s)
+------------------------------------------------------------------
+
+That's the whole change. Storage encrypted, false to true.
+
+Merging it destroys the database. That attribute is immutable on R D S, so
+Terraform deletes the instance and creates a new empty one. Nothing in the diff
+says so.
+
+Whoever approves this is the last checkpoint before production.
+
+
+------------------------------------------------------------------
+BEAT 3  -  "The baseline: a static scanner, scored generously"  (16s)
+------------------------------------------------------------------
+
+The tool most teams already have is a static scanner. Here is Checkov, across
+fifteen labelled pull requests, scored generously.
+
+An F one score of zero point three two.
+
+
+------------------------------------------------------------------
+BEAT 4  -  "What the scanner says about case 08"  (18s)
+------------------------------------------------------------------
+
+It does flag the database. For missing log exports.
+
+The right resource, an entirely unrelated reason, and nothing about the
+deletion. Unrestricted, it reports nine point six findings on every pull
+request, whatever changed. Which is why nobody reads it.
+
+
+------------------------------------------------------------------
+BEAT 5  -  "The agent: one prompt, the diff, Haiku 4.5 on Bedrock"  (12s)
+------------------------------------------------------------------
+
+So here is the agent. One prompt: the diff, and the pull request description.
+Claude Haiku four point five, through Bedrock. No plan, no tools, no retries.
+
+
+------------------------------------------------------------------
+BEAT 6  -  "The finding"  (30s)
+------------------------------------------------------------------
+
+Verdict: block. One finding, on the database, categorised data loss.
+
+It says: AWS does not support modifying storage encrypted in place. Terraform
+will destroy the current database and create a new one, resulting in data loss
+unless migrated via snapshot first.
+
+Ten seconds. Less than a cent. And it got there from the diff alone, without
+ever being shown the plan.
+
+
+------------------------------------------------------------------
+BEAT 7  -  "Iteration 1: add the terraform plan. Same case."  (40s)
+------------------------------------------------------------------
+
+Which brings me to the thing this project was built around, and cut.
+
+The premise was that a reviewer needs the plan, because the diff doesn't say
+what will happen. So iteration one adds it. Same model, same prompt, same code
+path. One flag.
+
+Same case. Still blocked. Still the right resource. Look at the category.
+
+Without the plan: data loss. It will destroy the database.
+
+With the plan: reliability. The application will lose connectivity for ten to
+thirty minutes.
+
+Downtime. Not data loss. Shown a plan that says delete, then create, it reasoned
+about the resource lifecycle, and stopped reasoning about what was inside it.
+
+
+------------------------------------------------------------------
+BEAT 8  -  "Across all fifteen cases"  (14s)
+------------------------------------------------------------------
+
+Across all fifteen cases: zero point seven eight without the plan. Zero point
+six seven with it.
+
+The plan is more accurate than the diff, and it made the review worse. We
+removed it.
+
+
+------------------------------------------------------------------
+BEAT 9  -  "The same configuration, run four times, unchanged"  (40s)
+------------------------------------------------------------------
+
+The change that contributed most to this project didn't improve the agent at
+all. It's this.
+
+Same configuration. Run four times. Unchanged.
+
+Zero point nine zero. Zero point seven four. Zero point seven six. Zero point
+seven four.
+
+For most of this project I reported zero point nine zero. It was the best of
+four. I had already written up four iterations as regressions against it, each
+with a plausible mechanism, each committed.
+
+Three of them evaporated. They were inside the noise.
+
+Twelve minutes, and thirty three cents. It should have been the second
+measurement in this project, not the twenty second.
+
+
+------------------------------------------------------------------
+BEAT 10  -  "Everything measured"  (46s)
+------------------------------------------------------------------
+
+So here is everything, with the three regressions re-run four times each.
+
+Nothing beat one prompt. Three additions made it measurably worse. The other
+three couldn't be distinguished from doing nothing.
+
+The worst was the most capable thing I built. An agent with tools, the plan, the
+scanner, and unlimited steps. Nineteen times the cost. And it wandered.
+
+Two lessons.
+
+Every context you add to fix a blind spot also tells the model that blind spot
+is someone else's job now. The plan made the review about resource lifecycles.
+The scanner made it about security.
+
+And a single run is not a measurement. Measure your noise floor first, and
+refuse to interpret any difference smaller than it.
+
+
+------------------------------------------------------------------
+BEAT 11  -  "github.com/Jamesokooboh/blast-radius"  (8s)
+------------------------------------------------------------------
+
+Fifteen labelled cases. Twenty four configurations. About ten dollars, end to
+end.
+
+
+==================================================================
+NOTES
+==================================================================
+
+If a voice mispronounces something, the usual culprits and fixes:
+
+  Checkov    -> write "Check ov" if it says "Chekov"
+  R D S      -> already spaced; if it still runs together, write "R. D. S."
+  Haiku      -> write "High-koo" if it says "Hake-oo"
+  Terraform  -> usually fine; "Terra form" if not
+
+Never write F1, 0.78, $0.007, or an underscore anywhere in a block. Those are
+the four things a synthetic voice gets wrong most often, and every one of them
+has already been spelled out above.
+
+Do not let the voice rush beat 7 or beat 9. Those two carry the whole result,
+and both are on screen long enough to be read slowly.
