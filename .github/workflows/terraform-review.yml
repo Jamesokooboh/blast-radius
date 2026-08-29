@@ -47,6 +47,13 @@ jobs:
 
       # OIDC rather than long-lived keys. The role needs exactly one permission:
       # bedrock:InvokeModel on the model you choose.
+      # TEMPORARY: print the OIDC claims AWS is being asked to trust, so the
+      # trust policy can be matched against reality rather than assumption.
+      - name: Debug OIDC claims
+        run: |
+          TOKEN=$(curl -sH "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN"             "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sts.amazonaws.com" | jq -r .value)
+          echo "$TOKEN" | cut -d. -f2 | base64 -d 2>/dev/null | jq '{sub, aud, iss, repository, event_name, ref}'
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
