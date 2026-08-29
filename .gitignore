@@ -11,10 +11,12 @@ __pycache__/
 # are committed instead, since those are the readable evidence.
 results/plans/*.plan.json
 
-# The competition brief is micro1's material, not ours to redistribute.
+# The competition brief is micro1's material, not ours to redistribute. The
+# blanket rule stays so no stray PDF is committed by accident; our own four are
+# negated below and are committed on purpose, so judges get them without running
+# anything. Regenerate them with tools/md_to_pdf.py and tools/make_video_pdf.py.
 *.pdf
-
-# Generated from the markdown by tools/md_to_pdf.py
-README.pdf
-REPRODUCE.pdf
-report/changelog.pdf
+!README.pdf
+!REPRODUCE.pdf
+!report/changelog.pdf
+!report/video-recording-pack.pdf
