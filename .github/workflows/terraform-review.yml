@@ -9,7 +9,11 @@ name: Terraform review
 # permissions on your infrastructure.
 #
 # It never fails the build. Verdict accuracy topped out at 0.733 in evaluation,
-# which is not good enough to block a merge on.
+# which is not good enough to block a merge on. It also skips cleanly, rather
+# than failing, on a fork or a repository where AWS_REVIEW_ROLE_ARN is not set.
+#
+# Setup, including the OIDC trust policy that is not the format most guides
+# show, is in REPRODUCE.md under "Running it in CI".
 
 on:
   pull_request:
@@ -32,17 +36,34 @@ jobs:
   review:
     runs-on: ubuntu-latest
     steps:
+      # The `secrets` context is not available in a job-level `if`, so the
+      # check is a step that publishes an output the later steps gate on.
+      - name: Check whether AWS access is configured
+        id: cfg
+        env:
+          ROLE: ${{ secrets.AWS_REVIEW_ROLE_ARN }}
+        run: |
+          if [ -n "$ROLE" ]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::AWS_REVIEW_ROLE_ARN is not set, so there is no Bedrock access to review with. Skipping. See REPRODUCE.md."
+          fi
+
       - uses: actions/checkout@v4
+        if: steps.cfg.outputs.configured == 'true'
         with:
           # The base branch must be present locally to diff against it.
           fetch-depth: 0
 
       - uses: actions/setup-python@v5
+        if: steps.cfg.outputs.configured == 'true'
         with:
           python-version: "3.12"
           cache: pip
 
       - name: Install dependencies
+        if: steps.cfg.outputs.configured == 'true'
         run: pip install "anthropic[bedrock]" boto3 pydantic
 
       # OIDC rather than long-lived keys. The role needs exactly one permission,
@@ -50,19 +71,22 @@ jobs:
       # immutable-ID form -- see the note in REPRODUCE.md, it is not the format
       # most tutorials show.
       - name: Configure AWS credentials
+        if: steps.cfg.outputs.configured == 'true'
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_REVIEW_ROLE_ARN }}
           aws-region: us-east-1
 
       - name: Review the change
+        if: steps.cfg.outputs.configured == 'true'
         env:
           # A pull request body is untrusted text and can contain backticks or
           # $(...). Passing it through the environment keeps it inert; writing
           # it into the command line would not.
           PR_BODY: ${{ github.event.pull_request.body }}
           # tools/model.py defaults to a named local profile. On a runner the
-          # credentials come from the step above, so clear it.
+          # credentials come from the step above, so clear it -- empty means
+          # "use the ordinary credential chain".
           AWS_PROFILE: ""
         run: |
           printf '%s' "$PR_BODY" > pr-description.md
@@ -73,6 +97,7 @@ jobs:
             --out review-comment.md
 
       - name: Post or update the comment
+        if: steps.cfg.outputs.configured == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           PR: ${{ github.event.pull_request.number }}
